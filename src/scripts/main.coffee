@@ -1185,13 +1185,13 @@ class CustomizerView extends Backbone.View
     console.log @collection
 
 
-  addOneProductView :()->
+  #addOneProductView :()->
     #@addOne
-  resetProductView :()->
-    if(@productViewCollection.models.length > 0){
+  #resetProductView :()->
+    if(@productViewCollection.models.length > 0)
       activeView = @productViewCollection.models[0]
       @reset()
-    }
+    
 
   
   reSizeWindow : ()->

@@ -1,4 +1,4 @@
-ALL_TASKS = [ 'jst:all', 'jsbeautifier:default', 'coffee:all', 'concat:all', 'cssmin:dist', 'stylus:all'] #'clean:compiled'
+ALL_TASKS = [ 'jst:all', 'coffee:all', 'concat:all', 'cssmin:dist', 'stylus:all'] #'clean:compiled'
 
 # customizer.js must be compiled in this order:
 # 1. rivets-config
@@ -10,7 +10,7 @@ module.exports = (grunt) ->
 
   path = require('path')
   exec = require('child_process').exec
-  minify = require('html-minifier').minify;
+  #minify = require('html-minifier').minify;
 
   grunt.loadNpmTasks('grunt-contrib-coffee')
   grunt.loadNpmTasks('grunt-contrib-concat')
@@ -22,8 +22,11 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks('grunt-contrib-clean')
   grunt.loadNpmTasks('grunt-release')
   grunt.loadNpmTasks('grunt-karma')
-  grunt.loadNpmTasks('grunt-coffeescript-concat');
-  grunt.loadNpmTasks("grunt-jsbeautifier");
+
+  grunt.loadNpmTasks('grunt-browser-sync');
+
+  #grunt.loadNpmTasks('grunt-coffeescript-concat');
+  #grunt.loadNpmTasks("grunt-jsbeautifier");
 
   grunt.initConfig
 
@@ -159,6 +162,22 @@ module.exports = (grunt) ->
         files: ['<%= srcFolder %>/**/*.{coffee,scss,styl,html}', '<%= srcFolder %>/**/**/*.{coffee,scss,styl,html}']
         tasks: ALL_TASKS
 
+    browserSync: 
+      dev: 
+        bsFiles: 
+          src : [
+            'dist/*.css'
+            'dist/*.js'
+            'vendor/**/*.css'
+            'vendor/**/*.js'
+            'index.html'
+          ]
+        options: 
+            watchTask: true,
+            server: 
+              baseDir: "./"
+        
+
     # To test, run `grunt --no-write -v release`
     release:
       npm: false
@@ -171,7 +190,7 @@ module.exports = (grunt) ->
 
   #grunt.registerTask 'default', ALL_TASKS
 
-  grunt.registerTask('default', ALL_TASKS);
+  grunt.registerTask('default', ['browserSync', 'watch']);
   
   grunt.registerTask 'mobile_friendly', ['jst:all', 'coffee:all', 'concat:mobile_friendly', 'stylus:all', 'clean:compiled']
   grunt.registerTask 'dist', ['cssmin:dist', 'uglify:dist']
