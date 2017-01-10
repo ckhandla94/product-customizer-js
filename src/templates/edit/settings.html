@@ -3,6 +3,7 @@
 	<ul class='fb-tabs'>
 	    <li class='active'><a data-target='#element-bounding-panel'>Bounding Box</a></li>
 	    <li><a data-target='#modifications-panel'>Modifications</a></li>
+	    <li><a data-target='#other-settings-panel'>Other</a></li>
   	</ul>
 
   	<div class='fb-tab-content'>
@@ -103,6 +104,31 @@
 				<div class="pc-input-container  pc-half-width">
 					<label class="input-label"> <input class="checkbox-stay-on-top" <%= rf.get(Customizer.options.mappings.LAYER_DATA+".stayOnTop") == true ? 'checked' : '' %> type="checkbox"> Stay On Top</label>
 				</div> 
+			</div>
+		</div>
+
+
+		<div id="other-settings-panel" class="fb-tab-pane">
+			<div class="pc-input-container pc-full-width">
+				<label class="input-label">Layer Name</label>
+				<div class="input-fields text"> 
+					<input class="pc_layer_name" type="text" value="<%= rf.get(Customizer.options.mappings.LAYER_DATA+".title") %>">
+				</div>
+			</div>
+
+			<div class="pc-input-container pc-full-width">
+				<label class="input-label">Allowed Colors</label>
+				<div class="input-fields text"> 
+					<input class="pc_allowed_colors" type="text" value="<%= rf.get(Customizer.options.mappings.LAYER_DATA+".allowedColors") %>">
+				</div>
+				<div class="description">Add hexadecimal code of the color. For add multiple colors used comma(,).</div>
+			</div>
+			<div class="pc-input-container pc-full-width">
+				<label class="input-label">Default color</label>
+				<div class="input-fields text"> 
+					<input class="pc_default_color" type="text" value="<%= rf.get(Customizer.options.mappings.LAYER_DATA+".defaultColor") %>">
+				</div>
+				<div class="description">Add hexadecimal code of the color. I.e. "#000000, #FFF"</div>
 			</div>
 		</div>
   	</div>

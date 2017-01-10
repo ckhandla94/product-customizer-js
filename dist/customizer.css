@@ -1,4 +1,4 @@
-.fb-button{display:inline-block;margin:0;padding:.563rem .844rem;border:0 none;background:#16a085;color:#fff;text-align:center;text-decoration:none;font-size:12px;line-height:1.5;cursor:pointer;border-radius:.125rem;border:thin solid #19b394;border-bottom:2px solid #16a085}
+.fb-button{display:inline-block;margin:0;padding:.563rem .844rem;border:0 none;background:#16a085;color:#fff;text-align:center;text-decoration:none;line-height:1.5;cursor:pointer;border-radius:.125rem;border:thin solid #19b394;border-bottom:2px solid #16a085}
 select.rf-size-large{padding:7px}
 .fb-add-field-types a:hover{background:rgba(0,0,0,0) linear-gradient(to left,#1abc9c 68%,#03a585 90%) repeat scroll 86% 37%;color:#000}
 abbr{border-bottom:medium none !important;text-decoration:none}
@@ -9,8 +9,7 @@ abbr{border-bottom:medium none !important;text-decoration:none}
 .fb-tab-content .fb-tab-pane{padding:0 20px;display:none}
 .fb-tab-content .fb-tab-pane.active{display:block}
 .fb-add-field-types .section{padding-bottom:5px;margin-bottom:20px}
-.fb-add-field-types{font-size:0}
-.fb-add-field-types a{font-size:13px;display:inline-block;width:48.5%;background-color:#1abc9c;margin-bottom:9px;box-sizing:border-box;transition:all .6s ease 0}
+.fb-add-field-types a{display:inline-block;width:48.5%;background-color:#1abc9c;margin-bottom:9px;box-sizing:border-box;transition:all .6s ease 0}
 .fb-add-field-types a:nth-child(odd){margin-right:3%}
 .fb-add-field-types a .symbol{opacity:.6;margin:0 .25em 0 -1em}
 .fb-response-fields{padding-bottom:150px}
@@ -26,7 +25,6 @@ abbr{border-bottom:medium none !important;text-decoration:none}
 .fb-field-wrapper .actions-wrapper a{display:inline-block;background-color:#ccc;padding:2px 8px}
 .fb-settings-field-wrapper input,.edit-response-field input,.fb-settings-field-wrapper textarea,.edit-response-field textarea,.fb-settings-field-wrapper select,.edit-response-field select{border:thin solid #ddd;border-radius:.25em;padding:.5em;display:inline-block;height:auto;vertical-align:middle;height:32px}
 .fb-settings-field-wrapper input:focus,.edit-response-field input:focus,.fb-settings-field-wrapper textarea:focus,.edit-response-field textarea:focus,.fb-settings-field-wrapper select:focus,.edit-response-field select:focus{outline:none;border:thin solid #1abc9c}
-.fb-settings-field-wrapper select,.edit-response-field select{font-size:14px}
 .fb-field-wrapper .actions-wrapper a.js-duplicate,.fb-edit-field-wrapper .js-add-option{background-color:#2ecc71;border:none}
 .fb-field-wrapper .actions-wrapper a.js-clear,.fb-edit-field-wrapper .js-remove-option{background-color:#e74c3c;border:none}
 .fb-field-wrapper .subtemplate-wrapper{border:1px dashed transparent;margin-bottom:10px;padding:10px;position:relative}
@@ -37,16 +35,15 @@ abbr{border-bottom:medium none !important;text-decoration:none}
 .fb-field-wrapper .input-line .above-line{margin-top:7px}
 .fb-field-wrapper .input-line > span{display:inline-block;vertical-align:top}
 .fb-field-wrapper .input-line > span input{width:100%}
-.fb-field-wrapper .input-line > span > label{display:block;font-size:13px;margin-left:3px}
-.fb-field-wrapper .help-block{display:block;font-size:12px;margin-top:5px}
-.fb-settings-field-wrapper,.fb-edit-field-wrapper{font-size:13px}
+.fb-field-wrapper .input-line > span > label{display:block;font-sizemargin-left:3px}
+.fb-field-wrapper .help-block{display:block;margin-top:5px}
 .fb-settings-field-wrapper .input-group{margin-bottom:5px}
 .fb-settings-field-wrapper .input-group label{width:100%}
 .fb-settings-field-wrapper .input-group input{width:100%}
 .fb-settings-field-wrapper .input-group select{width:100%}
 .fb-settings-field-wrapper .input-group textarea{width:100%}
-.fb-edit-field-wrapper .fb-field-label{font-weight:normal;background:#eee;padding:.75em;color:#666;font-size:1.25em}
-.fb-edit-field-wrapper .fb-field-label .field-type{margin-top:.5em;display:block;font-family:'Source Sans Pro',sans-serif;font-size:1em}
+.fb-edit-field-wrapper .fb-field-label{font-weight:normal;background:#eee;padding:.75em;color:#666}
+.fb-edit-field-wrapper .fb-field-label .field-type{margin-top:.5em;display:block;font-family:'Source Sans Pro',sans-serif}
 .fb-edit-field-wrapper .fb-field-label .field-type:before{content:'Type: ';color:#999}
 .fb-edit-field-wrapper .fb-field-label .fa.fa-arrow-right{display:none}
 .fb-settings-field-wrapper .fb-section-headerm,.fb-edit-field-wrapper .fb-edit-section-header{border-bottom:1px solid #ddd;margin-top:25px;margin-bottom:10px;padding-bottom:5px;clear:both;font-weight:700}
@@ -109,11 +106,11 @@ abbr{border-bottom:medium none !important;text-decoration:none}
 .input-field-container textarea{max-width:100%;min-height:50px;width:100%}
 .input-field-container select{font-size:14px}
 .input-field-container input[type="submit"],.input-field-container input[type="button"],.input-field-container button{border-color:#19b394 #19b394 #16a085}
-.customizer-main{font-size:15px;box-shadow:0 2px 5px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12);position:relative}
+.customizer-main{box-shadow:0 2px 5px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12);position:relative}
 .customizer-main .pc-loader-container{background:rgba(255,255,255,0.8) none repeat scroll 0 0;height:100%;left:0;position:absolute;width:100%;top:0;right:0;bottom:0;display:none}
 .customizer-main .pc-loader-container .pc-loading-inner{text-align:center;transform:translate(-50%,-50%);top:50%;left:50%;position:absolute;font-size:25px}
 .customizer-main .pc-loader-container .pc-loading-inner .pc-loading-icon{margin-bottom:10px;font-size:40px}
-.customizer-main.fullscreen{bottom:0;height:auto;left:0;margin:.5%;max-width:none;position:fixed;right:0;top:0;width:auto;z-index:9999}
+.customizer-main.fullscreen{bottom:0;height:auto;left:0;margin:.1%;max-width:none;position:fixed;right:0;top:0;width:auto;z-index:9999;background:#fff}
 .customizer-main .pc-title{background:#000 none repeat scroll 0 0;border-bottom:1px solid #ccc;color:#fff;padding:10px}
 .customizer-main .pc-icon-inline{display:inline-table;margin-left:5px;margin-right:5px;padding-left:2px;padding-right:2px;vertical-align:middle;cursor:pointer}
 .customizer-main .pc-icon-inline-seprater{display:inline-table;margin-left:5px;margin-right:5px}
@@ -208,11 +205,11 @@ abbr{border-bottom:medium none !important;text-decoration:none}
 .input-field-container textarea{max-width:100%;min-height:50px;width:100%}
 .input-field-container select{font-size:14px}
 .input-field-container input[type="submit"],.input-field-container input[type="button"],.input-field-container button{border-color:#19b394 #19b394 #16a085}
-.customizer-main{font-size:15px;box-shadow:0 2px 5px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12);position:relative}
+.customizer-main{box-shadow:0 2px 5px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12);position:relative}
 .customizer-main .pc-loader-container{background:rgba(255,255,255,0.8) none repeat scroll 0 0;height:100%;left:0;position:absolute;width:100%;top:0;right:0;bottom:0;display:none}
 .customizer-main .pc-loader-container .pc-loading-inner{text-align:center;transform:translate(-50%,-50%);top:50%;left:50%;position:absolute;font-size:25px}
 .customizer-main .pc-loader-container .pc-loading-inner .pc-loading-icon{margin-bottom:10px;font-size:40px}
-.customizer-main.fullscreen{bottom:0;height:auto;left:0;margin:.5%;max-width:none;position:fixed;right:0;top:0;width:auto;z-index:9999}
+.customizer-main.fullscreen{bottom:0;height:auto;left:0;margin:.1%;max-width:none;position:fixed;right:0;top:0;width:auto;z-index:9999;background:#fff}
 .customizer-main .pc-title{background:#000 none repeat scroll 0 0;border-bottom:1px solid #ccc;color:#fff;padding:10px}
 .customizer-main .pc-icon-inline{display:inline-table;margin-left:5px;margin-right:5px;padding-left:2px;padding-right:2px;vertical-align:middle;cursor:pointer}
 .customizer-main .pc-icon-inline-seprater{display:inline-table;margin-left:5px;margin-right:5px}

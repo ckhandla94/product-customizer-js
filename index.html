@@ -25,7 +25,7 @@
 
   <script type="text/javascript">
   var session = sessionStorage.getItem('bootstrapData');
-
+  var customizer;
   if(session === undefined || session === null || session === ""){
     session = "[]";
   }
@@ -41,7 +41,7 @@
         settings : {
           imageUploadUrl : 'upload.php',
           administration : true,
-          boundingBoxCoords : 'Color',
+          //boundingBoxCoords : 'Color',
 
           maxTextLayer : -1,
           maxImageLayer : -1,
@@ -153,6 +153,10 @@
 
 
     });
+
+  function reload(){
+    customizer.rander();
+  }
   </script>
 
 </body>

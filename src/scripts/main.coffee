@@ -1,12 +1,10 @@
-
-
 fabric.Canvas::getItemByMyID = (myID) ->
   object = null
   objects = @getObjects()
   i = 0
   len = @size()
   while i < len
-    if objects[i].id and objects[i].id == myID
+    if objects[i].id and objects[i].id is myID
       object = objects[i]
       break
     i++
@@ -20,7 +18,7 @@ fabric.Canvas::getItemByName = (title) ->
   i = 0
   len = @size()
   while i < len
-    if objects[i].title and objects[i].title == title
+    if objects[i].title and objects[i].title is title
       object = objects[i]
       break
     i++
@@ -52,31 +50,38 @@ degToRad = (degrees) ->
   return degrees * (Math.PI / 180);
 
 
+
+
 clipByName = (ctx) ->
-  
-  @setCoords() 
-
+  @setCoords()
   clipRect = _.where(@canvas.getObjects(), { clipFor: @clipName })
-  if(clipRect.length > 0)
-    clipRect = clipRect[0]
 
+  if clipRect.length > 0
+    clipRect = clipRect[0]
+  else
+    return;
   scaleXTo1 = 1 / @scaleX
   scaleYTo1 = 1 / @scaleY
+
   ctx.save()
+  oldStrokeWidth = clipRect.strokeWidth
+  clipRect.strokeWidth = 0
   ctxLeft = -(@width / 2) + clipRect.strokeWidth
   ctxTop = -(@height / 2) + clipRect.strokeWidth
   ctxWidth = clipRect.width - (clipRect.strokeWidth)
   ctxHeight = clipRect.height - (clipRect.strokeWidth)
   ctx.translate ctxLeft, ctxTop
+
+  clipRect.strokeWidth = oldStrokeWidth
+
   ctx.rotate degToRad(@angle * -1)
   ctx.scale scaleXTo1, scaleYTo1
   ctx.beginPath()
+  ctx.rect clipRect.left - (@oCoords.tl.x), clipRect.top - (@oCoords.tl.y), (clipRect.width * clipRect.scaleX), (clipRect.height * clipRect.scaleY)
 
-
-  ctx.rect clipRect.left - (@oCoords.tl.x), clipRect.top - (@oCoords.tl.y), clipRect.width, clipRect.height
-  
   ctx.closePath()
   ctx.restore()
+  return
 
 
 fabric.Object::set
@@ -97,7 +102,7 @@ class CustomizerModel extends Backbone.DeepModel
     # { order: CustomizerCollection.nextOrder() }
 
   indexInDOM: ->
-    $wrapper = jQuery(".pc-layers-contianer.layers").filter ( (_, el) => jQuery(el).data('id') == @cid  )
+    $wrapper = jQuery(".pc-layers-contianer.layers").filter ( (_, el) => jQuery(el).data('id') is @cid  )
     jQuery(".pc-layers-contianer.layers").index $wrapper
 
 
@@ -122,10 +127,10 @@ class CustomizerCollection extends Backbone.Collection
     model.get(Customizer.options.mappings.LAYER_DATA+'.order') 
   
   setNextOrder : ->
-    if @length == 0
+    if @length is 0
       @nextOrder = 0
       return
-    if(@last() != undefined)
+    if(@last() isnt undefined)
       last_order = @last().get(Customizer.options.mappings.LAYER_DATA+'.order') 
       last_order = if last_order >= 0 then last_order else 0
       @nextOrder = parseInt(last_order) + 1
@@ -156,6 +161,9 @@ class ModelView extends Backbone.View
     'click .close': 'closeModel'
     'click .pc-prompt-cancel': 'closeModel'
     'click .pc-prompt-ok': 'promptOk'
+
+    'click .pc-confirm-yes': 'confirmYes'
+    'click .pc-confirm-no': 'confirmNo'
     
  
 
@@ -174,6 +182,14 @@ class ModelView extends Backbone.View
     @callback = callback
     @
 
+  confirm : (message, title, callback)->
+    @render(
+      body : "<div class='pc-model-confirm-body'><p>#{message}</p><div class='pc-model-button-container fb-button-group'><button class='pc-confirm-yes fb-button'>Yes</button><button class='pc-confirm-no fb-button fb-button-default'>No</button></div></div>"
+      title : title
+      )
+    @callback = callback
+    @
+
   prompt : (message, title, callback)->
     @render(
       body : "<div class='input-field-container'><label class='pc-model-alert-body'>#{message}</label><input class='pc-input-field promt-input'></div><div class='pc-prompt-error-message' style='display:none'></div> <div class='pc-model-button-container fb-button-group'><button class='pc-prompt-ok fb-button'>OK</button><button class='pc-prompt-cancel fb-button fb-button-default'>Cancel</button></div>"
@@ -184,12 +200,20 @@ class ModelView extends Backbone.View
 
   promptOk : ->
     val = @$el.find('.promt-input').val()
-    if(val != undefined && val != null && val != '')
+    if(val isnt undefined and val isnt null and val isnt '')
       @callback val
       @closeModel()
     else
       @$el.find('.pc-prompt-error-message').html("Plesae enter value.").show(500)
 
+  confirmYes : ->
+    @callback true
+    @closeModel()
+
+  confirmNo : ->
+    @callback false
+    @closeModel()
+     
   closeModel : ->
     _this = @
     @$el.find('.pc-prompt-error-message').html("").hide(500)
@@ -210,6 +234,9 @@ class ViewLayerView extends Backbone.View
     {@parentView} = options
     @canvas = @parentView.canvas;
 
+  unselect : ->
+    @$el.find('.pc-layers-contianer li').removeClass('active')
+
   render: ->
     layers = @canvas.getObjects()
 
@@ -226,8 +253,7 @@ class ViewLayerView extends Backbone.View
 
 
   lockUnlock: (ev)->
-    #current = ev.currentTarget;
-    if(jQuery(ev.currentTarget).prop("tagName") == 'li')
+    if(jQuery(ev.currentTarget).prop("tagName") is 'li')
       id = jQuery(ev.currentTarget).data('id')
       $el = jQuery(ev.currentTarget)
     else
@@ -235,7 +261,7 @@ class ViewLayerView extends Backbone.View
       $el = jQuery(ev.currentTarget).closest('li')
 
     object = @canvas.getItemByMyID(id);
-    if object.locked == false     
+    if object.locked is false     
       object.set(
         selection: true
         selectable: false
@@ -278,11 +304,10 @@ class ViewLayerView extends Backbone.View
     @canvas.discardActiveObject()
     @canvas.renderAll();
     @parentView.updateModel(id)
-    #@forceRender()
 
 
   remove: (ev)->
-    if(jQuery(ev.currentTarget).prop("tagName") == 'li')
+    if(jQuery(ev.currentTarget).prop("tagName") is 'li')
       id = jQuery(ev.currentTarget).data('id')
       $el = jQuery(ev.currentTarget)
     else
@@ -294,16 +319,15 @@ class ViewLayerView extends Backbone.View
     $el.remove()
     @parentView.getModel(id).destroy()
     @parentView.handleFormUpdate()
-    #@forceRender()
 
   scrollLayerWrapper: ($layerContainer) ->
     #return unless $responseFieldEl[0]
-    if typeof @$layerContainer == 'undefined' || @$layerContainer.length == 0
+    if typeof @$layerContainer is 'undefined' or @$layerContainer.length is 0
       return
 
     li = jQuery(@$layerContainer).find('li.active')
 
-    if typeof li == 'undefined' || li.length == 0
+    if typeof li is 'undefined' or li.length is 0
       return
 
     bottom = @$layerContainer.offset().top + @$layerContainer.height()
@@ -312,9 +336,6 @@ class ViewLayerView extends Backbone.View
       jQuery(@$layerContainer).animate({
           scrollTop: li.offset().top
       }, 200);
-    
-    #jQuery.scrollWindowTo ((li.offset().top + @$layerContainer.offset().top) - @$layerContainer.offset().top), 200
-      
 
   setSortable: ->
 
@@ -331,13 +352,14 @@ class ViewLayerView extends Backbone.View
       containment: "parent",
       scrollSpeed: 2
       items: "li:not(.unsortable)"
+      start: (e, ui )->
+        ui.placeholder.height(ui.helper.height());
+      
       stop: (e, ui) =>
         total = jQuery(e.target).find('li').length;
         jQuery(e.target).find('li').each((index)-> 
           i = total - (index + 1)
           id = jQuery(@).data('id')
-          #jQuery(@).data('order', i);
-          #jQuery(@).attr('data-order', i);
 
           model = _this.parentView.getModel(id)
 
@@ -352,7 +374,6 @@ class ViewLayerView extends Backbone.View
           _this.parentView.bringToppedElementsToFront();
         )
         
-        #@focusEditView()
         return true
       update: (e, ui) =>
         jQuery(e.target).find('li').each((i)-> 
@@ -385,7 +406,7 @@ class EditLayerView extends Backbone.View
 
 
     'change .text-font-family': 'fontFamily'
-    'keydown .text-font-size': 'fontSize'
+    'keyup .text-font-size': 'fontSize'
     'click .text-bold': 'textBold'
     'click .text-italic': 'textItalic'
     'click .text-underline': 'textUnderline'
@@ -400,6 +421,12 @@ class EditLayerView extends Backbone.View
     'change .checkbox-resizable': 'isResizable'
     'change .checkbox-hide-layer': 'isHideLayer'
     'change .checkbox-stay-on-top': 'stayOnTop'
+
+    'keyup .pc_allowed_colors': 'allowedColors'
+    'keyup .pc_layer_name': 'changeLayerName'
+    'keyup .pc_default_color': 'defaultColor'
+
+
     'change #enable_bounding': 'boundingEnable'
     'change #another_element_bounding': 'elementBoundingEnable'
     'keyup .input_another_element_bounding_name': 'boundingElementName'
@@ -412,10 +439,12 @@ class EditLayerView extends Backbone.View
     {@model} = options.layer
     {@canvas} = options.layer
    
+  destroy : ->
+     @$el.find('.colorselector').spectrum('destroy');
+     @$el.remove();
 
   render: ->
     $el = Customizer.templates["edit/base"]({layer : @layer, rf : @model})
-   
 
     @$el.html($el)
     @setColorPicker();
@@ -431,7 +460,7 @@ class EditLayerView extends Backbone.View
 
     if jQuery(target).hasClass('tool-tip')  
       jQuery('.toggle-div').each(()->
-        if e.currentTarget != @
+        if e.currentTarget isnt @
           target = jQuery(@).data('target')
           if jQuery(target).hasClass('tool-tip')
             _this.parentView.$el.find(target).slideUp();
@@ -440,47 +469,50 @@ class EditLayerView extends Backbone.View
   isRemovable : (e)->
     obj = @canvas.getActiveObject();
     if(jQuery(e.currentTarget).is(':checked'))
-      @update_layer_date obj,'removable', true
+      @update_layer_data obj,'removable', true
     else
-      @update_layer_date obj,'removable', false
+      @update_layer_data obj,'removable', false
 
   isUnlockable : (e)->
     obj = @canvas.getActiveObject();
     if(jQuery(e.currentTarget).is(':checked'))
-      @update_layer_date obj,'unlockable', true
+      @update_layer_data obj,'unlockable', true
     else
-      @update_layer_date obj,'unlockable', false
+      @update_layer_data obj,'unlockable', false
 
   isHideLayer : (e)->
     obj = @canvas.getActiveObject();
     if(jQuery(e.currentTarget).is(':checked'))
-      @update_layer_date obj,'hideLayer', true
+      @update_layer_data obj,'hideLayer', true
     else
-      @update_layer_date obj,'hideLayer', false
+      @update_layer_data obj,'hideLayer', false
 
   boundingEnable : (e)->
     obj = @canvas.getActiveObject();
     parent = jQuery(e.currentTarget).closest('.pc-define-bounding')
     if(jQuery(e.currentTarget).is(':checked'))
-      if jQuery('.input_another_element_bounding_name').is(':checked')
-        @update_layer_date(obj,
+      @update_layer_data(obj,
+        'boundingEnable': true
+        )
+      ###if jQuery('.input_another_element_bounding_name').is(':checked')
+        @update_layer_data(obj,
           'boundingEnable': true
-          'elementBoundingEnable': true
-          'boundingElementName': parent.find('[name="another_element_bounding_name"]').val()
+          #'elementBoundingEnable': true
+          #'boundingElementName': parent.find('[name="another_element_bounding_name"]').val()
           'boundingMode': parent.find('[name="bounding_box_mode"]').val()
           )
       else
-        @update_layer_date(obj,
+        @update_layer_data(obj,
           'boundingEnable': true
-          'elementBoundingEnable': false
-          'boundingCoordsLeft': parent.find('[name="bounding_coords_left"]').val()
-          'boundingCoordsTop': parent.find('[name="bounding_coords_top"]').val()
-          'boundingCoordsWidth': parent.find('[name="bounding_coords_width"]').val()
-          'boundingCoordsHeight': parent.find('[name="bounding_coords_height"]').val()
-          'boundingMode': parent.find('[name="bounding_box_mode"]').val()
-        )
+          #'elementBoundingEnable': false
+          #'boundingCoordsLeft': parent.find('[name="bounding_coords_left"]').val()
+          #'boundingCoordsTop': parent.find('[name="bounding_coords_top"]').val()
+          #'boundingCoordsWidth': parent.find('[name="bounding_coords_width"]').val()
+          #'boundingCoordsHeight': parent.find('[name="bounding_coords_height"]').val()
+          #'boundingMode': parent.find('[name="bounding_box_mode"]').val()
+        )###
     else
-      @update_layer_date(obj,
+      @update_layer_data(obj,
         'boundingEnable': false
         )
 
@@ -490,26 +522,26 @@ class EditLayerView extends Backbone.View
     obj = @canvas.getActiveObject();
     parent = jQuery(e.currentTarget).closest('.pc-define-bounding')
     if(jQuery(e.currentTarget).is(':checked'))
-      @update_layer_date(obj,
-        'boundingEnable': true
+      @update_layer_data(obj,
+        #'boundingEnable': true
         'elementBoundingEnable': true
         'boundingElementName': parent.find('[name="another_element_bounding_name"]').val()
         'boundingCoordsLeft' : ""
         'boundingCoordsTop' : ""
         'boundingCoordsWidth' : ""
         'boundingCoordsHeight'  : ""
-        'boundingMode': parent.find('[name="bounding_box_mode"]').val()
+        #'boundingMode': parent.find('[name="bounding_box_mode"]').val()
         )
     else
-      @update_layer_date(obj,
-        'boundingEnable': true
+      @update_layer_data(obj,
+        #'boundingEnable': true
         'elementBoundingEnable': false
         'boundingElementName': ""
         'boundingCoordsLeft': parent.find('[name="bounding_coords_left"]').val()
         'boundingCoordsTop': parent.find('[name="bounding_coords_top"]').val()
         'boundingCoordsWidth': parent.find('[name="bounding_coords_width"]').val()
         'boundingCoordsHeight': parent.find('[name="bounding_coords_height"]').val()
-        'boundingMode': parent.find('[name="bounding_box_mode"]').val()
+        #'boundingMode': parent.find('[name="bounding_box_mode"]').val()
       )
     
 
@@ -517,37 +549,37 @@ class EditLayerView extends Backbone.View
 
   boundingElementName : (e)->
     obj = @canvas.getActiveObject();
-    @update_layer_date obj, 'boundingElementName', jQuery(e.currentTarget).val()
+    @update_layer_data obj, 'boundingElementName', e.currentTarget.value
     @parentView.setBoundry(obj, @parentView)
 
   boundingBoxCoords : (e)->
     obj = @canvas.getActiveObject();
     coord = jQuery(e.currentTarget).data('coord')
 
-    @update_layer_date obj, "boundingCoords#{coord}" , jQuery(e.currentTarget).val()
+    @update_layer_data obj, "boundingCoords#{coord}" , e.currentTarget.value
     
     @parentView.setBoundry(obj, @parentView)
    
   boundingMode : (e)->
     obj = @canvas.getActiveObject();
-    @update_layer_date obj, 'boundingMode',jQuery(e.currentTarget).val()
+    @update_layer_data obj, 'boundingMode',e.currentTarget.value
     @parentView.setBoundry(obj, @parentView)
    
 
   isResizable : (e)->
     obj = @canvas.getActiveObject();
-    if(obj.locked == true)
+    if(obj.locked is true)
       return
 
     if(jQuery(e.currentTarget).is(':checked'))
-      @update_layer_date(obj,
+      @update_layer_data(obj,
         isResizable : true 
         lockScalingX : false
         lockScalingY : false
         hasControls: true
       )
     else
-      @update_layer_date(obj, 
+      @update_layer_data(obj, 
         isResizable : false 
         lockScalingX : true
         lockScalingY : true
@@ -558,27 +590,49 @@ class EditLayerView extends Backbone.View
     obj = @canvas.getActiveObject();
 
     if(jQuery(e.currentTarget).is(':checked'))
-      @update_layer_date obj, {'stayOnTop': true,  evented : false}
+      @update_layer_data obj, {'stayOnTop': true,  evented : false}
     else
-      @update_layer_date obj, {'stayOnTop': false,  evented : true}
+      @update_layer_data obj, {'stayOnTop': false,  evented : true}
 
     @bringToppedElementsToFront();
     @parentView.refreshLayer(obj)
 
 
+  defaultColor : (e)->
+    obj = @canvas.getActiveObject();
+    @update_layer_data obj, {'defaultColor': jQuery(e.currentTarget).val()}
+
+
+  
+  allowedColors : (e)->
+    obj = @canvas.getActiveObject();
+    colors = jQuery(e.currentTarget).val()
+    colors = colors.split(',');
+    colors.map (x,y,z)-> z[y] = x.trim()
+    colors = (colors.filter (i) -> /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(i))
+    @update_layer_data obj, {'allowedColors': colors}
+  
+  changeLayerName : (e)->
+    obj = @canvas.getActiveObject();
+    value = jQuery(e.currentTarget).val()
+    #obj.set(value)
+    obj.model.set 'title', value
+    @update_layer_data obj, {'title': value}
+
+
   isDraggable : (e)->
     obj = @canvas.getActiveObject();
-    if(obj.locked == true)
+    if(obj.locked is true)
       return
 
     if(jQuery(e.currentTarget).is(':checked'))
-      @update_layer_date(obj,
+      @update_layer_data(obj,
         isDraggable : true 
         lockMovementX : false
         lockMovementY : false
       )
     else
-      @update_layer_date(obj, 
+      @update_layer_data(obj, 
         isDraggable : false 
         lockMovementX : true
         lockMovementY : true
@@ -586,15 +640,15 @@ class EditLayerView extends Backbone.View
 
   isRotatable : (e)->
     obj = @canvas.getActiveObject();
-    if(obj.locked == true)
+    if(obj.locked is true)
       return
     if(jQuery(e.currentTarget).is(':checked'))
-      @update_layer_date(obj,
+      @update_layer_data(obj,
           'lockRotation': false
           hasRotatingPoint: true
         )
     else
-      @update_layer_date(obj,
+      @update_layer_data(obj,
           'lockRotation': true 
           hasRotatingPoint: false
         )
@@ -607,163 +661,190 @@ class EditLayerView extends Backbone.View
 
   setColorPicker: ()->
     _this = @
-    color = @layer.model.get(Customizer.options.mappings.LAYER_DATA+'.fill')
-
-    @$el.find('.colorselector').ColorPicker(
-        color: color,
-        onShow: (colpkr) ->
-          jQuery(colpkr).fadeIn(500);
-          return false;
-        onHide: (colpkr) ->
-          jQuery(colpkr).fadeOut(500);
-          return false;
-        onChange: (hsb, hex, rgb) ->
-          jQuery('.colorselector .background-color').css('backgroundColor', "##{hex}")
-          
-          if _this.layer.model.get(Customizer.options.mappings.LAYER_DATA+'.type') == 'text'
-            _this.update_layer_date(_this.layer , 'fill',"##{hex}")
-          else
-            _this.applyFilterValue 0, 'color', "##{hex}"
-
-
-        #onSubmit: (hsb, hex, rgb) ->
-          
-    );
-
-  applyFilterValue : (index, prop, value) ->
-    obj = @canvas.getActiveObject();
-    if obj.filters[index]
-      obj.filters[index][prop] = value;
+    obj =  @canvas.getActiveObject();
+    colorPickerArgs = 
+      preferredFormat: "hex3"
+      showInput : true
+      showButtons : false
+      clickoutFiresChange : true
+      hideAfterPaletteSelect : true
+      showInitial : true
+      chooseText : "Ok"
+      change : (color)-> 
+        colorPickerArgs.move(color)
+      move :(color)->
+        hex = color.toHexString(); 
+        jQuery(@).find('.background-color').css({'background-color' : hex})
+        jQuery('.colorselector .background-color').css('backgroundColor', "##{hex}")   
+        if _this.layer.model.get(Customizer.options.mappings.LAYER_DATA+'.type') is 'text'
+          _this.update_layer_data(_this.layer , 'fill',"##{hex}")
+        else
+          _this.applyFilterValue obj, 0, 'color', "#{hex}"
+    
+    allowedColors = @layer.model.get(Customizer.options.mappings.LAYER_DATA+'.allowedColors')
+    if allowedColors isnt undefined and allowedColors isnt null and allowedColors isnt "" and allowedColors.length > 0
+      defaultColor = @layer.model.get(Customizer.options.mappings.LAYER_DATA+'.defaultColor')
+      defaultColor = if defaultColor isnt undefined and defaultColor isnt null and defaultColor isnt "" then defaultColor else allowedColors[0]
+      if _this.layer.model.get(Customizer.options.mappings.LAYER_DATA+'.type') is 'text'
+        color = @layer.model.get(Customizer.options.mappings.LAYER_DATA+'.fill')
+      else
+        filters = @layer.model.get(Customizer.options.mappings.LAYER_DATA+'.filters')
+        if filters.length > 0
+          color = filters[0].color
+        else
+          color = defaultColor
+      colorPickerArgs.color = color
+      colorPickerArgs.showPaletteOnly = true
+      colorPickerArgs.showPalette = true
+      colorPickerArgs.palette = allowedColors
     else
-      obj.filters.push(
-          new fabric.Image.filters.Tint(
-            color: value
+      if _this.layer.model.get(Customizer.options.mappings.LAYER_DATA+'.type') is 'text'
+        color = @layer.model.get(Customizer.options.mappings.LAYER_DATA+'.fill')
+      else
+        filters = @layer.model.get(Customizer.options.mappings.LAYER_DATA+'.filters')
+        if filters.length > 0
+          color = filters[0].color
+        else
+          color = '#000'
+      colorPickerArgs.color = color
+
+    @$el.find('.colorselector').spectrum colorPickerArgs
+
+  applyFilterValue : (obj, index, prop, value) ->
+    if obj is undefined
+      obj = @canvas.getActiveObject();
+    if obj isnt undefined and obj isnt null
+      if obj.filters[index]
+        obj.filters[index][prop] = value;
+      else
+        obj.filters.push(
+            new fabric.Image.filters.Tint(
+              color: value
+            )
           )
-        )
-    obj.applyFilters(@canvas.renderAll.bind(@canvas));
-    obj.model.set Customizer.options.mappings.LAYER_DATA+".filters", obj.filters
-    obj.model.trigger 'change'
+      obj.applyFilters(@canvas.renderAll.bind(@canvas));
+      obj.model.set Customizer.options.mappings.LAYER_DATA+".filters", obj.filters
+      obj.model.trigger 'change'
   
   fontFamily : (e)->
     obj = @canvas.getActiveObject();
-    if(obj == undefined)
+    if obj is undefined
       return
-    @update_layer_date obj, 'fontFamily',  jQuery(e.currentTarget).val()
+    @update_layer_data obj, 'fontFamily',  e.currentTarget.value
     font = obj.toJSON().fontSize
-    @update_layer_date obj, 'fontSize',  parseInt(font) + 1
-    @update_layer_date obj, 'fontSize',  font
+    @update_layer_data obj, 'fontSize',  parseInt(font) + 1
+    @update_layer_data obj, 'fontSize',  font
   
   fontSize : (e)->
     obj = @canvas.getActiveObject();
-    if(obj == undefined)
+    if obj is undefined
       return
-    @update_layer_date obj, 'fontSize',  jQuery(e.currentTarget).val()
-
-    @parentView.setBoundry(obj, @parentView)
+    @update_layer_data obj, 'fontSize',  e.currentTarget.value
+    
 
   textBold : (e)->
     obj = @canvas.getActiveObject();
-    if(obj == undefined)
+    if obj is undefined
       return
-    @update_layer_date obj, 'fontWeight',  if obj.getFontWeight() == 'bold' then 'normal' else 'bold'
+    @update_layer_data obj, 'fontWeight',  if obj.getFontWeight() is 'bold' then 'normal' else 'bold'
 
   textItalic : (e)->
     obj = @canvas.getActiveObject();
-    if(obj == undefined)
+    if obj is undefined
       return
-    @update_layer_date obj, 'fontStyle',  if obj.getFontStyle() == 'italic' then 'normal' else 'italic'
+    @update_layer_data obj, 'fontStyle',  if obj.getFontStyle() is 'italic' then 'normal' else 'italic'
 
   textUnderline : (e)->
     obj = @canvas.getActiveObject();
-    if(obj == undefined)
+    if obj is undefined
       return
-    @update_layer_date obj, 'textDecoration',  if obj.getTextDecoration() == 'underline' then 'none' else  'underline'
+    @update_layer_data obj, 'textDecoration',  if obj.getTextDecoration() is 'underline' then 'none' else  'underline'
 
   rotateLeft : (e)->
     obj = @canvas.getActiveObject();
-    if(obj == undefined)
+    if obj is undefined
       return
 
     resetOrigin = false;
-    if (obj.originX != 'center' || obj.originY != 'center') && obj.centeredRotation
-      obj.setOriginToCenter && obj.setOriginToCenter()
+    if (obj.originX isnt 'center' or obj.originY isnt 'center') and obj.centeredRotation
+      obj.setOriginToCenter and obj.setOriginToCenter()
       resetOrigin = true
 
 
     angle = obj.getAngle()
     angle += 5
-    @update_layer_date obj, 'angle',  angle    
+    @update_layer_data obj, 'angle',  angle    
     if resetOrigin
-        obj.setCenterToOrigin && obj.setCenterToOrigin();
+        obj.setCenterToOrigin and obj.setCenterToOrigin();
     
 
   rotateRight : (e)->
     obj = @canvas.getActiveObject();
-    if(obj == undefined)
+    if obj is undefined
       return
 
     resetOrigin = false;
-    if (obj.originX != 'center' || obj.originY != 'center') && obj.centeredRotation
-      obj.setOriginToCenter && obj.setOriginToCenter()
+    if (obj.originX isnt 'center' or obj.originY isnt 'center') and obj.centeredRotation
+      obj.setOriginToCenter and obj.setOriginToCenter()
       resetOrigin = true
 
     angle = obj.getAngle()
     angle -= 5
-    @update_layer_date obj, 'angle',  angle
+    @update_layer_data obj, 'angle',  angle
 
     if resetOrigin
-        obj.setCenterToOrigin && obj.setCenterToOrigin();
+        obj.setCenterToOrigin and obj.setCenterToOrigin();
 
 
   alignBottom : (e)->
     obj = @canvas.getActiveObject();
-    if(obj == undefined)
+    if obj is undefined
       return
-    @update_layer_date obj, 'top',  (this.canvas.height - obj.getHeight())
+    @update_layer_data obj, 'top',  (this.canvas.height - obj.getHeight())
 
   alignTop : (e)->
     obj = @canvas.getActiveObject();
-    if(obj == undefined)
+    if obj is undefined
       return
-    @update_layer_date obj, 'top', 0
+    @update_layer_data obj, 'top', 0
 
   alignLeft : (e)->
     obj = @canvas.getActiveObject();
-    if(obj == undefined)
+    if obj is undefined
       return
-    @update_layer_date obj, 'left', 0
+    @update_layer_data obj, 'left', 0
 
   alignRight : (e)->
     obj = @canvas.getActiveObject();
-    if(obj == undefined)
+    if obj is undefined
       return
-    @update_layer_date obj, 'left', (this.canvas.width - obj.getWidth())
+    @update_layer_data obj, 'left', (this.canvas.width - obj.getWidth())
 
 
   horizontalCenter : (e)->
     obj = @canvas.getActiveObject();
-    if(obj == undefined)
+    if obj is undefined
       return
-    @update_layer_date(obj, 'left', ((@canvas.width / 2) - (obj.getWidth() / 2)))
+    @update_layer_data(obj, 'left', ((@canvas.width / 2) - (obj.getWidth() / 2)))
 
   verticalCenter : (e)->
     obj = @canvas.getActiveObject();
-    if(obj == undefined)
+    if obj is undefined
       return
-    @update_layer_date(obj, 'top', ((@canvas.height / 2) - (obj.getHeight() / 2)))
+    @update_layer_data(obj, 'top', ((@canvas.height / 2) - (obj.getHeight() / 2)))
       
   center : (e)->
     obj = @canvas.getActiveObject();
-    if(obj == undefined)
+    if obj is undefined
       return
     top =  (@canvas.height / 2) - (obj.getHeight() / 2)
     left = (@canvas.width / 2) - (obj.getWidth() / 2)
-    @update_layer_date(obj, {top : top, left : left})
+    @update_layer_data(obj, {top : top, left : left})
           
 
-  update_layer_date : (obj, key, value)->
+  update_layer_data : (obj, key, value)->
 
-    if(typeof key == 'object')
+    if(typeof key is 'object')
       jQuery.each(key, (k, v)->
         obj.set k, v
         obj.model.set Customizer.options.mappings.LAYER_DATA+"."+k, v
@@ -784,30 +865,36 @@ class CanvasView
   initialize: (options) ->
     @parentView = options
 
+  resetOrders : ()->
+    layers = @parentView.canvas.getObjects()
+    layers.sort (a,b) ->
+      return if a.model.get('order') >= b.model.get('order') then 1 else -1
+
+    jQuery.each(layers, (index,layer)-> 
+      layer.moveTo(index) 
+    )
+    @parentView.canvas.renderAll()
+
   update_layer: (obj, options)->
     order = options.model.get(Customizer.options.mappings.LAYER_DATA+'.order')
     
-    if order != undefined
+    if order isnt undefined
       obj.moveTo(order);
       obj.set 'order', order
-      #obj.model.set Customizer.options.mappings.LAYER_DATA+".order", order
-
-    if(obj.getTop() == 0 && obj.getLeft() == 0)
-      obj.center();
 
 
     @parentView.updateModel obj.model.get('cid')
 
-
-
     @parentView.setBoundry(obj, @parentView)
+    @parentView.updateBoundry();
     @parentView.randerLayers()
 
     @parentView.refreshLayer(obj)
+    @resetOrders()
 
 
   add: (obj)-> 
-    if obj.type == undefined
+    if obj.type is undefined
       obj.type = obj.template.options.type 
     @[obj.type](obj)
 
@@ -815,7 +902,8 @@ class CanvasView
   text : (obj) ->
     template = obj.template
     options = template.options
-    defaultOptions = {}
+
+    defaultOptions = if Customizer.options.settings.canvas.object.text isnt undefined and typeof Customizer.options.settings.canvas.object.text is 'object' then Customizer.options.settings.canvas.object.text else {}
 
     options = jQuery.extend(true, {}, @getDefault(defaultOptions, obj), options);
     delete options.clipTo
@@ -826,14 +914,15 @@ class CanvasView
 
     text = new fabric.IText(text, options);
     obj.canvas.add(text)
-    #.setActiveObject(text)
     @update_layer(text, options);
     
 
   rect: (obj)->
     template = obj.template
     options = template.options
-    defaultOptions = {}
+    
+    defaultOptions = if Customizer.options.settings.canvas.object.rect isnt undefined and typeof Customizer.options.settings.canvas.object.rect is 'object' then Customizer.options.settings.canvas.object.rect else {}
+
     options = jQuery.extend(true, {}, @getDefault(defaultOptions, obj), options);
     delete options.clipTo
     rect = new fabric.Rect(options)
@@ -846,20 +935,24 @@ class CanvasView
     template = obj.template
     options = template.options
 
-    if template.full != undefined
+    if template.full isnt undefined
       url = template.full
-    else if template.imageDate != undefined
+    else if template.imageDate isnt undefined
       url = template.imageDate
 
     img = fabric.Image.fromURL template.full, (image)->
-      defaultOptions = {
+
+      defaultOptions = if Customizer.options.settings.canvas.object.image isnt undefined and typeof Customizer.options.settings.canvas.object.image is 'object' then Customizer.options.settings.canvas.object.image else {}
+
+      defaultOptions = jQuery.extend(true,{}, defaultOptions, {
         width : image.width
         height : image.height
-      }
+      });
+
       options = jQuery.extend(true,{}, _this.getDefault(defaultOptions, obj), options);
       delete options.clipTo
       filters = {}
-      if(options.filters != undefined && options.filters.length > 0)
+      if(options.filters isnt undefined and options.filters.length > 0)
         filters = options.filters
         delete options.filters
 
@@ -871,6 +964,7 @@ class CanvasView
         _this.setFilterValue(image, filters)
 
       _this.update_layer(image, options);
+      obj.canvas.renderAll()
 
 
   setFilterValue : (obj, filters) ->
@@ -904,7 +998,7 @@ class CanvasView
         boundingCoordsTop : ""
         boundingCoordsWidth : ""
         boundingCoordsHeight : ""
-        boundingMode : "inside"
+        boundingMode : "clipping"
         stayOnTop : false
         unlockable : true
         isResizable : true
@@ -912,9 +1006,9 @@ class CanvasView
         lockRotation : false
       }
 
-    if Customizer.options.settings.boundingBoxCoords != undefined
+    if Customizer.options.settings.boundingBoxCoords isnt undefined and Customizer.options.settings.boundingBoxCoords isnt null
       defaultOptions.boundingEnable = true
-      if(typeof Customizer.options.settings.boundingBoxCoords == 'object')
+      if(typeof Customizer.options.settings.boundingBoxCoords is 'object')
         defaultOptions.elementBoundingEnable = true
         defaultOptions.boundingCoordsLeft = Customizer.options.settings.boundingBoxCoords.x
         defaultOptions.boundingCoordsTop = Customizer.options.settings.boundingBoxCoords.y
@@ -924,7 +1018,13 @@ class CanvasView
         defaultOptions.elementBoundingEnable = false
         defaultOptions.boundingElementName = Customizer.options.settings.boundingBoxCoords
 
-    
+    if Customizer.options.settings.administration is true
+      defaultOptions.administration = true
+    else
+      defaultOptions.administration = false
+      
+
+
     jQuery.extend(true,{}, defaultOptions, options);
   
 
@@ -933,7 +1033,7 @@ class CustomizerView extends Backbone.View
   SUBVIEWS: []
   canvasView : new CanvasView()
   events:
-    'click .js-save-form': 'saveForm'
+    'click .js-save-data': 'saveForm'
     'click .fb-tabs a': 'showTab'
     'click .fb-add-field-types a': 'addField'
     'click #pc-text-panel .add-text': 'addTextLayer'
@@ -944,8 +1044,7 @@ class CustomizerView extends Backbone.View
     'click .canvas-actions .zoom-out': (e)-> @canvas.setZoom(@canvas.getZoom() / 1.1 )
     'click .canvas-actions .zoom-reset': (e)-> @canvas.setZoom(1)
     'click .canvas-actions .preview': 'saveImage'
-
-
+  
   initialize: (options) ->
     {selector, @customizer, @bootstrapData, settings} = options
     if selector?
@@ -953,8 +1052,17 @@ class CustomizerView extends Backbone.View
 
     defaultSettings =
       administration : true
-      boundingBoxColor: '#005ede'
-      boundingBoxCoords: ''
+      allowAddText : true
+      allowUploadImage : true
+      replaceImage : false,  # false, true, 'confirm'
+      canvas :
+        object :
+          text  : {}
+          rect  : {}
+          images: {}
+
+      boundingBoxCoords: null
+
 
     @canvasView.initialize(@)
 
@@ -964,21 +1072,24 @@ class CustomizerView extends Backbone.View
     if @settings?
        Customizer.options.settings = @settings
 
-    if @settings.images != undefined
-      if typeof @settings.images == 'object' || typeof @settings.images == 'array'
+    if @settings.images isnt undefined
+      if typeof @settings.images is 'object' or typeof @settings.images is 'array'
         jQuery.each(@settings.images, (index, v)->
-          if v != undefined
-            if typeof v == 'object' || typeof v == 'array'
+          if v isnt undefined
+            if typeof v is 'object' or typeof v is 'array'
                 jQuery.each(v, (i, value)->
-                  value.type  = if value.type == undefined then index else value.type
-                  value.id    = if value.id == undefined then i else value.id
+                  value.type  = if value.type is undefined then index else value.type
+                  value.id    = if value.id is undefined then i else value.id
                   Customizer.registerImages index, value
                 )
         )
-    if @settings.fonts != undefined
+    if @settings.fonts isnt undefined
       jQuery.each(@settings.fonts, (index, v)->
         Customizer.registerFonts(v)
       )
+
+    if @settings.fonts.length > 0 and Customizer.options.settings.canvas.object.text.fontFamily is undefined
+      Customizer.options.settings.canvas.object.text.fontFamily = @settings.fonts[0]
 
     Customizer.registerText()
     Customizer.registerImage()
@@ -1002,18 +1113,33 @@ class CustomizerView extends Backbone.View
 
     @listenTo @canvas, "mouse:up", (o) -> @isDown = false;
     @listenTo @canvas, "mouse:down", (o) -> @isDown = true;
-    @listenTo @canvas, "object:moving", @objectMoveing
     @listenTo @canvas, "object:selected", @objectSelected
     @listenTo @canvas, "object:modified", @objectModified
     @listenTo @canvas, "object:scaling", @objectScaling
     @listenTo @canvas, "before:selection:cleared", @beforeSelectionCleared
     @listenTo @canvas, "after:render", (evt)-> @calcOffset()
+    
+    @listenTo jQuery(window) "resize", @reSizeWindow()
 
     @collection.reset(@bootstrapData)
+  
+  reSizeWindow : ()->
+    originalWidth = 600;
+    width = @$el.find('.pc-canvas-waraper .pc-canvas').innerWidth();
+    #width = if (window.innerWidth > 0) then window.innerWidth else screen.width;
 
+    widthRatio = width / originalWidth ;
+   
+    width = @canvas.getWidth() * widthRatio;
+    height = @canvas.getWidth() * widthRatio;
+
+    @canvas.setWidth width
+    @canvas.setHeight height
+
+    console.log widthRatio;
 
   fullscreen : (ev)->
-    if(jQuery(ev.currentTarget).prop("tagName") == 'span')
+    if(jQuery(ev.currentTarget).prop("tagName") is 'span')
       $el = jQuery(ev.currentTarget)
     else
       $el = jQuery(ev.currentTarget).find('span')
@@ -1028,10 +1154,22 @@ class CustomizerView extends Backbone.View
       offset = @$el.find('.canvas-actions').outerHeight(true)
       @canvas.setHeight(@$el.height() - offset - 8)
       
+      
+
       @canvas.setWidth(@$el.find('.pc-canvas').width())
     else
       @canvas.setHeight(@oldCanvasHeight)
       @canvas.setWidth(@oldCanvasWidth)
+
+  realWidth : (obj)->
+      clone = obj.clone();
+      clone.css("visibility","hidden");
+      jQuery('body').append(clone);
+      width = clone.outerWidth();
+      clone.remove();
+      return width;
+  
+
 
 
   render: ->
@@ -1049,45 +1187,52 @@ class CustomizerView extends Backbone.View
       selection: false
       hoverCursor: 'pointer'
       controlsAboveOverlay: true
-      centeredScaling: true
+      centeredScaling: false
       preserveObjectStacking: true
 
-    if Customizer.options.settings.canvas == undefined
+    if Customizer.options.settings.canvas is undefined
       Customizer.options.settings.canvas = {}
 
-    canvasAttr = jQuery.extend(true, {}, Customizer.options.settings.canvas, defaultCanvasArgs)
+    @canvasAttr = jQuery.extend(true, {}, Customizer.options.settings.canvas, defaultCanvasArgs)
 
     canvas = new fabric.Canvas(el[0],
-      canvasAttr
+      @canvasAttr
     )
-    h = @$el.find('.pc-canvas').height()
-    w = @$el.find('.pc-canvas').width()
-
-    if(canvasAttr.height != undefined && canvasAttr.height > 0)
-      canvas.setHeight(canvasAttr.height)
-    else
-      canvas.setHeight(500)
-
-    if(canvasAttr.width != undefined && canvasAttr.width > 0)    
-      canvas.setWidth(canvasAttr.width)
-    else  
-      canvas.setWidth(w)
+    
 
     @canvas = canvas
+    @reSetCanvasSize();
     @randerLayers()
     @randerUploadedImages()
 
     @loader.hide()
     return @
 
+  reSetCanvasSize : ()->
+    @canvas.setWidth(600)
+    @canvas.setHeight(500)
+    return;
+    h = @$el.find('.pc-canvas').height()
+    w = @$el.find('.pc-canvas').width()
+
+    if(@canvasAttr.height isnt undefined and @canvasAttr.height > 0)
+      @canvas.setHeight(@canvasAttr.height)
+    else
+      @canvas.setHeight(500)
+
+    if(@canvasAttr.width isnt undefined and @canvasAttr.width > 0)    
+      @canvas.setWidth(@canvasAttr.width)
+    else  
+      @canvas.setWidth(w)
+
   randerLayers : (canvas)->
     layers = @canvas.getObjects()
 
-    layersView = new ViewLayerView
+    @layersView = new ViewLayerView
       parentView: @
       canvas: @canvas
 
-    $el = layersView.render().$el
+    $el = @layersView.render().$el
     @$el.find('#pc-layers').html($el) 
 
   renderFontsCSS : ()->
@@ -1103,20 +1248,7 @@ class CustomizerView extends Backbone.View
     @exportCanvas().toDataURL()
 
   exportCanvas : ()->
-    #newCanvas= new fabric.Canvas(jQuery('<canvas></canvas>')[0]);
-    #objects = @canvas.getObjects()
     @canvas
-
-    ###newCanvas.setWidth @canvas.getWidth()
-    newCanvas.setHeight @canvas.getHeight()
-
-    if objects.length > 0
-      jQuery.each(objects, (index, vlaue)-> 
-        perams = vlaue.toJSON(Customizer.options.jsonArgs)
-        if !(perams.dontSync == true)
-            newCanvas.add(vlaue)
-      )
-    newCanvas###
 
   savePDF : ()->
     try 
@@ -1149,180 +1281,126 @@ class CustomizerView extends Backbone.View
     catch e
       alert("Error description: " + e.message);
 
-  
-    
-  clearSelection : (evt)->
-
   objectSelected: (evt)->
     view = evt.target.canvas.parentView
-
     view.setLayersActive(evt.target)
-    layersEditView = new EditLayerView
+    @layersEditView = new EditLayerView
       parentView: view
       layer: evt.target
 
-    $el = layersEditView.render().$el
+    $el = @layersEditView.render().$el
     view.$el.find('#pc-edit-layer').html($el)
 
 
   beforeSelectionCleared: (evt)->
-    view = evt.target.canvas.parentView
-    if(view != undefined)
-      view.$el.find('#pc-edit-layer').html("")
+    if evt is undefined or evt.target is undefined or evt.target is null
+      return
+    else
+      view = evt.target.canvas.parentView
+      if(view isnt undefined)
+        if @layersEditView isnt undefined
+          @layersEditView.destroy()
+
+
+        if view.layersView isnt undefined
+          view.layersView.unselect()
+        #view.$el.find('#pc-edit-layer').html("")
+
 
   objectModified: (evt)->
     view = evt.target.canvas.parentView
     view.updateModel(evt.target.id)
+
+    if evt.target.object is 'text'
+      old = evt.target.scaleX;
+      fontSize = (evt.target.fontSize * old).toFixed(0);
+      view.updateLayer(evt.target, {fontSize : fontSize, scaleX : 1, scaleY : 1})
     
-
   objectScaling : (evt)->
-    view = evt.target.canvas.parentView
-    obj = evt.target;
+    #object = evt.target
+    #view = evt.target.canvas.parentView
 
-    view.setBoundry(obj, view)   
-    #view.updateModel(evt.target.id)
-
-  objectMoveing: (evt)->
-    view = evt.target.canvas.parentView
-    obj = evt.target;
-
-    view.setBoundry(obj, view)
-
-    #view.updateModel(evt.target.id)
+  updateBoundry :  (view) ->
+    if view is undefined
+      view = @
+  
+    clipRect = _.filter(view.canvas.getObjects(), (obj)-> return obj.clipFor isnt undefined and obj.clipFor isnt null and obj.clipFor isnt "" )
+    if clipRect.length > 0
+      _.each clipRect, (obj)->
+        view.setBoundry(obj)
+    
 
 
   setBoundry : (object, view)->
-    if view != undefined
+    params = object.toJSON(Customizer.options.jsonArgs)
+    if params.boundingEnable is false
+      delete object.clipTo
+      return
+
+    if view isnt undefined
       view = @
 
-    boundingBox = view.getBoundingBoxCoords(object)
-    if !boundingBox
-      boundingBox = object.canvas
+    if params.boundingMode is 'clipping'
+      object.set 'clipName', params.boundingElementName
+      @setCliping object
+    else
+      boundingBox = view.getBoundingBoxCoords(object)
+      if !boundingBox
+        boundingBox = object.canvas
 
-    boundRect = object.getBoundingRect()
-
-    if object.getHeight() > boundingBox.height
-      h = Math.min(object.getHeight(), boundingBox.height)
-      object.scaleToHeight(h)
-      object.setCoords(); 
       boundRect = object.getBoundingRect()
-
-    if object.getWidth() > boundingBox.width
-      w = Math.min(object.getWidth(), boundingBox.width)
-      object.scaleToWidth(w)
-      object.setCoords(); 
-      boundRect = object.getBoundingRect()
-
-
-    object.setCoords(); 
-
-    if boundRect.top < boundingBox.top
-        object.top = Math.max(object.top, boundingBox.top)
-
-    #left  corner
-    if boundRect.left < boundingBox.left
-        object.left = Math.max(object.left, boundingBox.left)
-  
-    #bottom corner
-
-    if (boundRect.top + boundRect.height)  > (boundingBox.top + boundingBox.height)
-        object.top = Math.min(object.top, (boundingBox.height - boundRect.height + boundingBox.top))
-
-    #right corner
-    if (boundRect.left + boundRect.width)  > (boundingBox.left + boundingBox.width)
-      object.left = Math.min(object.left, (boundingBox.width - boundRect.width + boundingBox.left))
-
-    #object.canvas.renderAll();
-
-    view.updateModel(object.id)
-
-  ###getBoundingBoxCoords : (obj, _this)->
-    if(_this == undefined)
-      _this = @
-    if(obj == undefined)
-      obj = @canvas.getActiveObject()
-
-    elemParams = obj.toJSON(Customizer.options.jsonArgs)
-
-    if elemParams.boundingEnable
-      bbCoords = _this._getBoundingBoxCoords(obj, _this)
-      if bbCoords
-        currentBoundingObject = new (fabric.Rect)(
-          left: bbCoords.left
-          top: bbCoords.top
-          width: bbCoords.width
-          height: bbCoords.height
-          stroke: Customizer.options.settings.boundingBoxColor
-          strokeWidth: 1
-          fill: false
-          selectable: false
-          evented: false
-          originX: 'left'
-          originY: 'top'
-          name: 'bounding-box'
-          params:
-            x: bbCoords.left
-            y: bbCoords.top
-            scale: 1)
-        _this.canvas.add currentBoundingObject
-        currentBoundingObject.bringToFront()###
 
   getBoundingBoxCoords : (element) ->
     params = element.toJSON(Customizer.options.jsonArgs)
-
-    if params.boundingMode == 'clipping'
-      element.set 'clipName', params.boundingElementName
-      @setCliping element
-    else
-      if params.boundingEnable
-        boundingEnable = undefined
-        if typeof params.boundingElement == 'object'
-          return {
-            left: params.boundingCoordsTop
-            top: params.boundingCoordsLeft
-            width: params.boundingCoordsWidth
-            height: params.boundingCoordsHeight
-          }
-        else
-          objects = element.canvas.getObjects()
-          i = 0
-          while i < objects.length
-            #get all layers from first view
-            object = objects[i]
-            
-            name = if(object.title == undefined) then object.id else object.title 
-            if params.boundingElementName == name
-              bbRect = object.getBoundingRect()
-              return {
-                left: bbRect.left
-                top: bbRect.top
-                width: bbRect.width
-                height: bbRect.height
-              }
-              break
-            ++i
-      false
+    if params.boundingEnable 
+      if typeof params.boundingElement is 'object'
+        return {
+          left: params.boundingCoordsTop
+          top: params.boundingCoordsLeft
+          width: params.boundingCoordsWidth
+          height: params.boundingCoordsHeight
+        }
+      else
+        objects = element.canvas.getObjects()
+        i = 0
+        while i < objects.length
+          object = objects[i]
+          
+          name = if(object.title is undefined) then object.id else object.title 
+          if params.boundingElementName is name
+            bbRect = object.getBoundingRect()
+            return {
+              left: bbRect.left
+              top: bbRect.top
+              width: bbRect.width
+              height: bbRect.height
+            }
+            break
+          ++i
+    false
 
 
   setCliping : (obj)->
-    
-    obj.clipTo = (ctx)-> return _.bind(clipByName, @)(ctx)
+    clipRect = _.where(obj.canvas.getObjects(), { clipFor: obj.clipName })
+    if clipRect.length > 0
+      obj.clipTo = (ctx)-> return _.bind(clipByName, @)(ctx)
+    else if obj.clipTo isnt undefined
+      delete obj.clipTo
 
-  removeCliping : (obj)->
-    delete obj.clipTo
 
   bindSaveEvent: ->
     @formSaved = true
     @saveFormButton = @$el.find(".js-save-data")
-    @saveFormButton.attr('disabled', true).text(Customizer.options.dict.ALL_CHANGES_SAVED)
+    if @saveFormButton.length > 0
+      @saveFormButton.attr('disabled', true).text(Customizer.options.dict.ALL_CHANGES_SAVED)
 
-    unless !Customizer.options.AUTOSAVE
+    ###unless !Customizer.options.AUTOSAVE
       setInterval =>
         @saveForm.call(@)
       , 5000
 
     jQuery(window).bind 'beforeunload', =>
-      if @formSaved then undefined else Customizer.options.dict.UNSAVED_CHANGES
+      if @formSaved then undefined else Customizer.options.dict.UNSAVED_CHANGES###
 
   reset: ->
     @addAll()
@@ -1330,9 +1408,9 @@ class CustomizerView extends Backbone.View
 
   setLayersActive : (obj)->
     if(@$el.find('#pc-layers ul > li'))
-      li = @$el.find('#pc-layers ul > li').filter( (i, li)-> jQuery(li).data('id') == obj.id )  
+      li = @$el.find('#pc-layers ul > li').filter( (i, li)-> jQuery(li).data('id') is obj.id )  
 
-    if(li.length == 0)
+    if(li.length is 0)
       @randerLayers()
     else
       if(!li.hasClass('active'))
@@ -1347,7 +1425,7 @@ class CustomizerView extends Backbone.View
     jQuery.each data, (index, vlaue)->
       model.set(Customizer.options.mappings.LAYER_DATA+'.'+index, vlaue)
 
-    if model.get('type') == 'text'
+    if model.get('type') is 'text'
       model.set('text', obj.__text)
 
     model.trigger 'change'
@@ -1355,40 +1433,9 @@ class CustomizerView extends Backbone.View
 
   refreshLayer: (obj)-> 
     @bringToppedElementsToFront();
-
-    if(obj != undefined)
+    if(obj isnt undefined)
       obj.setCoords();
-      #if obj.model.get(Customizer.options.mappings.LAYER_DATA+'.boundingEnable') == true
-        #@_clipElement(obj, @);
-      
-      
     @canvas.renderAll()
-
-  _clipElement : (element, _this) ->
-    bbCoords = @getBoundingBoxCoords(element)
-    if bbCoords
-      element.clippingRect = bbCoords
-      element.setClipTo (ctx) ->
-        _this._clipById ctx, this
-        return
-    return
-
-  _clipById = (ctx, _this, scale) ->
-    scale = if scale == undefined then 1 else scale
-    clipRect = _this.clippingRect
-    scaleXTo1 = 1 / _this.scaleX
-    scaleYTo1 = 1 / _this.scaleY
-    ctx.save()
-    ctx.translate 0, 0
-    ctx.rotate fabric.util.degreesToRadians(_this.angle * -1)
-    ctx.scale scaleXTo1, scaleYTo1
-    ctx.beginPath()
-    ctx.rect clipRect.left * responsiveScale - (_this.left) - (if _this.originX == 'left' then _this.width * .5 * responsiveScale else 0), clipRect.top * responsiveScale - (_this.top) - (if _this.originY == 'top' then _this.height * .5 * responsiveScale else 0), clipRect.width * responsiveScale * scale, clipRect.height * responsiveScale * scale
-    ctx.fillStyle = 'transparent'
-    ctx.fill()
-    ctx.closePath()
-    ctx.restore()
-    return
 
   bringToppedElementsToFront : ()->
     objects = @canvas.getObjects()
@@ -1398,7 +1445,7 @@ class CustomizerView extends Backbone.View
     i = 0
     while i < objects.length
       object = objects[i]
-      if object.model && object.model.get(Customizer.options.mappings.LAYER_DATA+".stayOnTop") == true
+      if object.model and object.model.get(Customizer.options.mappings.LAYER_DATA+".stayOnTop") is true
         bringToFrontObj.push object
       ++i
     i = 0
@@ -1419,23 +1466,16 @@ class CustomizerView extends Backbone.View
     )
 
   getModel: (id)-> 
-    @collection.find((model)-> model.cid == id)
+    @collection.find((model)-> model.cid is id)
 
   showTab: (e) ->
     $el = jQuery(e.currentTarget)
-
     target = $el.data('target')
-
     $el.closest('li').addClass('active').siblings('li').removeClass('active')
     jQuery(target).addClass('active').siblings('.fb-tab-pane').removeClass('active')
 
-    #@unlockLeftWrapper() unless target == '#editField'
-
-  #reset : (collection)->
-
   addOne: (model, _, options) ->
-      if model.attributes[Customizer.options.mappings.LAYER_DATA] != undefined 
-        #model.cid = model.attributes[Customizer.options.mappings.LAYER_DATA].id
+      if model.attributes[Customizer.options.mappings.LAYER_DATA] isnt undefined 
         model.attributes.cid = model.cid
         model.attributes[Customizer.options.mappings.LAYER_DATA].id = model.cid
         model_option = model.get(Customizer.options.mappings.LAYER_DATA)
@@ -1449,11 +1489,11 @@ class CustomizerView extends Backbone.View
         model_option = {}
 
 
-      if model.get(Customizer.options.mappings.OBJECT) == 'text'
+      if model.get(Customizer.options.mappings.OBJECT) is 'text'
         template = Customizer.text
         model_option.text = model.get('text')
 
-      else if model.get(Customizer.options.mappings.OBJECT) == 'image'
+      else if model.get(Customizer.options.mappings.OBJECT) is 'image'
         template = Customizer.image
         template.full = model.get('full')
         if model.get('title')
@@ -1467,7 +1507,7 @@ class CustomizerView extends Backbone.View
         template.title = model_option.title
         template.clipFor = model_option.title
         
-        if model.get('options') != undefined
+        if model.get('options') isnt undefined
           template.options = jQuery.extend(true,{}, template.options, model.get('options'));
         else
           template.options = model_option
@@ -1476,7 +1516,7 @@ class CustomizerView extends Backbone.View
 
       newTemplate = jQuery.extend(true,{}, template);
 
-      if newTemplate.options == undefined || newTemplate.options == null
+      if newTemplate.options is undefined or newTemplate.options is null
         newTemplate.options = {}
 
 
@@ -1488,12 +1528,10 @@ class CustomizerView extends Backbone.View
         model : model
         canvas : @canvas
       )
-      #@setDraggable();
     
 
   addAll: ->
     @collection.each @addOne, @
-    #@canvas.discardActiveObject()
 
   addField: (e) ->
     _this = @ 
@@ -1504,12 +1542,18 @@ class CustomizerView extends Backbone.View
 
     
   createField: (attrs, options) ->
+    if Customizer.options.settings.administration is true
+      attrs.administration = true
+    else
+      attrs.administration = false
+
     rf = @collection.create attrs, options
+
     @handleFormUpdate()
     rf
 
   removeLayer: (obj) ->
-    if typeof obj != 'object'
+    if typeof obj isnt 'object'
       obj = @canvas.getItemByMyID(obj);
 
     obj.remove()
@@ -1518,13 +1562,11 @@ class CustomizerView extends Backbone.View
     @getModel(obj.id).destroy()
     @handleFormUpdate()
 
-    
-    
   updateLayer: (obj, key, value) ->
-    if typeof obj != 'object'
+    if typeof obj isnt 'object'
       obj = @canvas.getItemByMyID(obj);
 
-    if(typeof key == 'object')
+    if(typeof key is 'object')
       jQuery.each(key, (k, v)->
         obj.set k, v
         obj.model.set Customizer.options.mappings.LAYER_DATA+"."+k, v
@@ -1534,8 +1576,8 @@ class CustomizerView extends Backbone.View
       obj.model.set Customizer.options.mappings.LAYER_DATA+"."+key, value
 
     obj.setCoords();
-    @canvas.renderAll();
     obj.model.trigger 'change'
+    @canvas.renderAll();
 
   setDraggable: ->
     ###$draggable = @$el.find(".draggable")
@@ -1544,9 +1586,6 @@ class CustomizerView extends Backbone.View
       containment: '.customizer-main'
     )###
     
-  #hideShowNoResponseFields: ->
-  #  @$el.find(".fb-no-response-fields")[if @collection.length > 0 then 'hide' else 'show']()
-
   addTextLayer: (e) ->
     text = jQuery(e.currentTarget).closest('.fb-text-field-wrapper').find('.pc-text')
     attrs = {text : text.val()}
@@ -1556,48 +1595,71 @@ class CustomizerView extends Backbone.View
 
   addImageLayer: (data) ->
     _this = @
-    _addImageLayer = (value)->
-      newData = jQuery.extend(true, {}, data)
-
-      if(newData.url && newData.full == undefined)
-        newData.full = newData.url
-
-      if newData.id != undefined
-        delete newData.id
-      
-      if(value != undefined)
-        newData.title = value
-
-      _this.createField Customizer.helpers.defaultLayersAttrs('img', 'image', newData)
-
-    if(Customizer.options.settings.administration)
-      model = new ModelView().prompt('Please enter name.', 'Name', (value)->
-        _addImageLayer(value)
-      )
-    else
-      _addImageLayer()
-
-
-
-
     
+    _replace = ()->
+      fabric.util.loadImage( data.full, (img) ->
+        obj.setElement img 
 
+        obj.canvas.renderAll();
+        obj.model.set 'full', data.full
+
+        _this.updateLayer obj, {src : data.full, width : img.width, 
+        height : img.height}
+      )
+      return;
+      
+    _addNew = ()->
+      _addImageLayer = (value)->
+        newData = jQuery.extend(true, {}, data)
+
+        if(newData.url and newData.full is undefined)
+          newData.full = newData.url
+
+        if newData.id isnt undefined
+          delete newData.id
+        
+        if(value isnt undefined)
+          newData.title = value
+
+        _this.createField Customizer.helpers.defaultLayersAttrs('img', 'image', newData)
+
+      if(Customizer.options.settings.administration)
+        model = new ModelView().prompt('Please enter name.', 'Name', (value)->
+          _addImageLayer(value)
+        )
+      else
+        _addImageLayer()
+
+
+    obj =  @canvas.getActiveObject();
+    if obj isnt undefined and obj isnt null and obj isnt ""
+      if Customizer.options.settings.replaceImage is true
+        _replace()
+      else if Customizer.options.settings.replaceImage is 'confirm'
+        new ModelView().confirm('Are you want to replace the image?', 'Replace', (value)->
+            if value is true
+              _replace()
+            else
+              _addNew()
+          )
+      else
+        _addNew()
+    else
+      _addNew()
 
   uploadImages: (evt) ->
     @ajax_upload_image(evt.target.files)
 
-
-
   randerUploadedImages : ()->
     uploadImages = sessionStorage.getItem('uploadImages');
-    if uploadImages == undefined || uploadImages == null
+    if uploadImages is undefined or uploadImages is null
       uploadImages = {}
     else   
       uploadImages = JSON.parse(uploadImages)
     
     _this = @
     _this.LastUploadImageId = 0
-    if uploadImages == undefined || uploadImages == null || uploadImages == ""
+    if uploadImages is undefined or uploadImages is null or uploadImages is ""
       uploadImages = {}
     else
       jQuery.each(uploadImages, (id, data)->
@@ -1607,15 +1669,13 @@ class CustomizerView extends Backbone.View
           _this.randerUploadedImage(data, data.id)
       )
     
-
-
   randerUploadedImage : (data, id)->
     _this = @
 
     $ul = @$el.find('.uploaded-image-container ul')
     session_data = {}
 
-    if(id == undefined)
+    if(id is undefined)
       id = _this.LastUploadImageId
       id = if parseInt(id) > 0 then parseInt(id) else 0
       next_id = id + 1
@@ -1626,13 +1686,13 @@ class CustomizerView extends Backbone.View
 
     session_data.id = next_id
     session_data.url = data.url
-    session_data.moved = if data.moved == 'true' then 'true' else 'false'
+    session_data.moved = if data.moved is 'true' then 'true' else 'false'
     session_data.path = data.path
     del = jQuery('<span class="delete-contianer"><span class="mif-bin"></span></span>').on('click', ()->
         li = jQuery(@).closest('li')
         data = jQuery(li).data('image-data')
         
-        if(data.moved != 'true')
+        if(data.moved isnt 'true')
           _this.ajax_remove_image(data)
 
         _this.updateSession null, data.id
@@ -1659,12 +1719,12 @@ class CustomizerView extends Backbone.View
 
   updateSession : (data, id)->
     uploadImages = sessionStorage.getItem('uploadImages');
-    if uploadImages == undefined || uploadImages == null
+    if uploadImages is undefined or uploadImages is null
       uploadImages = {}
     else   
       uploadImages = JSON.parse(uploadImages)
 
-    if(uploadImages[id] != undefined && data == null)
+    if(uploadImages[id] isnt undefined and data is null)
         delete uploadImages[id]
     else
       uploadImages[id] = data
@@ -1689,11 +1749,11 @@ class CustomizerView extends Backbone.View
       beforeSend: ()->
         _this.loader.show()
       success: (data) ->
-        if data.status == 'success'
+        if data.status is 'success'
           image_url = data.url
-          if(image_url != undefined && image_url != null)
+          if(image_url isnt undefined and image_url isnt null)
             attrs = {uploadedImage : image_url}
-          else if (image_temp_url != undefined && image_temp_url != null)
+          else if (image_temp_url isnt undefined and image_temp_url isnt null)
             attrs = {uploadedImage : image_url}
           else
             return
@@ -1719,7 +1779,7 @@ class CustomizerView extends Backbone.View
   add_uploaded_image : (file, li)->
 
     _this = @
-    if file.moved == 'true'
+    if file.moved is 'true'
       _this.addImageLayer({full : file.url})
       return
 
@@ -1731,8 +1791,8 @@ class CustomizerView extends Backbone.View
       dataType : 'json'
       beforeSend: ()-> _this.loader.show()
       success: (data) -> 
-        if data.status == 'success'
-          if(li != undefined)
+        if data.status is 'success'
+          if(li isnt undefined)
             old_data = li.data('image-data');
             data.id = old_data.id
             data.moved = 'true'
@@ -1751,25 +1811,38 @@ class CustomizerView extends Backbone.View
   handleFormUpdate: ->
     return if @updatingBatch
     @formSaved = false
-    @saveFormButton.removeAttr('disabled').text(Customizer.options.dict.SAVE_FORM)
+    if @saveFormButton isnt undefined
+      @saveFormButton.removeAttr('disabled').text(Customizer.options.dict.SAVE_FORM)
+    else
+      return
     
   saveForm: (e) ->
     return if @formSaved
     @formSaved = true
     @saveFormButton.attr('disabled', true).text(Customizer.options.dict.ALL_CHANGES_SAVED)
-    @collection.sort()
-    fields = @collection.toJSON()
-    newFields = [];
-    if fields.length > 0
-      jQuery.each(fields, (index, vlaue)-> 
-        if !((vlaue.dontSync == true) || (vlaue.layer_data.dontSync == true))
-          newFields.push(vlaue)
-      )
-    payload = JSON.stringify fields: newFields
+    
+    payload = @getPayload()
 
     if Customizer.options.HTTP_ENDPOINT then @doAjaxSave(payload)
     @customizer.trigger 'save', payload
 
+  getPayload : (type)->
+    @collection.sort()
+    fields = @collection.toJSON(Customizer.options.jsonArgs)
+    newFields = [];
+    if fields.length > 0
+      jQuery.each(fields, (index, vlaue)-> 
+        if vlaue.layer_data.clipTo isnt undefined
+          delete vlaue.layer_data.clipTo
+        if vlaue.clipTo isnt undefined
+          delete vlaue.clipTo
+        if !(vlaue.dontSync is true or vlaue.layer_data.dontSync is true) or type is 'all'
+          newFields.push(vlaue)
+        else
+          vlaue.layer_data.opacity = 0;
+          newFields.push(vlaue)
+      )
+    JSON.stringify fields: newFields
 
   doAjaxSave: (payload) ->
     jQuery.ajax
@@ -1789,7 +1862,7 @@ class CustomizerView extends Backbone.View
 
 
 
-class Customizer
+class Customizer 
   @helpers:
     defaultLayersAttrs: (type, name, extra_attrs) ->
       attrs = {}
@@ -1797,18 +1870,18 @@ class Customizer
       attrs[Customizer.options.mappings.DATA_ID] = name
       attrs.layer_data = {}
 
-      if extra_attrs != undefined 
+      if extra_attrs isnt undefined 
         attrs = _.extend attrs, extra_attrs
 
       layer = {}
-      if type == 'text'  
+      if type is 'text'  
         layer = Customizer.text
-      else if type == 'img'  
+      else if type is 'img'  
         layer = Customizer.image
 
-      attrs.object = if layer.object != undefined then layer.object else '';
+      attrs.object = if layer.object isnt undefined then layer.object else '';
 
-      layer.defaultAttributes?(attrs) || attrs
+      layer.defaultAttributes?(attrs) or attrs
 
 
   @options:
@@ -1818,7 +1891,7 @@ class Customizer
     AUTOSAVE: true
     CLEAR_FIELD_CONFIRM: false
 
-    jsonArgs : ['id','unlockable', 'removable', 'hideLayer', 'displayInLayerBar', 'order', 'selection', 'selectable', 'locked', 'lockMovementX', 'lockMovementY', 'lockRotation', 'lockScalingX', 'lockScalingY', 'lockUniScaling', 'hasBorders', 'hasControls', 'hasRotatingPoint', 'hoverCursor', 'isResizable', 'isDraggable', 'boundingEnable', 'boundingElementName', 'boundingMode', 'stayOnTop', 'title', 'elementBoundingEnable','boundingCoordsLeft','boundingCoordsTop','boundingCoordsWidth','boundingCoordsHeight', 'clipFor', 'clipName', 'evented', 'dontSync']
+    jsonArgs : ['id','unlockable', 'removable', 'hideLayer', 'displayInLayerBar', 'order', 'selection', 'selectable', 'locked', 'lockMovementX', 'lockMovementY', 'lockRotation', 'lockScalingX', 'lockScalingY', 'lockUniScaling', 'hasBorders', 'hasControls', 'hasRotatingPoint', 'hoverCursor', 'isResizable', 'isDraggable', 'boundingEnable', 'boundingElementName', 'boundingMode', 'stayOnTop', 'title', 'elementBoundingEnable','boundingCoordsLeft','boundingCoordsTop','boundingCoordsWidth','boundingCoordsHeight', 'clipFor', 'clipName', 'evented', 'dontSync','defaultColor','allowedColors', 'object','administration']
 
     mappings:
       DATA_ID    : 'data_id'
@@ -1838,7 +1911,6 @@ class Customizer
   @layers: []
 
   @backgrounds: {}
-  @cliparts: {}
   @text: {}
   @images: {}
   @fonts : {}
@@ -1863,44 +1935,39 @@ class Customizer
 
   @registerImages: (category, opts) ->
 
-    if opts.type == undefined
+    if opts.type is undefined
       opts.type = category
 
-
-    if opts.object == undefined
+    if opts.object is undefined
       opts.object = 'image'
 
-
-    if opts.id != undefined
+    if opts.id isnt undefined
       id = opts.id
 
-    if opts.title == undefined && opts.name != undefined
-      opts.title = opts.name
-
-    if(Customizer.images[category] == undefined)
+    if(Customizer.images[category] is undefined)
       Customizer.images[category] = {}
 
     Customizer.images[category][id] = opts
 
 
   @registerFonts: (font) ->
-    if font.name == undefined
+    if font.name is undefined
         filename = font.url.split('/').pop().split('#')[0].split('?')[0]
         font.name = filename.split('.')[0];
         font.name = font.name.replace(/[^a-z0-9_-]/gi, '-').toLowerCase()
     else
       font.name = font.name.replace(/[^a-z0-9_-]/gi, '-').toLowerCase()
 
-    if font.displayName == undefined 
+    if font.displayName is undefined 
       font.displayName = font.name #.replace(/[^_-]/gi, ' ');
     
-    if font.src == undefined
+    if font.src is undefined
         font.src = {};
     
-    if font.url != undefined
+    if font.url isnt undefined
         filename = font.url.split('/').pop().split('#')[0].split('?')[0];
         ext = filename.split('.')[1];
-        if(ext != undefined)
+        if(ext isnt undefined)
             font.src[ext] = font.url;
     
     Customizer.fonts[font.name] = font
@@ -1923,27 +1990,24 @@ class Customizer
       object : 'image'
     Customizer.image = opts
 
-  @registerClipArts: (name, opts) ->
-    
-    #for x in ['view', 'edit']
-    #  opts[x] = _.template(opts[x])
-
-    if opts.type == undefined
-      opts.type = name
-
-    if opts.object == undefined
-      opts.object = 'image'
-
-    Customizer.cliparts[name] = opts
 
   setSettings : (key, value)->
     Customizer.options.settings[key] = value
 
   constructor: (opts={}) ->
     _.extend @, Backbone.Events
-    args = _.extend opts, {customizer: @}
-    @mainView = new CustomizerView args
+    @args = _.extend opts, {customizer: @}
+    @rander()
     @mainView
+
+  rander : ()->
+    if(@mainView isnt undefined)
+      @mainView.destroy();
+    
+    @mainView = new CustomizerView  @args
+
+     
+  
     
 
 window.Customizer = Customizer

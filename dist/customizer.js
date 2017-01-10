@@ -3,10 +3,10 @@
     publishes: true,
     routine: rivets.binders.value.routine,
     bind: function(el) {
-      return $(el).bind('input.rivets', this.publish);
+      return jQuery(el).bind('input.rivets', this.publish);
     },
     unbind: function(el) {
-      return $(el).unbind('input.rivets');
+      return jQuery(el).unbind('input.rivets');
     }
   };
 
@@ -106,28 +106,33 @@
   };
 
   clipByName = function(ctx) {
-    var clipRect, ctxHeight, ctxLeft, ctxTop, ctxWidth, scaleXTo1, scaleYTo1;
+    var clipRect, ctxHeight, ctxLeft, ctxTop, ctxWidth, oldStrokeWidth, scaleXTo1, scaleYTo1;
     this.setCoords();
     clipRect = _.where(this.canvas.getObjects(), {
       clipFor: this.clipName
     });
     if (clipRect.length > 0) {
       clipRect = clipRect[0];
+    } else {
+      return;
     }
     scaleXTo1 = 1 / this.scaleX;
     scaleYTo1 = 1 / this.scaleY;
     ctx.save();
+    oldStrokeWidth = clipRect.strokeWidth;
+    clipRect.strokeWidth = 0;
     ctxLeft = -(this.width / 2) + clipRect.strokeWidth;
     ctxTop = -(this.height / 2) + clipRect.strokeWidth;
     ctxWidth = clipRect.width - clipRect.strokeWidth;
     ctxHeight = clipRect.height - clipRect.strokeWidth;
     ctx.translate(ctxLeft, ctxTop);
+    clipRect.strokeWidth = oldStrokeWidth;
     ctx.rotate(degToRad(this.angle * -1));
     ctx.scale(scaleXTo1, scaleYTo1);
     ctx.beginPath();
-    ctx.rect(clipRect.left - this.oCoords.tl.x, clipRect.top - this.oCoords.tl.y, clipRect.width, clipRect.height);
+    ctx.rect(clipRect.left - this.oCoords.tl.x, clipRect.top - this.oCoords.tl.y, clipRect.width * clipRect.scaleX, clipRect.height * clipRect.scaleY);
     ctx.closePath();
-    return ctx.restore();
+    ctx.restore();
   };
 
   fabric.Object.prototype.set({
@@ -239,7 +244,9 @@
     ModelView.prototype.events = {
       'click .close': 'closeModel',
       'click .pc-prompt-cancel': 'closeModel',
-      'click .pc-prompt-ok': 'promptOk'
+      'click .pc-prompt-ok': 'promptOk',
+      'click .pc-confirm-yes': 'confirmYes',
+      'click .pc-confirm-no': 'confirmNo'
     };
 
     ModelView.prototype.render = function(modal) {
@@ -256,6 +263,15 @@
     ModelView.prototype.alert = function(message, title, callback) {
       this.render({
         body: "<p class='pc-model-alert-body'>" + message + "</p>",
+        title: title
+      });
+      this.callback = callback;
+      return this;
+    };
+
+    ModelView.prototype.confirm = function(message, title, callback) {
+      this.render({
+        body: "<div class='pc-model-confirm-body'><p>" + message + "</p><div class='pc-model-button-container fb-button-group'><button class='pc-confirm-yes fb-button'>Yes</button><button class='pc-confirm-no fb-button fb-button-default'>No</button></div></div>",
         title: title
       });
       this.callback = callback;
@@ -280,6 +296,16 @@
       } else {
         return this.$el.find('.pc-prompt-error-message').html("Plesae enter value.").show(500);
       }
+    };
+
+    ModelView.prototype.confirmYes = function() {
+      this.callback(true);
+      return this.closeModel();
+    };
+
+    ModelView.prototype.confirmNo = function() {
+      this.callback(false);
+      return this.closeModel();
     };
 
     ModelView.prototype.closeModel = function() {
@@ -318,6 +344,10 @@
     ViewLayerView.prototype.initialize = function(options) {
       this.parentView = options.parentView;
       return this.canvas = this.parentView.canvas;
+    };
+
+    ViewLayerView.prototype.unselect = function() {
+      return this.$el.find('.pc-layers-contianer li').removeClass('active');
     };
 
     ViewLayerView.prototype.render = function() {
@@ -442,6 +472,9 @@
         containment: "parent",
         scrollSpeed: 2,
         items: "li:not(.unsortable)",
+        start: function(e, ui) {
+          return ui.placeholder.height(ui.helper.height());
+        },
         stop: function(e, ui) {
           var total;
           total = jQuery(e.target).find('li').length;
@@ -503,7 +536,7 @@
       'click .hoizontal-align-center': 'horizontalCenter',
       'click .toggle-div': 'toggle',
       'change .text-font-family': 'fontFamily',
-      'keydown .text-font-size': 'fontSize',
+      'keyup .text-font-size': 'fontSize',
       'click .text-bold': 'textBold',
       'click .text-italic': 'textItalic',
       'click .text-underline': 'textUnderline',
@@ -517,6 +550,9 @@
       'change .checkbox-resizable': 'isResizable',
       'change .checkbox-hide-layer': 'isHideLayer',
       'change .checkbox-stay-on-top': 'stayOnTop',
+      'keyup .pc_allowed_colors': 'allowedColors',
+      'keyup .pc_layer_name': 'changeLayerName',
+      'keyup .pc_default_color': 'defaultColor',
       'change #enable_bounding': 'boundingEnable',
       'change #another_element_bounding': 'elementBoundingEnable',
       'keyup .input_another_element_bounding_name': 'boundingElementName',
@@ -530,6 +566,11 @@
       this.layer = options.layer;
       this.model = options.layer.model;
       return _ref5 = options.layer, this.canvas = _ref5.canvas, _ref5;
+    };
+
+    EditLayerView.prototype.destroy = function() {
+      this.$el.find('.colorselector').spectrum('destroy');
+      return this.$el.remove();
     };
 
     EditLayerView.prototype.render = function() {
@@ -565,9 +606,9 @@
       var obj;
       obj = this.canvas.getActiveObject();
       if (jQuery(e.currentTarget).is(':checked')) {
-        return this.update_layer_date(obj, 'removable', true);
+        return this.update_layer_data(obj, 'removable', true);
       } else {
-        return this.update_layer_date(obj, 'removable', false);
+        return this.update_layer_data(obj, 'removable', false);
       }
     };
 
@@ -575,9 +616,9 @@
       var obj;
       obj = this.canvas.getActiveObject();
       if (jQuery(e.currentTarget).is(':checked')) {
-        return this.update_layer_date(obj, 'unlockable', true);
+        return this.update_layer_data(obj, 'unlockable', true);
       } else {
-        return this.update_layer_date(obj, 'unlockable', false);
+        return this.update_layer_data(obj, 'unlockable', false);
       }
     };
 
@@ -585,9 +626,9 @@
       var obj;
       obj = this.canvas.getActiveObject();
       if (jQuery(e.currentTarget).is(':checked')) {
-        return this.update_layer_date(obj, 'hideLayer', true);
+        return this.update_layer_data(obj, 'hideLayer', true);
       } else {
-        return this.update_layer_date(obj, 'hideLayer', false);
+        return this.update_layer_data(obj, 'hideLayer', false);
       }
     };
 
@@ -596,26 +637,30 @@
       obj = this.canvas.getActiveObject();
       parent = jQuery(e.currentTarget).closest('.pc-define-bounding');
       if (jQuery(e.currentTarget).is(':checked')) {
-        if (jQuery('.input_another_element_bounding_name').is(':checked')) {
-          this.update_layer_date(obj, {
-            'boundingEnable': true,
-            'elementBoundingEnable': true,
-            'boundingElementName': parent.find('[name="another_element_bounding_name"]').val(),
+        this.update_layer_data(obj, {
+          'boundingEnable': true
+        });
+        /*if jQuery('.input_another_element_bounding_name').is(':checked')
+          @update_layer_data(obj,
+            'boundingEnable': true
+            #'elementBoundingEnable': true
+            #'boundingElementName': parent.find('[name="another_element_bounding_name"]').val()
             'boundingMode': parent.find('[name="bounding_box_mode"]').val()
-          });
-        } else {
-          this.update_layer_date(obj, {
-            'boundingEnable': true,
-            'elementBoundingEnable': false,
-            'boundingCoordsLeft': parent.find('[name="bounding_coords_left"]').val(),
-            'boundingCoordsTop': parent.find('[name="bounding_coords_top"]').val(),
-            'boundingCoordsWidth': parent.find('[name="bounding_coords_width"]').val(),
-            'boundingCoordsHeight': parent.find('[name="bounding_coords_height"]').val(),
-            'boundingMode': parent.find('[name="bounding_box_mode"]').val()
-          });
-        }
+            )
+        else
+          @update_layer_data(obj,
+            'boundingEnable': true
+            #'elementBoundingEnable': false
+            #'boundingCoordsLeft': parent.find('[name="bounding_coords_left"]').val()
+            #'boundingCoordsTop': parent.find('[name="bounding_coords_top"]').val()
+            #'boundingCoordsWidth': parent.find('[name="bounding_coords_width"]').val()
+            #'boundingCoordsHeight': parent.find('[name="bounding_coords_height"]').val()
+            #'boundingMode': parent.find('[name="bounding_box_mode"]').val()
+          )
+        */
+
       } else {
-        this.update_layer_date(obj, {
+        this.update_layer_data(obj, {
           'boundingEnable': false
         });
       }
@@ -627,26 +672,22 @@
       obj = this.canvas.getActiveObject();
       parent = jQuery(e.currentTarget).closest('.pc-define-bounding');
       if (jQuery(e.currentTarget).is(':checked')) {
-        this.update_layer_date(obj, {
-          'boundingEnable': true,
+        this.update_layer_data(obj, {
           'elementBoundingEnable': true,
           'boundingElementName': parent.find('[name="another_element_bounding_name"]').val(),
           'boundingCoordsLeft': "",
           'boundingCoordsTop': "",
           'boundingCoordsWidth': "",
-          'boundingCoordsHeight': "",
-          'boundingMode': parent.find('[name="bounding_box_mode"]').val()
+          'boundingCoordsHeight': ""
         });
       } else {
-        this.update_layer_date(obj, {
-          'boundingEnable': true,
+        this.update_layer_data(obj, {
           'elementBoundingEnable': false,
           'boundingElementName': "",
           'boundingCoordsLeft': parent.find('[name="bounding_coords_left"]').val(),
           'boundingCoordsTop': parent.find('[name="bounding_coords_top"]').val(),
           'boundingCoordsWidth': parent.find('[name="bounding_coords_width"]').val(),
-          'boundingCoordsHeight': parent.find('[name="bounding_coords_height"]').val(),
-          'boundingMode': parent.find('[name="bounding_box_mode"]').val()
+          'boundingCoordsHeight': parent.find('[name="bounding_coords_height"]').val()
         });
       }
       return this.parentView.setBoundry(obj, this.parentView);
@@ -655,7 +696,7 @@
     EditLayerView.prototype.boundingElementName = function(e) {
       var obj;
       obj = this.canvas.getActiveObject();
-      this.update_layer_date(obj, 'boundingElementName', jQuery(e.currentTarget).val());
+      this.update_layer_data(obj, 'boundingElementName', e.currentTarget.value);
       return this.parentView.setBoundry(obj, this.parentView);
     };
 
@@ -663,14 +704,14 @@
       var coord, obj;
       obj = this.canvas.getActiveObject();
       coord = jQuery(e.currentTarget).data('coord');
-      this.update_layer_date(obj, "boundingCoords" + coord, jQuery(e.currentTarget).val());
+      this.update_layer_data(obj, "boundingCoords" + coord, e.currentTarget.value);
       return this.parentView.setBoundry(obj, this.parentView);
     };
 
     EditLayerView.prototype.boundingMode = function(e) {
       var obj;
       obj = this.canvas.getActiveObject();
-      this.update_layer_date(obj, 'boundingMode', jQuery(e.currentTarget).val());
+      this.update_layer_data(obj, 'boundingMode', e.currentTarget.value);
       return this.parentView.setBoundry(obj, this.parentView);
     };
 
@@ -681,14 +722,14 @@
         return;
       }
       if (jQuery(e.currentTarget).is(':checked')) {
-        return this.update_layer_date(obj, {
+        return this.update_layer_data(obj, {
           isResizable: true,
           lockScalingX: false,
           lockScalingY: false,
           hasControls: true
         });
       } else {
-        return this.update_layer_date(obj, {
+        return this.update_layer_data(obj, {
           isResizable: false,
           lockScalingX: true,
           lockScalingY: true,
@@ -701,18 +742,52 @@
       var obj;
       obj = this.canvas.getActiveObject();
       if (jQuery(e.currentTarget).is(':checked')) {
-        this.update_layer_date(obj, {
+        this.update_layer_data(obj, {
           'stayOnTop': true,
           evented: false
         });
       } else {
-        this.update_layer_date(obj, {
+        this.update_layer_data(obj, {
           'stayOnTop': false,
           evented: true
         });
       }
       this.bringToppedElementsToFront();
       return this.parentView.refreshLayer(obj);
+    };
+
+    EditLayerView.prototype.defaultColor = function(e) {
+      var obj;
+      obj = this.canvas.getActiveObject();
+      return this.update_layer_data(obj, {
+        'defaultColor': jQuery(e.currentTarget).val()
+      });
+    };
+
+    EditLayerView.prototype.allowedColors = function(e) {
+      var colors, obj;
+      obj = this.canvas.getActiveObject();
+      colors = jQuery(e.currentTarget).val();
+      colors = colors.split(',');
+      colors.map(function(x, y, z) {
+        return z[y] = x.trim();
+      });
+      colors = colors.filter(function(i) {
+        return /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(i);
+      });
+      return this.update_layer_data(obj, {
+        'allowedColors': colors
+      });
+    };
+
+    EditLayerView.prototype.changeLayerName = function(e) {
+      var obj, value;
+      obj = this.canvas.getActiveObject();
+      value = jQuery(e.currentTarget).val();
+      obj.model.set('title', value);
+      return this.update_layer_data(obj, {
+        'title': value
+      });
     };
 
     EditLayerView.prototype.isDraggable = function(e) {
@@ -722,13 +797,13 @@
         return;
       }
       if (jQuery(e.currentTarget).is(':checked')) {
-        return this.update_layer_date(obj, {
+        return this.update_layer_data(obj, {
           isDraggable: true,
           lockMovementX: false,
           lockMovementY: false
         });
       } else {
-        return this.update_layer_date(obj, {
+        return this.update_layer_data(obj, {
           isDraggable: false,
           lockMovementX: true,
           lockMovementY: true
@@ -743,12 +818,12 @@
         return;
       }
       if (jQuery(e.currentTarget).is(':checked')) {
-        return this.update_layer_date(obj, {
+        return this.update_layer_data(obj, {
           'lockRotation': false,
           hasRotatingPoint: true
         });
       } else {
-        return this.update_layer_date(obj, {
+        return this.update_layer_data(obj, {
           'lockRotation': true,
           hasRotatingPoint: false
         });
@@ -762,43 +837,84 @@
     };
 
     EditLayerView.prototype.setColorPicker = function() {
-      var color, _this;
+      var allowedColors, color, colorPickerArgs, defaultColor, filters, obj, _this;
       _this = this;
-      color = this.layer.model.get(Customizer.options.mappings.LAYER_DATA + '.fill');
-      return this.$el.find('.colorselector').ColorPicker({
-        color: color,
-        onShow: function(colpkr) {
-          jQuery(colpkr).fadeIn(500);
-          return false;
+      obj = this.canvas.getActiveObject();
+      colorPickerArgs = {
+        preferredFormat: "hex3",
+        showInput: true,
+        showButtons: false,
+        clickoutFiresChange: true,
+        hideAfterPaletteSelect: true,
+        showInitial: true,
+        chooseText: "Ok",
+        change: function(color) {
+          return colorPickerArgs.move(color);
         },
-        onHide: function(colpkr) {
-          jQuery(colpkr).fadeOut(500);
-          return false;
-        },
-        onChange: function(hsb, hex, rgb) {
+        move: function(color) {
+          var hex;
+          hex = color.toHexString();
+          jQuery(this).find('.background-color').css({
+            'background-color': hex
+          });
           jQuery('.colorselector .background-color').css('backgroundColor', "#" + hex);
           if (_this.layer.model.get(Customizer.options.mappings.LAYER_DATA + '.type') === 'text') {
-            return _this.update_layer_date(_this.layer, 'fill', "#" + hex);
+            return _this.update_layer_data(_this.layer, 'fill', "#" + hex);
           } else {
-            return _this.applyFilterValue(0, 'color', "#" + hex);
+            return _this.applyFilterValue(obj, 0, 'color', "" + hex);
           }
         }
-      });
+      };
+      allowedColors = this.layer.model.get(Customizer.options.mappings.LAYER_DATA + '.allowedColors');
+      if (allowedColors !== void 0 && allowedColors !== null && allowedColors !== "" && allowedColors.length > 0) {
+        defaultColor = this.layer.model.get(Customizer.options.mappings.LAYER_DATA + '.defaultColor');
+        defaultColor = defaultColor !== void 0 && defaultColor !== null && defaultColor !== "" ? defaultColor : allowedColors[0];
+        if (_this.layer.model.get(Customizer.options.mappings.LAYER_DATA + '.type') === 'text') {
+          color = this.layer.model.get(Customizer.options.mappings.LAYER_DATA + '.fill');
+        } else {
+          filters = this.layer.model.get(Customizer.options.mappings.LAYER_DATA + '.filters');
+          if (filters.length > 0) {
+            color = filters[0].color;
+          } else {
+            color = defaultColor;
+          }
+        }
+        colorPickerArgs.color = color;
+        colorPickerArgs.showPaletteOnly = true;
+        colorPickerArgs.showPalette = true;
+        colorPickerArgs.palette = allowedColors;
+      } else {
+        if (_this.layer.model.get(Customizer.options.mappings.LAYER_DATA + '.type') === 'text') {
+          color = this.layer.model.get(Customizer.options.mappings.LAYER_DATA + '.fill');
+        } else {
+          filters = this.layer.model.get(Customizer.options.mappings.LAYER_DATA + '.filters');
+          if (filters.length > 0) {
+            color = filters[0].color;
+          } else {
+            color = '#000';
+          }
+        }
+        colorPickerArgs.color = color;
+      }
+      return this.$el.find('.colorselector').spectrum(colorPickerArgs);
     };
 
-    EditLayerView.prototype.applyFilterValue = function(index, prop, value) {
-      var obj;
-      obj = this.canvas.getActiveObject();
-      if (obj.filters[index]) {
-        obj.filters[index][prop] = value;
-      } else {
-        obj.filters.push(new fabric.Image.filters.Tint({
-          color: value
-        }));
+    EditLayerView.prototype.applyFilterValue = function(obj, index, prop, value) {
+      if (obj === void 0) {
+        obj = this.canvas.getActiveObject();
       }
-      obj.applyFilters(this.canvas.renderAll.bind(this.canvas));
-      obj.model.set(Customizer.options.mappings.LAYER_DATA + ".filters", obj.filters);
-      return obj.model.trigger('change');
+      if (obj !== void 0 && obj !== null) {
+        if (obj.filters[index]) {
+          obj.filters[index][prop] = value;
+        } else {
+          obj.filters.push(new fabric.Image.filters.Tint({
+            color: value
+          }));
+        }
+        obj.applyFilters(this.canvas.renderAll.bind(this.canvas));
+        obj.model.set(Customizer.options.mappings.LAYER_DATA + ".filters", obj.filters);
+        return obj.model.trigger('change');
+      }
     };
 
     EditLayerView.prototype.fontFamily = function(e) {
@@ -807,10 +923,10 @@
       if (obj === void 0) {
         return;
       }
-      this.update_layer_date(obj, 'fontFamily', jQuery(e.currentTarget).val());
+      this.update_layer_data(obj, 'fontFamily', e.currentTarget.value);
       font = obj.toJSON().fontSize;
-      this.update_layer_date(obj, 'fontSize', parseInt(font) + 1);
-      return this.update_layer_date(obj, 'fontSize', font);
+      this.update_layer_data(obj, 'fontSize', parseInt(font) + 1);
+      return this.update_layer_data(obj, 'fontSize', font);
     };
 
     EditLayerView.prototype.fontSize = function(e) {
@@ -819,8 +935,7 @@
       if (obj === void 0) {
         return;
       }
-      this.update_layer_date(obj, 'fontSize', jQuery(e.currentTarget).val());
-      return this.parentView.setBoundry(obj, this.parentView);
+      return this.update_layer_data(obj, 'fontSize', e.currentTarget.value);
     };
 
     EditLayerView.prototype.textBold = function(e) {
@@ -829,7 +944,7 @@
       if (obj === void 0) {
         return;
       }
-      return this.update_layer_date(obj, 'fontWeight', obj.getFontWeight() === 'bold' ? 'normal' : 'bold');
+      return this.update_layer_data(obj, 'fontWeight', obj.getFontWeight() === 'bold' ? 'normal' : 'bold');
     };
 
     EditLayerView.prototype.textItalic = function(e) {
@@ -838,7 +953,7 @@
       if (obj === void 0) {
         return;
       }
-      return this.update_layer_date(obj, 'fontStyle', obj.getFontStyle() === 'italic' ? 'normal' : 'italic');
+      return this.update_layer_data(obj, 'fontStyle', obj.getFontStyle() === 'italic' ? 'normal' : 'italic');
     };
 
     EditLayerView.prototype.textUnderline = function(e) {
@@ -847,7 +962,7 @@
       if (obj === void 0) {
         return;
       }
-      return this.update_layer_date(obj, 'textDecoration', obj.getTextDecoration() === 'underline' ? 'none' : 'underline');
+      return this.update_layer_data(obj, 'textDecoration', obj.getTextDecoration() === 'underline' ? 'none' : 'underline');
     };
 
     EditLayerView.prototype.rotateLeft = function(e) {
@@ -863,7 +978,7 @@
       }
       angle = obj.getAngle();
       angle += 5;
-      this.update_layer_date(obj, 'angle', angle);
+      this.update_layer_data(obj, 'angle', angle);
       if (resetOrigin) {
         return obj.setCenterToOrigin && obj.setCenterToOrigin();
       }
@@ -882,7 +997,7 @@
       }
       angle = obj.getAngle();
       angle -= 5;
-      this.update_layer_date(obj, 'angle', angle);
+      this.update_layer_data(obj, 'angle', angle);
       if (resetOrigin) {
         return obj.setCenterToOrigin && obj.setCenterToOrigin();
       }
@@ -894,7 +1009,7 @@
       if (obj === void 0) {
         return;
       }
-      return this.update_layer_date(obj, 'top', this.canvas.height - obj.getHeight());
+      return this.update_layer_data(obj, 'top', this.canvas.height - obj.getHeight());
     };
 
     EditLayerView.prototype.alignTop = function(e) {
@@ -903,7 +1018,7 @@
       if (obj === void 0) {
         return;
       }
-      return this.update_layer_date(obj, 'top', 0);
+      return this.update_layer_data(obj, 'top', 0);
     };
 
     EditLayerView.prototype.alignLeft = function(e) {
@@ -912,7 +1027,7 @@
       if (obj === void 0) {
         return;
       }
-      return this.update_layer_date(obj, 'left', 0);
+      return this.update_layer_data(obj, 'left', 0);
     };
 
     EditLayerView.prototype.alignRight = function(e) {
@@ -921,7 +1036,7 @@
       if (obj === void 0) {
         return;
       }
-      return this.update_layer_date(obj, 'left', this.canvas.width - obj.getWidth());
+      return this.update_layer_data(obj, 'left', this.canvas.width - obj.getWidth());
     };
 
     EditLayerView.prototype.horizontalCenter = function(e) {
@@ -930,7 +1045,7 @@
       if (obj === void 0) {
         return;
       }
-      return this.update_layer_date(obj, 'left', (this.canvas.width / 2) - (obj.getWidth() / 2));
+      return this.update_layer_data(obj, 'left', (this.canvas.width / 2) - (obj.getWidth() / 2));
     };
 
     EditLayerView.prototype.verticalCenter = function(e) {
@@ -939,7 +1054,7 @@
       if (obj === void 0) {
         return;
       }
-      return this.update_layer_date(obj, 'top', (this.canvas.height / 2) - (obj.getHeight() / 2));
+      return this.update_layer_data(obj, 'top', (this.canvas.height / 2) - (obj.getHeight() / 2));
     };
 
     EditLayerView.prototype.center = function(e) {
@@ -950,13 +1065,13 @@
       }
       top = (this.canvas.height / 2) - (obj.getHeight() / 2);
       left = (this.canvas.width / 2) - (obj.getWidth() / 2);
-      return this.update_layer_date(obj, {
+      return this.update_layer_data(obj, {
         top: top,
         left: left
       });
     };
 
-    EditLayerView.prototype.update_layer_date = function(obj, key, value) {
+    EditLayerView.prototype.update_layer_data = function(obj, key, value) {
       if (typeof key === 'object') {
         jQuery.each(key, function(k, v) {
           obj.set(k, v);
@@ -986,6 +1101,22 @@
       return this.parentView = options;
     };
 
+    CanvasView.prototype.resetOrders = function() {
+      var layers;
+      layers = this.parentView.canvas.getObjects();
+      layers.sort(function(a, b) {
+        if (a.model.get('order') >= b.model.get('order')) {
+          return 1;
+        } else {
+          return -1;
+        }
+      });
+      jQuery.each(layers, function(index, layer) {
+        return layer.moveTo(index);
+      });
+      return this.parentView.canvas.renderAll();
+    };
+
     CanvasView.prototype.update_layer = function(obj, options) {
       var order;
       order = options.model.get(Customizer.options.mappings.LAYER_DATA + '.order');
@@ -993,13 +1124,12 @@
         obj.moveTo(order);
         obj.set('order', order);
       }
-      if (obj.getTop() === 0 && obj.getLeft() === 0) {
-        obj.center();
-      }
       this.parentView.updateModel(obj.model.get('cid'));
       this.parentView.setBoundry(obj, this.parentView);
+      this.parentView.updateBoundry();
       this.parentView.randerLayers();
-      return this.parentView.refreshLayer(obj);
+      this.parentView.refreshLayer(obj);
+      return this.resetOrders();
     };
 
     CanvasView.prototype.add = function(obj) {
@@ -1013,7 +1143,7 @@
       var defaultOptions, options, template, text;
       template = obj.template;
       options = template.options;
-      defaultOptions = {};
+      defaultOptions = Customizer.options.settings.canvas.object.text !== void 0 && typeof Customizer.options.settings.canvas.object.text === 'object' ? Customizer.options.settings.canvas.object.text : {};
       options = jQuery.extend(true, {}, this.getDefault(defaultOptions, obj), options);
       delete options.clipTo;
       if (options.template.text) {
@@ -1030,7 +1160,7 @@
       var defaultOptions, options, rect, template;
       template = obj.template;
       options = template.options;
-      defaultOptions = {};
+      defaultOptions = Customizer.options.settings.canvas.object.rect !== void 0 && typeof Customizer.options.settings.canvas.object.rect === 'object' ? Customizer.options.settings.canvas.object.rect : {};
       options = jQuery.extend(true, {}, this.getDefault(defaultOptions, obj), options);
       delete options.clipTo;
       rect = new fabric.Rect(options);
@@ -1050,10 +1180,11 @@
       }
       return img = fabric.Image.fromURL(template.full, function(image) {
         var defaultOptions, filters;
-        defaultOptions = {
+        defaultOptions = Customizer.options.settings.canvas.object.image !== void 0 && typeof Customizer.options.settings.canvas.object.image === 'object' ? Customizer.options.settings.canvas.object.image : {};
+        defaultOptions = jQuery.extend(true, {}, defaultOptions, {
           width: image.width,
           height: image.height
-        };
+        });
         options = jQuery.extend(true, {}, _this.getDefault(defaultOptions, obj), options);
         delete options.clipTo;
         filters = {};
@@ -1066,7 +1197,8 @@
         if (filters.length > 0) {
           _this.setFilterValue(image, filters);
         }
-        return _this.update_layer(image, options);
+        _this.update_layer(image, options);
+        return obj.canvas.renderAll();
       });
     };
 
@@ -1102,14 +1234,14 @@
         boundingCoordsTop: "",
         boundingCoordsWidth: "",
         boundingCoordsHeight: "",
-        boundingMode: "inside",
+        boundingMode: "clipping",
         stayOnTop: false,
         unlockable: true,
         isResizable: true,
         isDraggable: true,
         lockRotation: false
       };
-      if (Customizer.options.settings.boundingBoxCoords !== void 0) {
+      if (Customizer.options.settings.boundingBoxCoords !== void 0 && Customizer.options.settings.boundingBoxCoords !== null) {
         defaultOptions.boundingEnable = true;
         if (typeof Customizer.options.settings.boundingBoxCoords === 'object') {
           defaultOptions.elementBoundingEnable = true;
@@ -1122,6 +1254,11 @@
           defaultOptions.boundingElementName = Customizer.options.settings.boundingBoxCoords;
         }
       }
+      if (Customizer.options.settings.administration === true) {
+        defaultOptions.administration = true;
+      } else {
+        defaultOptions.administration = false;
+      }
       return jQuery.extend(true, {}, defaultOptions, options);
     };
 
@@ -1130,8 +1267,6 @@
   })();
 
   CustomizerView = (function(_super) {
-    var _clipById;
-
     __extends(CustomizerView, _super);
 
     function CustomizerView() {
@@ -1144,7 +1279,7 @@
     CustomizerView.prototype.canvasView = new CanvasView();
 
     CustomizerView.prototype.events = {
-      'click .js-save-form': 'saveForm',
+      'click .js-save-data': 'saveForm',
       'click .fb-tabs a': 'showTab',
       'click .fb-add-field-types a': 'addField',
       'click #pc-text-panel .add-text': 'addTextLayer',
@@ -1171,8 +1306,17 @@
       }
       defaultSettings = {
         administration: true,
-        boundingBoxColor: '#005ede',
-        boundingBoxCoords: ''
+        allowAddText: true,
+        allowUploadImage: true,
+        replaceImage: false,
+        canvas: {
+          object: {
+            text: {},
+            rect: {},
+            images: {}
+          }
+        },
+        boundingBoxCoords: null
       };
       this.canvasView.initialize(this);
       this.settings = jQuery.extend(true, {}, defaultSettings, settings);
@@ -1199,6 +1343,9 @@
           return Customizer.registerFonts(v);
         });
       }
+      if (this.settings.fonts.length > 0 && Customizer.options.settings.canvas.object.text.fontFamily === void 0) {
+        Customizer.options.settings.canvas.object.text.fontFamily = this.settings.fonts[0];
+      }
       Customizer.registerText();
       Customizer.registerImage();
       this.collection = new CustomizerCollection({
@@ -1217,7 +1364,6 @@
       this.listenTo(this.canvas, "mouse:down", function(o) {
         return this.isDown = true;
       });
-      this.listenTo(this.canvas, "object:moving", this.objectMoveing);
       this.listenTo(this.canvas, "object:selected", this.objectSelected);
       this.listenTo(this.canvas, "object:modified", this.objectModified);
       this.listenTo(this.canvas, "object:scaling", this.objectScaling);
@@ -1225,7 +1371,20 @@
       this.listenTo(this.canvas, "after:render", function(evt) {
         return this.calcOffset();
       });
+      this.listenTo(jQuery(window)("resize", this.reSizeWindow()));
       return this.collection.reset(this.bootstrapData);
+    };
+
+    CustomizerView.prototype.reSizeWindow = function() {
+      var height, originalWidth, width, widthRatio;
+      originalWidth = 600;
+      width = this.$el.find('.pc-canvas-waraper .pc-canvas').innerWidth();
+      widthRatio = width / originalWidth;
+      width = this.canvas.getWidth() * widthRatio;
+      height = this.canvas.getWidth() * widthRatio;
+      this.canvas.setWidth(width);
+      this.canvas.setHeight(height);
+      return console.log(widthRatio);
     };
 
     CustomizerView.prototype.fullscreen = function(ev) {
@@ -1249,8 +1408,18 @@
       }
     };
 
+    CustomizerView.prototype.realWidth = function(obj) {
+      var clone, width;
+      clone = obj.clone();
+      clone.css("visibility", "hidden");
+      jQuery('body').append(clone);
+      width = clone.outerWidth();
+      clone.remove();
+      return width;
+    };
+
     CustomizerView.prototype.render = function() {
-      var canvas, canvasAttr, defaultCanvasArgs, el, h, subview, w, _i, _len, _ref6;
+      var canvas, defaultCanvasArgs, el, subview, _i, _len, _ref6;
       this.$el.html(Customizer.templates['page']());
       this.loader = this.$el.find('.pc-loader-container');
       this.loader.show();
@@ -1267,41 +1436,49 @@
         selection: false,
         hoverCursor: 'pointer',
         controlsAboveOverlay: true,
-        centeredScaling: true,
+        centeredScaling: false,
         preserveObjectStacking: true
       };
       if (Customizer.options.settings.canvas === void 0) {
         Customizer.options.settings.canvas = {};
       }
-      canvasAttr = jQuery.extend(true, {}, Customizer.options.settings.canvas, defaultCanvasArgs);
-      canvas = new fabric.Canvas(el[0], canvasAttr);
-      h = this.$el.find('.pc-canvas').height();
-      w = this.$el.find('.pc-canvas').width();
-      if (canvasAttr.height !== void 0 && canvasAttr.height > 0) {
-        canvas.setHeight(canvasAttr.height);
-      } else {
-        canvas.setHeight(500);
-      }
-      if (canvasAttr.width !== void 0 && canvasAttr.width > 0) {
-        canvas.setWidth(canvasAttr.width);
-      } else {
-        canvas.setWidth(w);
-      }
+      this.canvasAttr = jQuery.extend(true, {}, Customizer.options.settings.canvas, defaultCanvasArgs);
+      canvas = new fabric.Canvas(el[0], this.canvasAttr);
       this.canvas = canvas;
+      this.reSetCanvasSize();
       this.randerLayers();
       this.randerUploadedImages();
       this.loader.hide();
       return this;
     };
 
+    CustomizerView.prototype.reSetCanvasSize = function() {
+      var h, w;
+      this.canvas.setWidth(600);
+      this.canvas.setHeight(500);
+      return;
+      h = this.$el.find('.pc-canvas').height();
+      w = this.$el.find('.pc-canvas').width();
+      if (this.canvasAttr.height !== void 0 && this.canvasAttr.height > 0) {
+        this.canvas.setHeight(this.canvasAttr.height);
+      } else {
+        this.canvas.setHeight(500);
+      }
+      if (this.canvasAttr.width !== void 0 && this.canvasAttr.width > 0) {
+        return this.canvas.setWidth(this.canvasAttr.width);
+      } else {
+        return this.canvas.setWidth(w);
+      }
+    };
+
     CustomizerView.prototype.randerLayers = function(canvas) {
-      var $el, layers, layersView;
+      var $el, layers;
       layers = this.canvas.getObjects();
-      layersView = new ViewLayerView({
+      this.layersView = new ViewLayerView({
         parentView: this,
         canvas: this.canvas
       });
-      $el = layersView.render().$el;
+      $el = this.layersView.render().$el;
       return this.$el.find('#pc-layers').html($el);
     };
 
@@ -1322,18 +1499,6 @@
 
     CustomizerView.prototype.exportCanvas = function() {
       return this.canvas;
-      /*newCanvas.setWidth @canvas.getWidth()
-      newCanvas.setHeight @canvas.getHeight()
-      
-      if objects.length > 0
-        jQuery.each(objects, (index, vlaue)-> 
-          perams = vlaue.toJSON(Customizer.options.jsonArgs)
-          if !(perams.dontSync == true)
-              newCanvas.add(vlaue)
-        )
-      newCanvas
-      */
-
     };
 
     CustomizerView.prototype.savePDF = function() {
@@ -1370,186 +1535,152 @@
       }
     };
 
-    CustomizerView.prototype.clearSelection = function(evt) {};
-
     CustomizerView.prototype.objectSelected = function(evt) {
-      var $el, layersEditView, view;
+      var $el, view;
       view = evt.target.canvas.parentView;
       view.setLayersActive(evt.target);
-      layersEditView = new EditLayerView({
+      this.layersEditView = new EditLayerView({
         parentView: view,
         layer: evt.target
       });
-      $el = layersEditView.render().$el;
+      $el = this.layersEditView.render().$el;
       return view.$el.find('#pc-edit-layer').html($el);
     };
 
     CustomizerView.prototype.beforeSelectionCleared = function(evt) {
       var view;
-      view = evt.target.canvas.parentView;
-      if (view !== void 0) {
-        return view.$el.find('#pc-edit-layer').html("");
+      if (evt === void 0 || evt.target === void 0 || evt.target === null) {
+
+      } else {
+        view = evt.target.canvas.parentView;
+        if (view !== void 0) {
+          if (this.layersEditView !== void 0) {
+            this.layersEditView.destroy();
+          }
+          if (view.layersView !== void 0) {
+            return view.layersView.unselect();
+          }
+        }
       }
     };
 
     CustomizerView.prototype.objectModified = function(evt) {
-      var view;
+      var fontSize, old, view;
       view = evt.target.canvas.parentView;
-      return view.updateModel(evt.target.id);
+      view.updateModel(evt.target.id);
+      if (evt.target.object === 'text') {
+        old = evt.target.scaleX;
+        fontSize = (evt.target.fontSize * old).toFixed(0);
+        return view.updateLayer(evt.target, {
+          fontSize: fontSize,
+          scaleX: 1,
+          scaleY: 1
+        });
+      }
     };
 
-    CustomizerView.prototype.objectScaling = function(evt) {
-      var obj, view;
-      view = evt.target.canvas.parentView;
-      obj = evt.target;
-      return view.setBoundry(obj, view);
-    };
+    CustomizerView.prototype.objectScaling = function(evt) {};
 
-    CustomizerView.prototype.objectMoveing = function(evt) {
-      var obj, view;
-      view = evt.target.canvas.parentView;
-      obj = evt.target;
-      return view.setBoundry(obj, view);
+    CustomizerView.prototype.updateBoundry = function(view) {
+      var clipRect;
+      if (view === void 0) {
+        view = this;
+      }
+      clipRect = _.filter(view.canvas.getObjects(), function(obj) {
+        return obj.clipFor !== void 0 && obj.clipFor !== null && obj.clipFor !== "";
+      });
+      if (clipRect.length > 0) {
+        return _.each(clipRect, function(obj) {
+          return view.setBoundry(obj);
+        });
+      }
     };
 
     CustomizerView.prototype.setBoundry = function(object, view) {
-      var boundRect, boundingBox, h, w;
+      var boundRect, boundingBox, params;
+      params = object.toJSON(Customizer.options.jsonArgs);
+      if (params.boundingEnable === false) {
+        delete object.clipTo;
+        return;
+      }
       if (view !== void 0) {
         view = this;
       }
-      boundingBox = view.getBoundingBoxCoords(object);
-      if (!boundingBox) {
-        boundingBox = object.canvas;
+      if (params.boundingMode === 'clipping') {
+        object.set('clipName', params.boundingElementName);
+        return this.setCliping(object);
+      } else {
+        boundingBox = view.getBoundingBoxCoords(object);
+        if (!boundingBox) {
+          boundingBox = object.canvas;
+        }
+        return boundRect = object.getBoundingRect();
       }
-      boundRect = object.getBoundingRect();
-      if (object.getHeight() > boundingBox.height) {
-        h = Math.min(object.getHeight(), boundingBox.height);
-        object.scaleToHeight(h);
-        object.setCoords();
-        boundRect = object.getBoundingRect();
-      }
-      if (object.getWidth() > boundingBox.width) {
-        w = Math.min(object.getWidth(), boundingBox.width);
-        object.scaleToWidth(w);
-        object.setCoords();
-        boundRect = object.getBoundingRect();
-      }
-      object.setCoords();
-      if (boundRect.top < boundingBox.top) {
-        object.top = Math.max(object.top, boundingBox.top);
-      }
-      if (boundRect.left < boundingBox.left) {
-        object.left = Math.max(object.left, boundingBox.left);
-      }
-      if ((boundRect.top + boundRect.height) > (boundingBox.top + boundingBox.height)) {
-        object.top = Math.min(object.top, boundingBox.height - boundRect.height + boundingBox.top);
-      }
-      if ((boundRect.left + boundRect.width) > (boundingBox.left + boundingBox.width)) {
-        object.left = Math.min(object.left, boundingBox.width - boundRect.width + boundingBox.left);
-      }
-      return view.updateModel(object.id);
     };
 
-    /*getBoundingBoxCoords : (obj, _this)->
-      if(_this == undefined)
-        _this = @
-      if(obj == undefined)
-        obj = @canvas.getActiveObject()
-    
-      elemParams = obj.toJSON(Customizer.options.jsonArgs)
-    
-      if elemParams.boundingEnable
-        bbCoords = _this._getBoundingBoxCoords(obj, _this)
-        if bbCoords
-          currentBoundingObject = new (fabric.Rect)(
-            left: bbCoords.left
-            top: bbCoords.top
-            width: bbCoords.width
-            height: bbCoords.height
-            stroke: Customizer.options.settings.boundingBoxColor
-            strokeWidth: 1
-            fill: false
-            selectable: false
-            evented: false
-            originX: 'left'
-            originY: 'top'
-            name: 'bounding-box'
-            params:
-              x: bbCoords.left
-              y: bbCoords.top
-              scale: 1)
-          _this.canvas.add currentBoundingObject
-          currentBoundingObject.bringToFront()
-    */
-
-
     CustomizerView.prototype.getBoundingBoxCoords = function(element) {
-      var bbRect, boundingEnable, i, name, object, objects, params;
+      var bbRect, i, name, object, objects, params;
       params = element.toJSON(Customizer.options.jsonArgs);
-      if (params.boundingMode === 'clipping') {
-        element.set('clipName', params.boundingElementName);
-        return this.setCliping(element);
-      } else {
-        if (params.boundingEnable) {
-          boundingEnable = void 0;
-          if (typeof params.boundingElement === 'object') {
-            return {
-              left: params.boundingCoordsTop,
-              top: params.boundingCoordsLeft,
-              width: params.boundingCoordsWidth,
-              height: params.boundingCoordsHeight
-            };
-          } else {
-            objects = element.canvas.getObjects();
-            i = 0;
-            while (i < objects.length) {
-              object = objects[i];
-              name = object.title === void 0 ? object.id : object.title;
-              if (params.boundingElementName === name) {
-                bbRect = object.getBoundingRect();
-                return {
-                  left: bbRect.left,
-                  top: bbRect.top,
-                  width: bbRect.width,
-                  height: bbRect.height
-                };
-                break;
-              }
-              ++i;
+      if (params.boundingEnable) {
+        if (typeof params.boundingElement === 'object') {
+          return {
+            left: params.boundingCoordsTop,
+            top: params.boundingCoordsLeft,
+            width: params.boundingCoordsWidth,
+            height: params.boundingCoordsHeight
+          };
+        } else {
+          objects = element.canvas.getObjects();
+          i = 0;
+          while (i < objects.length) {
+            object = objects[i];
+            name = object.title === void 0 ? object.id : object.title;
+            if (params.boundingElementName === name) {
+              bbRect = object.getBoundingRect();
+              return {
+                left: bbRect.left,
+                top: bbRect.top,
+                width: bbRect.width,
+                height: bbRect.height
+              };
+              break;
             }
+            ++i;
           }
         }
-        return false;
       }
+      return false;
     };
 
     CustomizerView.prototype.setCliping = function(obj) {
-      return obj.clipTo = function(ctx) {
-        return _.bind(clipByName, this)(ctx);
-      };
-    };
-
-    CustomizerView.prototype.removeCliping = function(obj) {
-      return delete obj.clipTo;
+      var clipRect;
+      clipRect = _.where(obj.canvas.getObjects(), {
+        clipFor: obj.clipName
+      });
+      if (clipRect.length > 0) {
+        return obj.clipTo = function(ctx) {
+          return _.bind(clipByName, this)(ctx);
+        };
+      } else if (obj.clipTo !== void 0) {
+        return delete obj.clipTo;
+      }
     };
 
     CustomizerView.prototype.bindSaveEvent = function() {
-      var _this = this;
       this.formSaved = true;
       this.saveFormButton = this.$el.find(".js-save-data");
-      this.saveFormButton.attr('disabled', true).text(Customizer.options.dict.ALL_CHANGES_SAVED);
-      if (!!Customizer.options.AUTOSAVE) {
-        setInterval(function() {
-          return _this.saveForm.call(_this);
-        }, 5000);
+      if (this.saveFormButton.length > 0) {
+        return this.saveFormButton.attr('disabled', true).text(Customizer.options.dict.ALL_CHANGES_SAVED);
       }
-      return jQuery(window).bind('beforeunload', function() {
-        if (_this.formSaved) {
-          return void 0;
-        } else {
-          return Customizer.options.dict.UNSAVED_CHANGES;
-        }
-      });
+      /*unless !Customizer.options.AUTOSAVE
+        setInterval =>
+          @saveForm.call(@)
+        , 5000
+      
+      jQuery(window).bind 'beforeunload', =>
+        if @formSaved then undefined else Customizer.options.dict.UNSAVED_CHANGES
+      */
+
     };
 
     CustomizerView.prototype.reset = function() {
@@ -1593,35 +1724,6 @@
         obj.setCoords();
       }
       return this.canvas.renderAll();
-    };
-
-    CustomizerView.prototype._clipElement = function(element, _this) {
-      var bbCoords;
-      bbCoords = this.getBoundingBoxCoords(element);
-      if (bbCoords) {
-        element.clippingRect = bbCoords;
-        element.setClipTo(function(ctx) {
-          _this._clipById(ctx, this);
-        });
-      }
-    };
-
-    _clipById = function(ctx, _this, scale) {
-      var clipRect, scaleXTo1, scaleYTo1;
-      scale = scale === void 0 ? 1 : scale;
-      clipRect = _this.clippingRect;
-      scaleXTo1 = 1 / _this.scaleX;
-      scaleYTo1 = 1 / _this.scaleY;
-      ctx.save();
-      ctx.translate(0, 0);
-      ctx.rotate(fabric.util.degreesToRadians(_this.angle * -1));
-      ctx.scale(scaleXTo1, scaleYTo1);
-      ctx.beginPath();
-      ctx.rect(clipRect.left * responsiveScale - _this.left - (_this.originX === 'left' ? _this.width * .5 * responsiveScale : 0), clipRect.top * responsiveScale - _this.top - (_this.originY === 'top' ? _this.height * .5 * responsiveScale : 0), clipRect.width * responsiveScale * scale, clipRect.height * responsiveScale * scale);
-      ctx.fillStyle = 'transparent';
-      ctx.fill();
-      ctx.closePath();
-      ctx.restore();
     };
 
     CustomizerView.prototype.bringToppedElementsToFront = function() {
@@ -1738,6 +1840,11 @@
 
     CustomizerView.prototype.createField = function(attrs, options) {
       var rf;
+      if (Customizer.options.settings.administration === true) {
+        attrs.administration = true;
+      } else {
+        attrs.administration = false;
+      }
       rf = this.collection.create(attrs, options);
       this.handleFormUpdate();
       return rf;
@@ -1768,8 +1875,8 @@
         obj.model.set(Customizer.options.mappings.LAYER_DATA + "." + key, value);
       }
       obj.setCoords();
-      this.canvas.renderAll();
-      return obj.model.trigger('change');
+      obj.model.trigger('change');
+      return this.canvas.renderAll();
     };
 
     CustomizerView.prototype.setDraggable = function() {
@@ -1793,28 +1900,61 @@
     };
 
     CustomizerView.prototype.addImageLayer = function(data) {
-      var model, _addImageLayer, _this;
+      var obj, _addNew, _replace, _this;
       _this = this;
-      _addImageLayer = function(value) {
-        var newData;
-        newData = jQuery.extend(true, {}, data);
-        if (newData.url && newData.full === void 0) {
-          newData.full = newData.url;
-        }
-        if (newData.id !== void 0) {
-          delete newData.id;
-        }
-        if (value !== void 0) {
-          newData.title = value;
-        }
-        return _this.createField(Customizer.helpers.defaultLayersAttrs('img', 'image', newData));
-      };
-      if (Customizer.options.settings.administration) {
-        return model = new ModelView().prompt('Please enter name.', 'Name', function(value) {
-          return _addImageLayer(value);
+      _replace = function() {
+        fabric.util.loadImage(data.full, function(img) {
+          obj.setElement(img);
+          obj.canvas.renderAll();
+          obj.model.set('full', data.full);
+          return _this.updateLayer(obj, {
+            src: data.full,
+            width: img.width,
+            height: img.height
+          });
         });
+      };
+      _addNew = function() {
+        var model, _addImageLayer;
+        _addImageLayer = function(value) {
+          var newData;
+          newData = jQuery.extend(true, {}, data);
+          if (newData.url && newData.full === void 0) {
+            newData.full = newData.url;
+          }
+          if (newData.id !== void 0) {
+            delete newData.id;
+          }
+          if (value !== void 0) {
+            newData.title = value;
+          }
+          return _this.createField(Customizer.helpers.defaultLayersAttrs('img', 'image', newData));
+        };
+        if (Customizer.options.settings.administration) {
+          return model = new ModelView().prompt('Please enter name.', 'Name', function(value) {
+            return _addImageLayer(value);
+          });
+        } else {
+          return _addImageLayer();
+        }
+      };
+      obj = this.canvas.getActiveObject();
+      if (obj !== void 0 && obj !== null && obj !== "") {
+        if (Customizer.options.settings.replaceImage === true) {
+          return _replace();
+        } else if (Customizer.options.settings.replaceImage === 'confirm') {
+          return new ModelView().confirm('Are you want to replace the image?', 'Replace', function(value) {
+            if (value === true) {
+              return _replace();
+            } else {
+              return _addNew();
+            }
+          });
+        } else {
+          return _addNew();
+        }
       } else {
-        return _addImageLayer();
+        return _addNew();
       }
     };
 
@@ -2020,33 +2160,51 @@
         return;
       }
       this.formSaved = false;
-      return this.saveFormButton.removeAttr('disabled').text(Customizer.options.dict.SAVE_FORM);
+      if (this.saveFormButton !== void 0) {
+        return this.saveFormButton.removeAttr('disabled').text(Customizer.options.dict.SAVE_FORM);
+      } else {
+
+      }
     };
 
     CustomizerView.prototype.saveForm = function(e) {
-      var fields, newFields, payload;
+      var payload;
       if (this.formSaved) {
         return;
       }
       this.formSaved = true;
       this.saveFormButton.attr('disabled', true).text(Customizer.options.dict.ALL_CHANGES_SAVED);
-      this.collection.sort();
-      fields = this.collection.toJSON();
-      newFields = [];
-      if (fields.length > 0) {
-        jQuery.each(fields, function(index, vlaue) {
-          if (!((vlaue.dontSync === true) || (vlaue.layer_data.dontSync === true))) {
-            return newFields.push(vlaue);
-          }
-        });
-      }
-      payload = JSON.stringify({
-        fields: newFields
-      });
+      payload = this.getPayload();
       if (Customizer.options.HTTP_ENDPOINT) {
         this.doAjaxSave(payload);
       }
       return this.customizer.trigger('save', payload);
+    };
+
+    CustomizerView.prototype.getPayload = function(type) {
+      var fields, newFields;
+      this.collection.sort();
+      fields = this.collection.toJSON(Customizer.options.jsonArgs);
+      newFields = [];
+      if (fields.length > 0) {
+        jQuery.each(fields, function(index, vlaue) {
+          if (vlaue.layer_data.clipTo !== void 0) {
+            delete vlaue.layer_data.clipTo;
+          }
+          if (vlaue.clipTo !== void 0) {
+            delete vlaue.clipTo;
+          }
+          if (!(vlaue.dontSync === true || vlaue.layer_data.dontSync === true) || type === 'all') {
+            return newFields.push(vlaue);
+          } else {
+            vlaue.layer_data.opacity = 0;
+            return newFields.push(vlaue);
+          }
+        });
+      }
+      return JSON.stringify({
+        fields: newFields
+      });
     };
 
     CustomizerView.prototype.doAjaxSave = function(payload) {
@@ -2105,7 +2263,7 @@
       HTTP_METHOD: 'POST',
       AUTOSAVE: true,
       CLEAR_FIELD_CONFIRM: false,
-      jsonArgs: ['id', 'unlockable', 'removable', 'hideLayer', 'displayInLayerBar', 'order', 'selection', 'selectable', 'locked', 'lockMovementX', 'lockMovementY', 'lockRotation', 'lockScalingX', 'lockScalingY', 'lockUniScaling', 'hasBorders', 'hasControls', 'hasRotatingPoint', 'hoverCursor', 'isResizable', 'isDraggable', 'boundingEnable', 'boundingElementName', 'boundingMode', 'stayOnTop', 'title', 'elementBoundingEnable', 'boundingCoordsLeft', 'boundingCoordsTop', 'boundingCoordsWidth', 'boundingCoordsHeight', 'clipFor', 'clipName', 'evented', 'dontSync'],
+      jsonArgs: ['id', 'unlockable', 'removable', 'hideLayer', 'displayInLayerBar', 'order', 'selection', 'selectable', 'locked', 'lockMovementX', 'lockMovementY', 'lockRotation', 'lockScalingX', 'lockScalingY', 'lockUniScaling', 'hasBorders', 'hasControls', 'hasRotatingPoint', 'hoverCursor', 'isResizable', 'isDraggable', 'boundingEnable', 'boundingElementName', 'boundingMode', 'stayOnTop', 'title', 'elementBoundingEnable', 'boundingCoordsLeft', 'boundingCoordsTop', 'boundingCoordsWidth', 'boundingCoordsHeight', 'clipFor', 'clipName', 'evented', 'dontSync', 'defaultColor', 'allowedColors', 'object', 'administration'],
       mappings: {
         DATA_ID: 'data_id',
         TYPE: 'type',
@@ -2125,8 +2283,6 @@
     Customizer.layers = [];
 
     Customizer.backgrounds = {};
-
-    Customizer.cliparts = {};
 
     Customizer.text = {};
 
@@ -2166,9 +2322,6 @@
       }
       if (opts.id !== void 0) {
         id = opts.id;
-      }
-      if (opts.title === void 0 && opts.name !== void 0) {
-        opts.title = opts.name;
       }
       if (Customizer.images[category] === void 0) {
         Customizer.images[category] = {};
@@ -2228,32 +2381,28 @@
       return Customizer.image = opts;
     };
 
-    Customizer.registerClipArts = function(name, opts) {
-      if (opts.type === void 0) {
-        opts.type = name;
-      }
-      if (opts.object === void 0) {
-        opts.object = 'image';
-      }
-      return Customizer.cliparts[name] = opts;
-    };
-
     Customizer.prototype.setSettings = function(key, value) {
       return Customizer.options.settings[key] = value;
     };
 
     function Customizer(opts) {
-      var args;
       if (opts == null) {
         opts = {};
       }
       _.extend(this, Backbone.Events);
-      args = _.extend(opts, {
+      this.args = _.extend(opts, {
         customizer: this
       });
-      this.mainView = new CustomizerView(args);
+      this.rander();
       this.mainView;
     }
+
+    Customizer.prototype.rander = function() {
+      if (this.mainView !== void 0) {
+        this.mainView.destroy();
+      }
+      return this.mainView = new CustomizerView(this.args);
+    };
 
     return Customizer;
 
@@ -2289,458 +2438,371 @@ this["Customizer"] = this["Customizer"] || {};
 this["Customizer"]["templates"] = this["Customizer"]["templates"] || {};
 
 this["Customizer"]["templates"]["edit/administration"] = function(obj) {
-obj || (obj = {});
-var __t, __p = '', __e = _.escape;
-with (obj) {
-__p += '<div class=\'pc-administration-wrapper pull-right\'>\r\n  \t<div class="pc-style-icon admin-settings toggle-div" data-target="#admin-setting-container" ><i class="fa fa-gear"></i></span></div>\r\n</div>\r\n<div id="admin-setting-container" class="tool-tip" style="display:none">\r\n\t<div class="tool-tip-container-inner">\r\n\t\t' +
-((__t = ( Customizer.templates['edit/settings']({rf : rf}) )) == null ? '' : __t) +
-'\r\n\t</div>\r\n</div>\r\n';
-
-}
-return __p
+    obj || (obj = {});
+    var __t, __p = '';
+    with(obj) {
+        __p += '<div class="pc-administration-wrapper pull-right"><div class="pc-style-icon admin-settings toggle-div" data-target="#admin-setting-container"><i class="fa fa-gear"></i></div></div><div id="admin-setting-container" class="tool-tip" style="display:none"><div class="tool-tip-container-inner"> ' + ((__t = (Customizer.templates['edit/settings']({
+            rf: rf
+        }))) == null ? '' : __t) + ' </div></div>';
+    }
+    return __p
 };
 
 this["Customizer"]["templates"]["edit/base"] = function(obj) {
-obj || (obj = {});
-var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
-function print() { __p += __j.call(arguments, '') }
-with (obj) {
-__p +=
-((__t = ( Customizer.templates['edit/header']() )) == null ? '' : __t) +
-'\n';
- if(Customizer.fields[rf.get(Customizer.options.mappings.OBJECT)] !== undefined){ ;
-__p += '\n\t' +
-((__t = ( Customizer.fields[rf.get(Customizer.options.mappings.OBJECT)].edit({rf: rf}) )) == null ? '' : __t) +
-'\n';
- } ;
-__p += '\n' +
-((__t = ( Customizer.templates['edit/footer']() )) == null ? '' : __t);
+    obj || (obj = {});
+    var __t, __p = '',
+        __j = Array.prototype.join;
 
-}
-return __p
+    function print() {
+        __p += __j.call(arguments, '')
+    }
+    with(obj) {
+        __p += ((__t = (Customizer.templates['edit/header']())) == null ? '' : __t) + ' ';
+        if (Customizer.fields[rf.get(Customizer.options.mappings.OBJECT)] !== undefined) {;
+            __p += ' ' + ((__t = (Customizer.fields[rf.get(Customizer.options.mappings.OBJECT)].edit({
+                rf: rf
+            }))) == null ? '' : __t) + ' ';
+        };
+        __p += ' ' + ((__t = (Customizer.templates['edit/footer']())) == null ? '' : __t);
+    }
+    return __p
 };
 
 this["Customizer"]["templates"]["edit/color-picker"] = function(obj) {
-obj || (obj = {});
-var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
-function print() { __p += __j.call(arguments, '') }
-with (obj) {
-__p += '<div class=\'pc-color-wrapper\'>\r\n\t';
- if(rf.get(Customizer.options.mappings.LAYER_DATA+'.type') == 'text'){
-		color = rf.get(Customizer.options.mappings.LAYER_DATA+'.fill')
-	}else{
-		if(rf.get(Customizer.options.mappings.LAYER_DATA+'.filters') !== undefined && rf.get(Customizer.options.mappings.LAYER_DATA+'.filters').length > 0){
-			color = rf.get(Customizer.options.mappings.LAYER_DATA+'.filters')[0].color
-		}else{
-			color = ""
-		}
-	};
-__p += '\r\n  \t<div class="colorselector"><div class="background-color" style="background-color:' +
-((__t = ( color )) == null ? '' : __t) +
-'"></div></div>\r\n</div>';
+    obj || (obj = {});
+    var __t, __p = '',
+        __j = Array.prototype.join;
 
-}
-return __p
+    function print() {
+        __p += __j.call(arguments, '')
+    }
+    with(obj) {
+        __p += '<div class="pc-color-wrapper"> ';
+        if (rf.get(Customizer.options.mappings.LAYER_DATA + '.type') == 'text') {
+            color = rf.get(Customizer.options.mappings.LAYER_DATA + '.fill')
+        } else {
+            if (rf.get(Customizer.options.mappings.LAYER_DATA + '.filters') !== undefined && rf.get(Customizer.options.mappings.LAYER_DATA + '.filters').length > 0) {
+                color = rf.get(Customizer.options.mappings.LAYER_DATA + '.filters')[0].color
+            } else {
+                color = ""
+            }
+        };
+        __p += ' <div class="colorselector"><div class="background-color" style="background-color:' + ((__t = (color)) == null ? '' : __t) + '"></div></div></div>';
+    }
+    return __p
 };
 
 this["Customizer"]["templates"]["edit/footer"] = function(obj) {
-obj || (obj = {});
-var __t, __p = '', __e = _.escape;
-with (obj) {
-__p += '';
-
-}
-return __p
+    obj || (obj = {});
+    var __t, __p = '';
+    with(obj) {
+        __p += '';
+    }
+    return __p
 };
 
 this["Customizer"]["templates"]["edit/header"] = function(obj) {
-obj || (obj = {});
-var __t, __p = '', __e = _.escape;
-with (obj) {
-__p += '';
-
-}
-return __p
+    obj || (obj = {});
+    var __t, __p = '';
+    with(obj) {
+        __p += '';
+    }
+    return __p
 };
 
 this["Customizer"]["templates"]["edit/settings"] = function(obj) {
-obj || (obj = {});
-var __t, __p = '', __e = _.escape;
-with (obj) {
-__p += '<div class=\'pc-settings-wrapper\'>\r\n\r\n\t<ul class=\'fb-tabs\'>\r\n\t    <li class=\'active\'><a data-target=\'#element-bounding-panel\'>Bounding Box</a></li>\r\n\t    <li><a data-target=\'#modifications-panel\'>Modifications</a></li>\r\n  \t</ul>\r\n\r\n  \t<div class=\'fb-tab-content\'>\r\n\t    <div id="element-bounding-panel" class="fb-tab-pane active">\r\n\r\n\t\t\t<div class="pc-input-container input-checkbox">\r\n\t\t\t\t<label class="input-label" for="enable_bounding">Enable bounding box</label>\r\n\t\t\t\t<div class="input-fields checkbox"> \r\n\t\t\t\t\t<input type="checkbox" class="toggle-div" data-target="#pc-define-bounding" id="enable_bounding" name="enable_bounding" ' +
-((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".boundingEnable") == true ? 'checked' : '' )) == null ? '' : __t) +
-'>\r\n\t\t\t\t</div>\r\n\t\t\t</div>\r\n\t\t\t<div id="pc-define-bounding" class="pc-define-bounding"  ' +
-((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".boundingEnable") == true ? '' : 'style="display:none"' )) == null ? '' : __t) +
-'>\r\n\r\n\t\t\t\t<div class="pc-input-container input-checkbox">\r\n\t\t\t\t\t<label class="input-label" for="another_element_bounding">Use another element as bounding box</label>\r\n\t\t\t\t\t<div class="input-fields checkbox"> \r\n\t\t\t\t\t\t<input type="checkbox" class="toggle-div" data-target=".pc-define-bounding-name, .pc-define-bounding-coords" id="another_element_bounding" name="another_element_bounding" ' +
-((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".elementBoundingEnable") == true ? 'checked' : '' )) == null ? '' : __t) +
-'>\r\n\t\t\t\t\t</div>\r\n\t\t\t\t</div>\r\n\r\n\t\t\t\t\r\n\t\t\t\t<div class="pc-define-bounding-name" ' +
-((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".elementBoundingEnable") == true ? '' : 'style="display:none"' )) == null ? '' : __t) +
-'>\r\n\r\n\t\t\t\t\t<div class="pc-input-container pc-full-width">\r\n\t\t\t\t\t\t<label class="input-label">Define Bounding Box</label>\r\n\t\t\t\t\t\t<div class="input-fields text"> \r\n\t\t\t\t\t\t\t<input class="input_another_element_bounding_name" type="text" name="another_element_bounding_name" value="' +
-((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".boundingElementName") )) == null ? '' : __t) +
-'">\r\n\t\t\t\t\t\t</div>\r\n\t\t\t\t\t\t<div class="description">Name when you have entered while adding<!-- or id of the layer (I.e. "c1", "c2", "c3", ...) -->.</div>\r\n\t\t\t\t\t</div>\r\n\t\t\t\t</div>\r\n\t\t\t\t<div class="pc-define-bounding-coords" ' +
-((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".elementBoundingEnable") == true ? 'style="display:none"' : '' )) == null ? '' : __t) +
-'>\r\n\t\t\t\t\t<div class="pc-input-container pc-full-width">\r\n\t\t\t\t\t\t<label class="input-label">Define Bounding Box Coords</label>\r\n\t\t\t\t\t\t<div class="input-fields text"> \r\n\t\t\t\t\t\t\t<div class="pc-input-container pc-half-width">\r\n\t\t\t\t\t\t\t\t<label class="input-label">Left</label>\r\n\t\t\t\t\t\t\t\t<input class="bounding_coords" data-coord="Left"  type="text" name="bounding_coords_x" value="' +
-((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".boundingCoordsLeft") )) == null ? '' : __t) +
-'">\r\n\t\t\t\t\t\t\t</div>\r\n\t\t\t\t\t\t\t<div class="pc-input-container pc-half-width">\r\n\t\t\t\t\t\t\t\t<label class="input-label">Top</label>\r\n\t\t\t\t\t\t\t\t<input class="bounding_coords" data-coord="Top" type="text" name="bounding_coords_y" value="' +
-((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".boundingCoordsTop") )) == null ? '' : __t) +
-'">\r\n\t\t\t\t\t\t\t</div>\r\n\t\t\t\t\t\t</div>\r\n\r\n\t\t\t\t\t\t<div class="input-fields text"> \r\n\t\t\t\t\t\t\t<div class="pc-input-container pc-half-width">\r\n\t\t\t\t\t\t\t\t<label class="input-label">Width</label>\r\n\t\t\t\t\t\t\t\t<input class="bounding_coords" data-coord="Width" type="text" name="bounding_coords_width" value="' +
-((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".boundingCoordsWidth") )) == null ? '' : __t) +
-'">\r\n\t\t\t\t\t\t\t</div>\r\n\t\t\t\t\t\t\t<div class="pc-input-container pc-half-width">\r\n\t\t\t\t\t\t\t\t<label class="input-label">Height</label>\r\n\t\t\t\t\t\t\t\t<input class="bounding_coords" data-coord="Height" type="text" name="bounding_coords_height" value="' +
-((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".boundingCoordsHeight") )) == null ? '' : __t) +
-'">\r\n\t\t\t\t\t\t\t</div>\r\n\t\t\t\t\t\t</div>\r\n\t\t\t\t\t\t\r\n\t\t\t\t\t</div>\r\n\t\t\t\t</div>\r\n\r\n\r\n\t\t\t\t<div class="pc-input-container pc-full-width">\r\n\t\t\t\t\t<label class="input-label">Mode</label> \r\n\t\t\t\t\t<div class="input-fields select">\r\n\t\t\t\t\t\t<select class="input_bounding_box_mode" name="bounding_box_mode">\r\n\t\t\t\t\t\t\t<option value="inside" ' +
-((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".boundingMode") == 'inside' ? 'selected' : '' )) == null ? '' : __t) +
-'>Inside</option>\r\n\t\t\t\t\t\t\t<option value="clipping" ' +
-((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".boundingMode") == 'clipping' ? 'selected' : '' )) == null ? '' : __t) +
-'>Clipping</option>\r\n\t\t\t\t\t\t</select>\r\n\t\t\t\t\t</div>\r\n\t\t\t\t</div>\r\n\t\t\t</div>\r\n\t\t</div>\r\n\r\n\r\n\t\t<div id="modifications-panel" class="fb-tab-pane">\r\n\t\t\t<div class="checkbox-group">\r\n\t\t\t\t<div class="pc-input-container  pc-half-width">\r\n\t\t\t\t\t<label class="input-label"><input class="checkbox-draggable" ' +
-((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".isDraggable") == true ? 'checked' : '' )) == null ? '' : __t) +
-' type="checkbox"> Draggable</label>\r\n\t\t\t\t</div>\r\n\t\t\t\t<div class="pc-input-container  pc-half-width">\r\n\t\t\t\t\t<label class="input-label"><input class="checkbox-rotatable" ' +
-((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".lockRotation") == false ? 'checked' : '' )) == null ? '' : __t) +
-' type="checkbox"> Rotatable</label>\r\n\r\n\t\t\t\t</div>\r\n\t\t\t\t<div class="pc-input-container  pc-half-width">\r\n\t\t\t\t\t<label class="input-label"><input class="checkbox-resizable" ' +
-((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".isResizable") == true ? 'checked' : '' )) == null ? '' : __t) +
-' type="checkbox"> Resizable</label>\r\n\t\t\t\t</div>\r\n\r\n\t\t\t\t<div class="pc-input-container pc-half-width">\r\n\t\t\t\t\t<label class="input-label"><input class="checkbox-hide-layer" ' +
-((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".hideLayer") == true ? 'checked' : '' )) == null ? '' : __t) +
-' type="checkbox"> Hide Layer</label>\r\n\t\t\t\t</div>\r\n\r\n\t\t\t\t<div class="pc-input-container  pc-half-width">\r\n\t\t\t\t\t<label class="input-label"><input class="checkbox-removable" ' +
-((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".removable") == true ? 'checked' : '' )) == null ? '' : __t) +
-' type="checkbox"> Removable</label>\r\n\t\t\t\t</div>\r\n\r\n\t\t\t\t<div class="pc-input-container  pc-half-width">\r\n\t\t\t\t\t<label class="input-label"><input class="checkbox-unlockable" ' +
-((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".unlockable") == true ? 'checked' : '' )) == null ? '' : __t) +
-' type="checkbox"> Unlockable</label>\r\n\t\t\t\t</div>\r\n\t\t\t\t<div class="pc-input-container  pc-half-width">\r\n\t\t\t\t\t<label class="input-label"> <input class="checkbox-stay-on-top" ' +
-((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".stayOnTop") == true ? 'checked' : '' )) == null ? '' : __t) +
-' type="checkbox"> Stay On Top</label>\r\n\t\t\t\t</div> \r\n\t\t\t</div>\r\n\t\t</div>\r\n  \t</div>\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\t\r\n\r\n\t\r\n\r\n\r\n\r\n  \t<!-- <div class="pc-style-icon bring-forward"></div> -->\r\n  \t \r\n</div>';
-
-}
-return __p
+    obj || (obj = {});
+    var __t, __p = '';
+    with(obj) {
+        __p += '<div class="pc-settings-wrapper"><ul class="fb-tabs"><li class="active"><a data-target="#element-bounding-panel">Bounding Box</a></li><li><a data-target="#modifications-panel">Modifications</a></li><li><a data-target="#other-settings-panel">Other</a></li></ul><div class="fb-tab-content"><div id="element-bounding-panel" class="fb-tab-pane active"><div class="pc-input-container input-checkbox"><label class="input-label" for="enable_bounding">Enable bounding box</label><div class="input-fields checkbox"><input type="checkbox" class="toggle-div" data-target="#pc-define-bounding" id="enable_bounding" name="enable_bounding" ' + ((__t = (rf.get(Customizer.options.mappings.LAYER_DATA + ".boundingEnable") == true ? 'checked' : '')) == null ? '' : __t) + '></div></div><div id="pc-define-bounding" class="pc-define-bounding" ' + ((__t = (rf.get(Customizer.options.mappings.LAYER_DATA + ".boundingEnable") == true ? '' : 'style="display:none"')) == null ? '' : __t) + '><div class="pc-input-container input-checkbox"><label class="input-label" for="another_element_bounding">Use another element as bounding box</label><div class="input-fields checkbox"><input type="checkbox" class="toggle-div" data-target=".pc-define-bounding-name, .pc-define-bounding-coords" id="another_element_bounding" name="another_element_bounding" ' + ((__t = (rf.get(Customizer.options.mappings.LAYER_DATA + ".elementBoundingEnable") == true ? 'checked' : '')) == null ? '' : __t) + '></div></div><div class="pc-define-bounding-name" ' + ((__t = (rf.get(Customizer.options.mappings.LAYER_DATA + ".elementBoundingEnable") == true ? '' : 'style="display:none"')) == null ? '' : __t) + '><div class="pc-input-container pc-full-width"><label class="input-label">Define Bounding Box</label><div class="input-fields text"><input class="input_another_element_bounding_name" type="text" name="another_element_bounding_name" value="' + ((__t = (rf.get(Customizer.options.mappings.LAYER_DATA + ".boundingElementName"))) == null ? '' : __t) + '"></div><div class="description">Name when you have entered while adding<!-- or id of the layer (I.e. "c1", "c2", "c3", ...) -->.</div></div></div><div class="pc-define-bounding-coords" ' + ((__t = (rf.get(Customizer.options.mappings.LAYER_DATA + ".elementBoundingEnable") == true ? 'style="display:none"' : '')) == null ? '' : __t) + '><div class="pc-input-container pc-full-width"><label class="input-label">Define Bounding Box Coords</label><div class="input-fields text"><div class="pc-input-container pc-half-width"><label class="input-label">Left</label><input class="bounding_coords" data-coord="Left" type="text" name="bounding_coords_x" value="' + ((__t = (rf.get(Customizer.options.mappings.LAYER_DATA + ".boundingCoordsLeft"))) == null ? '' : __t) + '"></div><div class="pc-input-container pc-half-width"><label class="input-label">Top</label><input class="bounding_coords" data-coord="Top" type="text" name="bounding_coords_y" value="' + ((__t = (rf.get(Customizer.options.mappings.LAYER_DATA + ".boundingCoordsTop"))) == null ? '' : __t) + '"></div></div><div class="input-fields text"><div class="pc-input-container pc-half-width"><label class="input-label">Width</label><input class="bounding_coords" data-coord="Width" type="text" name="bounding_coords_width" value="' + ((__t = (rf.get(Customizer.options.mappings.LAYER_DATA + ".boundingCoordsWidth"))) == null ? '' : __t) + '"></div><div class="pc-input-container pc-half-width"><label class="input-label">Height</label><input class="bounding_coords" data-coord="Height" type="text" name="bounding_coords_height" value="' + ((__t = (rf.get(Customizer.options.mappings.LAYER_DATA + ".boundingCoordsHeight"))) == null ? '' : __t) + '"></div></div></div></div><div class="pc-input-container pc-full-width"><label class="input-label">Mode</label><div class="input-fields select"><select class="input_bounding_box_mode" name="bounding_box_mode"><option value="inside" ' + ((__t = (rf.get(Customizer.options.mappings.LAYER_DATA + ".boundingMode") == 'inside' ? 'selected' : '')) == null ? '' : __t) + '>Inside</option><option value="clipping" ' + ((__t = (rf.get(Customizer.options.mappings.LAYER_DATA + ".boundingMode") == 'clipping' ? 'selected' : '')) == null ? '' : __t) + '>Clipping</option></select></div></div></div></div><div id="modifications-panel" class="fb-tab-pane"><div class="checkbox-group"><div class="pc-input-container pc-half-width"><label class="input-label"><input class="checkbox-draggable" ' + ((__t = (rf.get(Customizer.options.mappings.LAYER_DATA + ".isDraggable") == true ? 'checked' : '')) == null ? '' : __t) + ' type="checkbox"> Draggable</label></div><div class="pc-input-container pc-half-width"><label class="input-label"><input class="checkbox-rotatable" ' + ((__t = (rf.get(Customizer.options.mappings.LAYER_DATA + ".lockRotation") == false ? 'checked' : '')) == null ? '' : __t) + ' type="checkbox"> Rotatable</label></div><div class="pc-input-container pc-half-width"><label class="input-label"><input class="checkbox-resizable" ' + ((__t = (rf.get(Customizer.options.mappings.LAYER_DATA + ".isResizable") == true ? 'checked' : '')) == null ? '' : __t) + ' type="checkbox"> Resizable</label></div><div class="pc-input-container pc-half-width"><label class="input-label"><input class="checkbox-hide-layer" ' + ((__t = (rf.get(Customizer.options.mappings.LAYER_DATA + ".hideLayer") == true ? 'checked' : '')) == null ? '' : __t) + ' type="checkbox"> Hide Layer</label></div><div class="pc-input-container pc-half-width"><label class="input-label"><input class="checkbox-removable" ' + ((__t = (rf.get(Customizer.options.mappings.LAYER_DATA + ".removable") == true ? 'checked' : '')) == null ? '' : __t) + ' type="checkbox"> Removable</label></div><div class="pc-input-container pc-half-width"><label class="input-label"><input class="checkbox-unlockable" ' + ((__t = (rf.get(Customizer.options.mappings.LAYER_DATA + ".unlockable") == true ? 'checked' : '')) == null ? '' : __t) + ' type="checkbox"> Unlockable</label></div><div class="pc-input-container pc-half-width"><label class="input-label"><input class="checkbox-stay-on-top" ' + ((__t = (rf.get(Customizer.options.mappings.LAYER_DATA + ".stayOnTop") == true ? 'checked' : '')) == null ? '' : __t) + ' type="checkbox"> Stay On Top</label></div></div></div><div id="other-settings-panel" class="fb-tab-pane"><div class="pc-input-container pc-full-width"><label class="input-label">Layer Name</label><div class="input-fields text"><input class="pc_layer_name" type="text" value="' + ((__t = (rf.get(Customizer.options.mappings.LAYER_DATA + ".title"))) == null ? '' : __t) + '"></div></div><div class="pc-input-container pc-full-width"><label class="input-label">Allowed Colors</label><div class="input-fields text"><input class="pc_allowed_colors" type="text" value="' + ((__t = (rf.get(Customizer.options.mappings.LAYER_DATA + ".allowedColors"))) == null ? '' : __t) + '"></div><div class="description">Add hexadecimal code of the color. For add multiple colors used comma(,).</div></div><div class="pc-input-container pc-full-width"><label class="input-label">Default color</label><div class="input-fields text"><input class="pc_default_color" type="text" value="' + ((__t = (rf.get(Customizer.options.mappings.LAYER_DATA + ".defaultColor"))) == null ? '' : __t) + '"></div><div class="description">Add hexadecimal code of the color. I.e. "#000000, #FFF"</div></div></div></div><!-- <div class="pc-style-icon bring-forward"></div> --></div>';
+    }
+    return __p
 };
 
 this["Customizer"]["templates"]["edit/text-alignment"] = function(obj) {
-obj || (obj = {});
-var __t, __p = '', __e = _.escape;
-with (obj) {
-__p += '<div class=\'pc-alignment-wrapper left-border\'>\r\n  \t<div class="pc-style-icon align-top"><span class="mif-vertical-align-top"></span></div>\r\n  \t<div class="pc-style-icon align-right"><span class="mif-vertical-align-top rotate90"></span></div>\r\n  \t<div class="pc-style-icon align-bottom"><span class="mif-vertical-align-bottom"></span></div>\r\n  \t<div class="pc-style-icon align-left"><span class="mif-vertical-align-bottom rotate90"></span></div>\r\n\r\n  \t<div class="pc-style-icon vertical-align-center"><span class="mif-vertical-align-center"></span></div>\r\n  \t<div class="pc-style-icon hoizontal-align-center"><span class="mif-vertical-align-center rotate90"></span></div>\r\n</div>';
-
-}
-return __p
+    obj || (obj = {});
+    var __t, __p = '';
+    with(obj) {
+        __p += '<div class="pc-alignment-wrapper left-border"><div class="pc-style-icon align-top"><span class="mif-vertical-align-top"></span></div><div class="pc-style-icon align-right"><span class="mif-vertical-align-top rotate90"></span></div><div class="pc-style-icon align-bottom"><span class="mif-vertical-align-bottom"></span></div><div class="pc-style-icon align-left"><span class="mif-vertical-align-bottom rotate90"></span></div><div class="pc-style-icon vertical-align-center"><span class="mif-vertical-align-center"></span></div><div class="pc-style-icon hoizontal-align-center"><span class="mif-vertical-align-center rotate90"></span></div></div>';
+    }
+    return __p
 };
 
 this["Customizer"]["templates"]["edit/text-style"] = function(obj) {
-obj || (obj = {});
-var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
-function print() { __p += __j.call(arguments, '') }
-with (obj) {
-__p += '<div class=\'pc-style-wrapper left-border\'>\r\n\t';
- if(rf.get(Customizer.options.mappings.LAYER_DATA+".type") == 'text'){ ;
-__p += '\r\n  \t<div class="pc-style-icon font-familty toggle-div" data-target="#font-family"><i class="fa fa-font" aria-hidden="true"></i></div>\r\n  \t<div class="pc-style-icon text-bold"><span class="mif-bold"></span></div>\r\n  \t<div class="pc-style-icon text-italic"><span class="mif-italic"></span></div>\r\n  \t<div class="pc-style-icon text-underline"><span class="mif-underline"></span></div>\r\n  \t';
- } ;
-__p += '\r\n  \t<div class="pc-style-icon rotate-left"><i class="fa fa-rotate-left"></i></div>\r\n  \t<div class="pc-style-icon rotate-right"><i class="fa fa-rotate-right"></i></div>  \r\n</div>\r\n\r\n';
- fonts = []
-jQuery.each(Customizer.fonts, function(index,font){
-	if(rf.get(Customizer.options.mappings.LAYER_DATA+".fontFamily") == font.name){ 
-		selected = "selected='selected'";
-	}else{
-		selected = "";
-	}
-	fonts.push("<option value='"+font.name+"' "+selected+" style='font-family:\""+font.name+"\"'>"+font.displayName+"</option>");
-}); ;
-__p += '\r\n<div id="font-family" class="tool-tip" style="display: none;">\r\n\t<div class="tool-tip-container-inner">\r\n\t\t<div class="tool-tip-title">Font</div>\r\n\t\t<div class="tool-tip-wraper">\r\n\t\t\t<div class="font-familty-wraper">\r\n\t\t\t\t<div class="pc-input-container pc-full-width">\r\n\t\t\t\t\t<label class="input-label">Select Font Familty</label>\r\n\t\t\t\t\t<div class="input-fields select">\r\n\t\t\t\t\t\t<select class="text-font-family">\r\n\t\t\t\t\t\t\t' +
-((__t = ( fonts.join("") )) == null ? '' : __t) +
-'\r\n\t\t\t\t\t\t</select>\r\n\t\t\t\t\t</div>\r\n\t\t\t\t\t\r\n\t\t\t\t</div>\r\n\r\n\t\t\t\t<div class="pc-input-container pc-full-width">\r\n\t\t\t\t\t<label class="input-label">Font Size</label>\r\n\t\t\t\t\t<div class="input-fields select">\r\n\t\t\t\t\t\t<input type="number" class="text-font-size" value="' +
-((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".fontSize") )) == null ? '' : __t) +
-'" class="text-font-family">\r\n\t\t\t\t\t</div>\r\n\t\t\t\t</div>\r\n\t\t\t</div>\r\n\t\t</div>\r\n\t</div>\r\n</div>';
+    obj || (obj = {});
+    var __t, __p = '',
+        __j = Array.prototype.join;
 
-}
-return __p
+    function print() {
+        __p += __j.call(arguments, '')
+    }
+    with(obj) {
+        __p += '<div class="pc-style-wrapper left-border"> ';
+        if (rf.get(Customizer.options.mappings.LAYER_DATA + ".type") == 'text') {;
+            __p += ' <div class="pc-style-icon font-familty toggle-div" data-target="#font-family"><i class="fa fa-font" aria-hidden="true"></i></div><div class="pc-style-icon text-bold"><span class="mif-bold"></span></div><div class="pc-style-icon text-italic"><span class="mif-italic"></span></div><div class="pc-style-icon text-underline"><span class="mif-underline"></span></div> ';
+        };
+        __p += ' <div class="pc-style-icon rotate-left"><i class="fa fa-rotate-left"></i></div><div class="pc-style-icon rotate-right"><i class="fa fa-rotate-right"></i></div></div> ';
+        fonts = []
+        jQuery.each(Customizer.fonts, function(index, font) {
+            if (rf.get(Customizer.options.mappings.LAYER_DATA + ".fontFamily") == font.name) {
+                selected = "selected='selected'";
+            } else {
+                selected = "";
+            }
+            fonts.push("<option value='" + font.name + "' " + selected + " style='font-family:\"" + font.name + "\"'>" + font.displayName + "</option>");
+        });;
+        __p += ' <div id="font-family" class="tool-tip" style="display:none"><div class="tool-tip-container-inner"><div class="tool-tip-title">Font</div><div class="tool-tip-wraper"><div class="font-familty-wraper"><div class="pc-input-container pc-full-width"><label class="input-label">Select Font Familty</label><div class="input-fields select"><select class="text-font-family"> ' + ((__t = (fonts.join(""))) == null ? '' : __t) + ' </select></div></div><div class="pc-input-container pc-full-width"><label class="input-label">Font Size</label><div class="input-fields select"><input type="number" class="text-font-size" value="' + ((__t = (rf.get(Customizer.options.mappings.LAYER_DATA + ".fontSize"))) == null ? '' : __t) + '" class="text-font-family"></div></div></div></div></div></div>';
+    }
+    return __p
 };
 
 this["Customizer"]["templates"]["page"] = function(obj) {
-obj || (obj = {});
-var __t, __p = '', __e = _.escape;
-with (obj) {
-__p += '<div class=\'fb-left\'>\n\t<div class=\'pc-assets\'>\n\t  <ul class=\'fb-tabs\'>\n\t    <li class=\'active\'><a data-target=\'#pc-backgrounds-panel\'><span class="mif-images"></span> Images</a></li>\n\t    <li><a data-target=\'#pc-text-panel\'><i class="fa fa-file-text"></i> Text</a></li>\n\t    <li><a data-target=\'#pc-upload-image-panel\'><span class="fa fa fa-upload"></span> Upload</a></li>\n\t  </ul>\n\n\t  <div class=\'fb-tab-content\'>\n\t    ' +
-((__t = ( Customizer.templates['partials/panels/images']() )) == null ? '' : __t) +
-'\n\t    ' +
-((__t = ( Customizer.templates['partials/panels/text']() )) == null ? '' : __t) +
-'\n\t    ' +
-((__t = ( Customizer.templates['partials/panels/upload-image']() )) == null ? '' : __t) +
-'\n\t  </div>\n\t</div>\n</div>\n<div class=\'fb-right\'>\n\t' +
-((__t = ( Customizer.templates['partials/canvas']() )) == null ? '' : __t) +
-'\n\n\t' +
-((__t = ( Customizer.templates['partials/edit']() )) == null ? '' : __t) +
-'\n</div>\n' +
-((__t = ( Customizer.templates['partials/layers']() )) == null ? '' : __t) +
-'\n<div class=\'fb-clear\'></div>\n\n<div class=\'fb-save-wrapper\'>\n  <button class=\'js-save-data ' +
-((__t = ( Customizer.options.BUTTON_CLASS )) == null ? '' : __t) +
-'\'></button>\n</div>\n<div class="pc-loader-container">\n\t<div class="pc-loading-inner">\n\t\t<div class="pc-loading-icon"><!-- <span class="mif-spinner2 mif-ani-spin"></span> --><span class="mif-spinner3 mif-ani-spin"></span></div>\n\t\t<div class="pc-loading-text">Loading...</div>\n\t</div>\n</div>';
+    obj || (obj = {});
+    var __t, __p = '',
+        __j = Array.prototype.join;
 
-}
-return __p
+    function print() {
+        __p += __j.call(arguments, '')
+    }
+    with(obj) {
+        __p += '<div class="fb-left"><div class="pc-assets"><ul class="fb-tabs"><li class="active"><a data-target="#pc-backgrounds-panel"><span class="mif-images"></span>Images</a></li> ';
+        if (Customizer.options.settings.allowAddText) {;
+            __p += ' <li><a data-target="#pc-text-panel"><i class="fa fa-file-text"></i>Text</a></li> ';
+        };
+        __p += ' ';
+        if (Customizer.options.settings.allowUploadImage) {;
+            __p += ' <li><a data-target="#pc-upload-image-panel"><span class="fa fa fa-upload"></span>Upload</a></li> ';
+        };
+        __p += ' </ul><div class="fb-tab-content"> ' + ((__t = (Customizer.templates['partials/panels/images']())) == null ? '' : __t) + ' ';
+        if (Customizer.options.settings.allowAddText) {;
+            __p += ' ' + ((__t = (Customizer.templates['partials/panels/text']())) == null ? '' : __t) + ' ';
+        };
+        __p += ' ';
+        if (Customizer.options.settings.allowUploadImage) {;
+            __p += ' ' + ((__t = (Customizer.templates['partials/panels/upload-image']())) == null ? '' : __t) + ' ';
+        };
+        __p += ' </div></div></div><div class="fb-right"> ' + ((__t = (Customizer.templates['partials/canvas']())) == null ? '' : __t) + ' ' + ((__t = (Customizer.templates['partials/edit']())) == null ? '' : __t) + ' </div> ' + ((__t = (Customizer.templates['partials/layers']())) == null ? '' : __t) + ' <div class="fb-clear"></div><div class="fb-save-wrapper"><button class="js-save-data ' + ((__t = (Customizer.options.BUTTON_CLASS)) == null ? '' : __t) + '"></button></div><div class="pc-loader-container"><div class="pc-loading-inner"><div class="pc-loading-icon"><!-- <span class="mif-spinner2 mif-ani-spin"></span> --><span class="mif-spinner3 mif-ani-spin"></span></div><div class="pc-loading-text">Loading...</div></div></div>';
+    }
+    return __p
 };
 
 this["Customizer"]["templates"]["partials/add_field"] = function(obj) {
-obj || (obj = {});
-var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
-function print() { __p += __j.call(arguments, '') }
-with (obj) {
-__p += '<div class=\'fb-tab-pane active\' id=\'addField\'>\n  <div class=\'fb-add-field-types\'>\n    <div class=\'section\'>\n      ';
- _.each(_.sortBy(Customizer.inputFields, 'order'), function(f){ ;
-__p += '\n        <a data-field-type="' +
-((__t = ( f.field_type )) == null ? '' : __t) +
-'" class="' +
-((__t = ( Customizer.options.BUTTON_CLASS )) == null ? '' : __t) +
-'">\n          ' +
-((__t = ( f.addButton )) == null ? '' : __t) +
-'\n        </a>\n      ';
- }); ;
-__p += '\n    </div>\n\n    <div class=\'section\'>\n      ';
- _.each(_.sortBy(Customizer.nonInputFields, 'order'), function(f){ ;
-__p += '\n        <a data-field-type="' +
-((__t = ( f.field_type )) == null ? '' : __t) +
-'" class="' +
-((__t = ( Customizer.options.BUTTON_CLASS )) == null ? '' : __t) +
-'">\n          ' +
-((__t = ( f.addButton )) == null ? '' : __t) +
-'\n        </a>\n      ';
- }); ;
-__p += '\n    </div>\n  </div>\n</div>\n';
+    obj || (obj = {});
+    var __t, __p = '',
+        __j = Array.prototype.join;
 
-}
-return __p
+    function print() {
+        __p += __j.call(arguments, '')
+    }
+    with(obj) {
+        __p += '<div class="fb-tab-pane active" id="addField"><div class="fb-add-field-types"><div class="section"> ';
+        _.each(_.sortBy(Customizer.inputFields, 'order'), function(f) {;
+            __p += ' <a data-field-type="' + ((__t = (f.field_type)) == null ? '' : __t) + '" class="' + ((__t = (Customizer.options.BUTTON_CLASS)) == null ? '' : __t) + '"> ' + ((__t = (f.addButton)) == null ? '' : __t) + ' </a> ';
+        });;
+        __p += ' </div><div class="section"> ';
+        _.each(_.sortBy(Customizer.nonInputFields, 'order'), function(f) {;
+            __p += ' <a data-field-type="' + ((__t = (f.field_type)) == null ? '' : __t) + '" class="' + ((__t = (Customizer.options.BUTTON_CLASS)) == null ? '' : __t) + '"> ' + ((__t = (f.addButton)) == null ? '' : __t) + ' </a> ';
+        });;
+        __p += ' </div></div></div>';
+    }
+    return __p
 };
 
 this["Customizer"]["templates"]["partials/canvas"] = function(obj) {
-obj || (obj = {});
-var __t, __p = '', __e = _.escape;
-with (obj) {
-__p += '<div class="pc-canvas-waraper">\n<div class="pc-title canvas-actions">\n\t<div class="pc-icon-inline download" data-title="Download PDF file"><span class="mif-file-pdf"></span></div>\n\t<div class="pc-icon-inline preview" data-title="Preview"><span class="mif-eye"></span></div>\n\t<div class="pc-icon-inline-seprater"></div>\n\t<div class="pc-icon-inline zoom-in" data-title="Zoom-in"><span class="mif-zoom-in"></span></div>\n\t<div class="pc-icon-inline zoom-out" data-title="Zoom-out"><span class="mif-zoom-out"></span></div>\n\t<div class="pc-icon-inline zoom-reset" data-title="Reset zoom"><span class="mif-search"></span></div>\n\t<div class="pc-icon-inline-seprater" ></div>\n\t<div class="pc-icon-inline fullscreen pull-right" data-title="Fullscreen"><span class="mif-enlarge"></span></div>\n</div>\n<div class=\'pc-canvas\'></div>\n</div>\n';
-
-}
-return __p
+    obj || (obj = {});
+    var __t, __p = '';
+    with(obj) {
+        __p += '<div class="pc-canvas-waraper"><div class="pc-title canvas-actions"><div class="pc-icon-inline download" data-title="Download PDF file"><span class="mif-file-pdf"></span></div><div class="pc-icon-inline preview" data-title="Preview"><span class="mif-eye"></span></div><div class="pc-icon-inline-seprater"></div><div class="pc-icon-inline zoom-in" data-title="Zoom-in"><span class="mif-zoom-in"></span></div><div class="pc-icon-inline zoom-out" data-title="Zoom-out"><span class="mif-zoom-out"></span></div><div class="pc-icon-inline zoom-reset" data-title="Reset zoom"><span class="mif-search"></span></div><div class="pc-icon-inline-seprater"></div><div class="pc-icon-inline fullscreen pull-right" data-title="Fullscreen"><span class="mif-enlarge"></span></div></div><div class="pc-canvas"></div></div>';
+    }
+    return __p
 };
 
 this["Customizer"]["templates"]["partials/edit"] = function(obj) {
-obj || (obj = {});
-var __t, __p = '', __e = _.escape;
-with (obj) {
-__p += '<div id="pc-edit-layer" class=\'draggable pc-edit-layer\'></div>\n';
-
-}
-return __p
+    obj || (obj = {});
+    var __t, __p = '';
+    with(obj) {
+        __p += '<div id="pc-edit-layer" class="draggable pc-edit-layer"></div>';
+    }
+    return __p
 };
 
 this["Customizer"]["templates"]["partials/layers"] = function(obj) {
-obj || (obj = {});
-var __t, __p = '', __e = _.escape;
-with (obj) {
-__p += '<div id="pc-layers" class=\'draggable pc-layersbar\'>\n\t\n</div>\n';
-
-}
-return __p
+    obj || (obj = {});
+    var __t, __p = '';
+    with(obj) {
+        __p += '<div id="pc-layers" class="draggable pc-layersbar"></div>';
+    }
+    return __p
 };
 
 this["Customizer"]["templates"]["partials/panels/images"] = function(obj) {
-obj || (obj = {});
-var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
-function print() { __p += __j.call(arguments, '') }
-with (obj) {
-__p += '<div class=\'fb-tab-pane active\' id=\'pc-backgrounds-panel\'>\n  <div class=\'fb-add-field-types\'>\n    <div class=\'section\'>\n      \t';
- _.each(Customizer.images, function(category){ ;
-__p += '\n      \t\t';
- _.each(_.sortBy(category, 'order'), function(f){ ;
-__p += '\n        \t\t<a data-field-id="' +
-((__t = ( f.id )) == null ? '' : __t) +
-'" data-field-type="' +
-((__t = ( f.type )) == null ? '' : __t) +
-'" class="' +
-((__t = ( f.type )) == null ? '' : __t) +
-'-image assets">\n\t\t\t\t\t';
- if(f.addButton === undefined || f.addButton === null || f.addButton === ""){ ;
-__p += '\n\t\t\t            ';
- if(f.thumb === undefined || f.thumb === null || f.thumb === ""){ ;
-__p += '\n\t\t\t              \t<img src="' +
-((__t = ( f.full )) == null ? '' : __t) +
-'">\n\t\t\t            ';
- }else{ ;
-__p += '\n\t\t\t              \t<img src="' +
-((__t = ( f.thumb )) == null ? '' : __t) +
-'">\n\t\t\t            ';
- } ;
-__p += '\n\t\t\t        ';
- }else{ ;
-__p += '\n\t\t\t            ' +
-((__t = ( f.addButton )) == null ? '' : __t) +
-'\n\t\t\t        ';
- } ;
-__p += '\n\t\t\t    </a>\n\n        \t';
- }); ;
-__p += '\n      \t';
- }); ;
-__p += '\n    </div>\n  </div>\n</div>\n';
+    obj || (obj = {});
+    var __t, __p = '',
+        __j = Array.prototype.join;
 
-}
-return __p
+    function print() {
+        __p += __j.call(arguments, '')
+    }
+    with(obj) {
+        __p += '<div class="fb-tab-pane active" id="pc-backgrounds-panel"><div class="fb-add-field-types"><div class="section"> ';
+        _.each(Customizer.images, function(category) {;
+            __p += ' ';
+            _.each(_.sortBy(category, 'order'), function(f) {;
+                __p += ' <a data-field-id="' + ((__t = (f.id)) == null ? '' : __t) + '" data-field-type="' + ((__t = (f.type)) == null ? '' : __t) + '" class="' + ((__t = (f.type)) == null ? '' : __t) + '-image assets"> ';
+                if (f.addButton === undefined || f.addButton === null || f.addButton === "") {;
+                    __p += ' ';
+                    if (f.thumb === undefined || f.thumb === null || f.thumb === "") {;
+                        __p += ' <img src="' + ((__t = (f.full)) == null ? '' : __t) + '"> ';
+                    } else {;
+                        __p += ' <img src="' + ((__t = (f.thumb)) == null ? '' : __t) + '"> ';
+                    };
+                    __p += ' ';
+                } else {;
+                    __p += ' ' + ((__t = (f.addButton)) == null ? '' : __t) + ' ';
+                };
+                __p += ' </a> ';
+            });;
+            __p += ' ';
+        });;
+        __p += ' </div></div></div>';
+    }
+    return __p
 };
 
 this["Customizer"]["templates"]["partials/panels/text"] = function(obj) {
-obj || (obj = {});
-var __t, __p = '', __e = _.escape;
-with (obj) {
-__p += '<div class=\'fb-tab-pane\' id=\'pc-text-panel\'>\n  <div class=\'fb-text-field-wrapper\'>\n  \t<div class="input-field-container">\n\t  \t<label>Text</label>\n\t  \t<textarea class="pc-text" placeholder="Please enter text"></textarea>\n\t</div>\n\t<div class="input-field-container">\n\t\t<input type="button" class="add-text fb-button pull-right" value="Add">\n\t</div>\n  </div>\n</div>';
-
-}
-return __p
+    obj || (obj = {});
+    var __t, __p = '';
+    with(obj) {
+        __p += '<div class="fb-tab-pane" id="pc-text-panel"><div class="fb-text-field-wrapper"><div class="input-field-container"><label>Text</label><textarea class="pc-text" placeholder="Please enter text"></textarea></div><div class="input-field-container"><input type="button" class="add-text fb-button pull-right" value="Add"></div></div></div>';
+    }
+    return __p
 };
 
 this["Customizer"]["templates"]["partials/panels/upload-image"] = function(obj) {
-obj || (obj = {});
-var __t, __p = '', __e = _.escape;
-with (obj) {
-__p += '<div class=\'fb-tab-pane\' id=\'pc-upload-image-panel\'>\n  <div class=\'fb-upload-image-field-wrapper\'>\n  \t<div class="input-field-container">\n\t  \t<label>Upload Image</label>\n\t  \t<div class="pd-upload-zone">\n\t  \t\t<div class="inner-upload-zone">\n\t\t         <span class="fa fa fa-upload"></span>\n\t\t\t\t <span data-defaulttext="Click or drop images here">Click or drop images here</span>\n\t        </div>\n\t  \t\t<input type="file" class="pc-upload-image">\n\t  \t</div>\n\t</div>\n\t<div class="uploaded-image-container">\n\t\t<ul></ul>\n\t</div>\n  </div>\n</div>';
-
-}
-return __p
+    obj || (obj = {});
+    var __t, __p = '';
+    with(obj) {
+        __p += '<div class="fb-tab-pane" id="pc-upload-image-panel"><div class="fb-upload-image-field-wrapper"><div class="input-field-container"><label>Upload Image</label><div class="pd-upload-zone"><div class="inner-upload-zone"><span class="fa fa fa-upload"></span><span data-defaulttext="Click or drop images here">Click or drop images here</span></div><input type="file" class="pc-upload-image"></div></div><div class="uploaded-image-container"><ul></ul></div></div></div>';
+    }
+    return __p
 };
 
 this["Customizer"]["templates"]["partials/text-fonts-css"] = function(obj) {
-obj || (obj = {});
-var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
-function print() { __p += __j.call(arguments, '') }
-with (obj) {
-__p += '<style type="text/css">\r\n    ';
- 
-    jQuery.each(Customizer.fonts, function(index,font){
-        var font_str = [];
-        jQuery.each(font.src, function(type, path){
-            switch(type){
-                case 'eot':
-                 format = "format('embedded-opentype')";
-                 url = "#iefix";
-                 break;
-                case 'woff':
-                 format = "format('woff')";
-                 url = "";
-                 break;
-                case 'ttf':
-                 format = "format('truetype')";
-                 url = "";
-                 break;
-                case 'svg':
-                 format = "format('svg')";
-                 url = "#"+font.name;
-                 break;
-            }
-            font_str.push("url('"+path+"') "+format);
-        }); 
-        ;
-__p += '\r\n        @font-face{\r\n            font-family:\'' +
-((__t = ( font.name )) == null ? '' : __t) +
-'\';    \r\n            ' +
-((__t = ( (font_str.length > 0) ? 'src:'+font_str.join(', ')+";" : "" )) == null ? '' : __t) +
-'\r\n            font-weight:normal;\r\n            font-style:normal;\r\n        }\r\n    ';
- }); ;
-__p += '\r\n</style>\r\n</style>';
+    obj || (obj = {});
+    var __t, __p = '',
+        __j = Array.prototype.join;
 
-}
-return __p
+    function print() {
+        __p += __j.call(arguments, '')
+    }
+    with(obj) {
+        __p += '<style type="text/css"> ';
+        jQuery.each(Customizer.fonts, function(index, font) {
+            var font_str = [];
+            jQuery.each(font.src, function(type, path) {
+                switch (type) {
+                    case 'eot':
+                        format = "format('embedded-opentype')";
+                        url = "#iefix";
+                        break;
+                    case 'woff':
+                        format = "format('woff')";
+                        url = "";
+                        break;
+                    case 'ttf':
+                        format = "format('truetype')";
+                        url = "";
+                        break;
+                    case 'svg':
+                        format = "format('svg')";
+                        url = "#" + font.name;
+                        break;
+                }
+                font_str.push("url('" + path + "') " + format);
+            });;
+            __p += ' @font-face{font-family:' + ((__t = (font.name)) == null ? '' : __t) + '; ' + ((__t = ((font_str.length > 0) ? 'src:' + font_str.join(', ') + ";" : "")) == null ? '' : __t) + ' font-weight:normal;font-style:normal} ';
+        });;
+        __p += ' </style>';
+    }
+    return __p
 };
 
 this["Customizer"]["templates"]["view/edit"] = function(obj) {
-obj || (obj = {});
-var __t, __p = '', __e = _.escape;
-with (obj) {
-__p += '';
-
-}
-return __p
+    obj || (obj = {});
+    var __t, __p = '';
+    with(obj) {
+        __p += '';
+    }
+    return __p
 };
 
 this["Customizer"]["templates"]["view/layers"] = function(obj) {
-obj || (obj = {});
-var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
-function print() { __p += __j.call(arguments, '') }
-with (obj) {
-__p += '<div class="pc-container">\n\t<div class=\'pc-title handle\'><span class="mif-stack"></span> Layers</div>\n  \t<div class=\'pc-body\'>\n  \t\t<ul class="pc-layers-contianer">\n  \t\t\t';
- if(layers.length > 0){
-	  			_.each(_.sortBy(layers, 'order').reverse(), function(_layer){
-	  				;
-__p += '\n\t  \t\t\t';
- layer = _layer.toJSON(Customizer.options.jsonArgs) ;
-__p += '\n\t\t\t\t';
- active = _layer.canvas.getActiveObject() ;
-__p += '\n\t\t  \t\t<li \n\t\t  \t\t\tstyle="' +
-((__t = ( (Customizer.options.settings.administration == false && _layer.hideLayer) || (_layer.displayInLayerBar !== undefined && _layer.displayInLayerBar == false) ? 'display:none' : "" )) == null ? '' : __t) +
-'" \n\t\t  \t\t\tclass="layers ' +
-((__t = ( (active !== undefined && active !== null && active.id == _layer.id) ? 'active' : '' )) == null ? '' : __t) +
-' ' +
-((__t = ( (Customizer.options.settings.administration == false && (_layer.hideLayer == true || _layer.unlockable == false || _layer.removable == false)) ? 'unsortable' : '' )) == null ? '' : __t) +
-'" \n\t\t  \t\t\tdata-id="' +
-((__t = ( _layer.id )) == null ? '' : __t) +
-'">\n\t\t\t\t    <span class="pc-image-contianer">\n\t\t\t\t    \t';
- if(layer.type == 'text'){ ;
-__p += '\n\t\t\t\t    \t\t<i class="fa fa-text-width"></i>\n\t\t\t\t    \t';
- }else{ ;
-__p += '\n\t\t\t\t    \t\t<img width=50  src="' +
-((__t = ( layer.src )) == null ? '' : __t) +
-'">\n\t\t\t\t    \t';
- } ;
-__p += '\n\t\t\t\t    </span>\n\t\t\t\t    <span class="pc-layer-title">\n\t\t\t\t    \t';
- if(_layer.title !== undefined && _layer.title !== null ){ ;
-__p += '\n\t\t\t\t    \t\t' +
-((__t = ( _layer.id )) == null ? '' : __t) +
-' - ' +
-((__t = ( _layer.title )) == null ? '' : __t) +
-'\n\t\t\t\t    \t';
- }else{ ;
-__p += '\n\t\t\t\t\t    \t';
- if(layer.type == 'text'){ ;
-__p += '\n\t\t\t\t\t    \t\t' +
-((__t = ( _layer.id )) == null ? '' : __t) +
-' - ' +
-((__t = ( layer.text.substring(0,15) )) == null ? '' : __t) +
-'\n\t\t\t\t\t    \t';
- }else{ ;
-__p += '\n\t\t\t\t\t\t\t\t' +
-((__t = ( _layer.id )) == null ? '' : __t) +
-' - ' +
-((__t = ( layer.type )) == null ? '' : __t) +
-'\n\t\t\t\t\t    \t';
- } ;
-__p += '\n\t\t\t\t\t\t';
- };
-__p += '\n\t\t\t\t    </span>\n\t\t\t\t\t<span class="pc-layers-action">\n\t\t\t\t\t\t';
- if(Customizer.options.settings.administration == true || layer.removable == true){;
-__p += '\n\t\t\t  \t\t\t\t<a href="javascript:" class="pc-layers-delete"><i class="fa fa-trash-o fa-1"> </i></a>\n\t\t\t  \t\t\t';
- } ;
-__p += '\n\t\t\t  \t\t\t';
- if(Customizer.options.settings.administration == true || layer.unlockable == true){;
-__p += '\n\t\t\t\t\t\t\t<a href="javascript:" class="pc-layers-lock-unlock"><i class="fa ' +
-((__t = ( _layer.locked == true ? 'fa-lock' : 'fa-unlock-alt' )) == null ? '' : __t) +
-'"></i></a>\n\t\t\t\t\t\t';
- } ;
-__p += '\n\t\t  \t\t\t</span>\n\t\t  \t\t</li>\n\t\t  \t\t';
- }); ;
-__p += '\n\n\t\t  \t';
- }else{ ;
-__p += '\n\t\t\t\t<li class="layers no-found">No layer found.</li>\n\t\t  \t';
- } ;
-__p += '\n\t  \t</ul>\n  \t</div>\n</div>';
+    obj || (obj = {});
+    var __t, __p = '',
+        __j = Array.prototype.join;
 
-}
-return __p
+    function print() {
+        __p += __j.call(arguments, '')
+    }
+    with(obj) {
+        __p += '<div class="pc-container"><div class="pc-title handle"><span class="mif-stack"></span>Layers</div><div class="pc-body"><ul class="pc-layers-contianer"> ';
+        if (layers.length > 0) {
+            _.each(_.sortBy(layers, 'order').reverse(), function(_layer) {;
+                __p += ' ';
+                layer = _layer.toJSON(Customizer.options.jsonArgs);
+                __p += ' ';
+                active = _layer.canvas.getActiveObject();
+                __p += ' <li style="" class="layers ' + ((__t = ((active !== undefined && active !== null && active.id == _layer.id) ? 'active' : '')) == null ? '' : __t) + ' ' + ((__t = ((Customizer.options.settings.administration == false && (_layer.hideLayer == true || _layer.unlockable == false || _layer.removable == false)) ? 'unsortable' : '')) == null ? '' : __t) + '" data-id="' + ((__t = (_layer.id)) == null ? '' : __t) + '"><span class="pc-image-contianer"> ';
+                if (layer.type == 'text') {;
+                    __p += ' <i class="fa fa-text-width"></i> ';
+                } else {;
+                    __p += ' <img width="50" src="' + ((__t = (layer.src)) == null ? '' : __t) + '"> ';
+                };
+                __p += ' </span><span class="pc-layer-title"> ';
+                if (_layer.title !== undefined && _layer.title !== null) {;
+                    __p += ' ' + ((__t = (_layer.id)) == null ? '' : __t) + ' - ' + ((__t = (_layer.title)) == null ? '' : __t) + ' ';
+                } else {;
+                    __p += ' ';
+                    if (layer.type == 'text') {;
+                        __p += ' ' + ((__t = (_layer.id)) == null ? '' : __t) + ' - ' + ((__t = (layer.text.substring(0, 15))) == null ? '' : __t) + ' ';
+                    } else {;
+                        __p += ' ' + ((__t = (_layer.id)) == null ? '' : __t) + ' - ' + ((__t = (layer.type)) == null ? '' : __t) + ' ';
+                    };
+                    __p += ' ';
+                };
+                __p += ' </span><span class="pc-layers-action"> ';
+                if (Customizer.options.settings.administration == true || layer.removable == true) {;
+                    __p += ' <a href="javascript:" class="pc-layers-delete"><i class="fa fa-trash-o fa-1"></i></a> ';
+                };
+                __p += ' ';
+                if (Customizer.options.settings.administration == true || layer.unlockable == true) {;
+                    __p += ' <a href="javascript:" class="pc-layers-lock-unlock"><i class="fa ' + ((__t = (_layer.locked == true ? 'fa-lock' : 'fa-unlock-alt')) == null ? '' : __t) + '"></i></a> ';
+                };
+                __p += ' </span></li> ';
+            });;
+            __p += ' ';
+        } else {;
+            __p += ' <li class="layers no-found">No layer found.</li> ';
+        };
+        __p += ' </ul></div></div>';
+    }
+    return __p
 };
 
 this["Customizer"]["templates"]["view/popup"] = function(obj) {
-obj || (obj = {});
-var __t, __p = '', __e = _.escape, __j = Array.prototype.join;
-function print() { __p += __j.call(arguments, '') }
-with (obj) {
-__p += '<div class="pc-modal">\n\t<div class="model-inner">\n\t\t<div class="modal-heder pc-title">\n\t\t\t';
- if(modal.title){ ;
-__p += '\n\t\t\t<div class="pc-title-text">' +
-((__t = ( modal.title )) == null ? '' : __t) +
-'</div>\n\t\t\t';
- } ;
-__p += '\n\t\t\t<div class="pc-model-close"><a href="javascript:" class="close"><span class="mif-cross"></span></a></div>\n\t\t</div>\n\t\t<div class="pc-model-body">\n\t\t\t' +
-((__t = ( modal.body )) == null ? '' : __t) +
-'\n\t\t</div>\n\t</div>\n</div>';
+    obj || (obj = {});
+    var __t, __p = '',
+        __j = Array.prototype.join;
 
-}
-return __p
+    function print() {
+        __p += __j.call(arguments, '')
+    }
+    with(obj) {
+        __p += '<div class="pc-modal"><div class="model-inner"><div class="modal-heder pc-title"> ';
+        if (modal.title) {;
+            __p += ' <div class="pc-title-text">' + ((__t = (modal.title)) == null ? '' : __t) + '</div> ';
+        };
+        __p += ' <div class="pc-model-close"><a href="javascript:" class="close"><span class="mif-cross"></span></a></div></div><div class="pc-model-body"> ' + ((__t = (modal.body)) == null ? '' : __t) + ' </div></div></div>';
+    }
+    return __p
 };

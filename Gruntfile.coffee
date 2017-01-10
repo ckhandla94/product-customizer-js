@@ -1,4 +1,4 @@
-ALL_TASKS = [ 'jst:all', 'coffee:all', 'concat:all', 'cssmin:dist', 'stylus:all', 'clean:compiled']
+ALL_TASKS = [ 'jst:all', 'coffeescript_concat:compile', 'jsbeautifier:default', 'coffee:all', 'concat:all', 'cssmin:dist', 'stylus:all'] #'clean:compiled'
 
 # customizer.js must be compiled in this order:
 # 1. rivets-config
@@ -10,7 +10,7 @@ module.exports = (grunt) ->
 
   path = require('path')
   exec = require('child_process').exec
-
+  minify = require('html-minifier').minify;
 
   grunt.loadNpmTasks('grunt-contrib-coffee')
   grunt.loadNpmTasks('grunt-contrib-concat')
@@ -22,6 +22,8 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks('grunt-contrib-clean')
   grunt.loadNpmTasks('grunt-release')
   grunt.loadNpmTasks('grunt-karma')
+  grunt.loadNpmTasks('grunt-coffeescript-concat');
+  grunt.loadNpmTasks("grunt-jsbeautifier");
 
   grunt.initConfig
 
@@ -36,12 +38,42 @@ module.exports = (grunt) ->
       all:
         options:
           namespace: 'Customizer.templates'
+          prettify: true,
           processName: (filename) ->
             signalStr = "templates/" #strip extra filepath and extensions
             filename.slice(filename.indexOf(signalStr)+signalStr.length, filename.indexOf(".html"))
+          processContent: (src) ->
+            result = minify(src, {
+              removeAttributeQuotes: false
+              ignoreCustomFragments: [ /<%[\s\S]*?%>/, /<\?[\s\S]*?\?>/ ] 
+              comments: true
+              collapseInlineTagWhitespace: true
+              collapseWhitespace: true
+              minifyJS: true
+              minifyCSS: true
+            });
+            result
         files:
           '<%= compiledFolder %>/templates.js': '<%= srcFolder %>/templates/**/*.html'
 
+    coffeescript_concat:
+      compile: 
+        options: 
+          includeFolders: [
+            'src/includes'
+          ]
+        files: 
+          'src/main.coffee': []
+
+    jsbeautifier: 
+      default: 
+        src : ["compiled/*.js", "compiled/*.css"] 
+        options:
+          js: 
+            indentSize: 4
+          css: 
+            indentSize: 4
+        
     coffee:
       all:
         files:
@@ -49,7 +81,7 @@ module.exports = (grunt) ->
             '<%= srcFolder %>/scripts/underscore_mixins.coffee'
             '<%= srcFolder %>/scripts/rivets-config.coffee'
             '<%= srcFolder %>/scripts/main.coffee'
-            '<%= srcFolder %>/scripts/**/*.coffee'
+            '<%= srcFolder %>/scripts/fields/*.coffee'
           ]
 
     concat:
@@ -75,7 +107,8 @@ module.exports = (grunt) ->
             'bower_components/fabric.js/dist/fabric.min.js'
             'bower_components/fabric-customise-controls/dist/customiseControls.min.js'
             'bower_components/jspdf/dist/jspdf.min.js'
-            'bower_components/jquery-colorpicker/colorpicker.min.js'
+            'bower_components/spectrum/spectrum.js'
+            #'bower_components/jquery-colorpicker/colorpicker.min.js'
             'bower_components/bower-webfontloader/webfont.js'
             'footer.js'
           ]
@@ -98,7 +131,8 @@ module.exports = (grunt) ->
           '<%= vendorFolder %>/css/vendor.css': [
             'bower_components/font-awesome/css/font-awesome.css'
             'bower_components/metro/build/css/metro-icons.min.css'
-            'bower_components/jquery-colorpicker/css/colorpicker.min.css' 
+            'bower_components/spectrum/spectrum.css'
+            #'bower_components/jquery-colorpicker/css/colorpicker.min.css' 
           ]
 
     

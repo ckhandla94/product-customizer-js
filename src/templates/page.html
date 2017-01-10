@@ -1,15 +1,25 @@
+
 <div class='fb-left'>
 	<div class='pc-assets'>
 	  <ul class='fb-tabs'>
 	    <li class='active'><a data-target='#pc-backgrounds-panel'><span class="mif-images"></span> Images</a></li>
+	    <% if(Customizer.options.settings.allowAddText){ %>
 	    <li><a data-target='#pc-text-panel'><i class="fa fa-file-text"></i> Text</a></li>
+	    <% } %>
+	    <% if(Customizer.options.settings.allowUploadImage){ %>
 	    <li><a data-target='#pc-upload-image-panel'><span class="fa fa fa-upload"></span> Upload</a></li>
+	    <% } %>
 	  </ul>
 
 	  <div class='fb-tab-content'>
 	    <%= Customizer.templates['partials/panels/images']() %>
-	    <%= Customizer.templates['partials/panels/text']() %>
-	    <%= Customizer.templates['partials/panels/upload-image']() %>
+		
+		<% if(Customizer.options.settings.allowAddText){ %>
+	    	<%= Customizer.templates['partials/panels/text']() %>
+	    <% } %>
+	    <% if(Customizer.options.settings.allowUploadImage){ %>
+	    	<%= Customizer.templates['partials/panels/upload-image']() %>
+	    <% } %>
 	  </div>
 	</div>
 </div>
