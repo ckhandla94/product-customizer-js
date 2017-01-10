@@ -1,4 +1,4 @@
-ALL_TASKS = [ 'jst:all', 'coffeescript_concat:compile', 'jsbeautifier:default', 'coffee:all', 'concat:all', 'cssmin:dist', 'stylus:all'] #'clean:compiled'
+ALL_TASKS = [ 'jst:all', 'jsbeautifier:default', 'coffee:all', 'concat:all', 'cssmin:dist', 'stylus:all'] #'clean:compiled'
 
 # customizer.js must be compiled in this order:
 # 1. rivets-config
@@ -43,7 +43,7 @@ module.exports = (grunt) ->
             signalStr = "templates/" #strip extra filepath and extensions
             filename.slice(filename.indexOf(signalStr)+signalStr.length, filename.indexOf(".html"))
           processContent: (src) ->
-            result = minify(src, {
+            ###result = minify(src, {
               removeAttributeQuotes: false
               ignoreCustomFragments: [ /<%[\s\S]*?%>/, /<\?[\s\S]*?\?>/ ] 
               comments: true
@@ -51,8 +51,8 @@ module.exports = (grunt) ->
               collapseWhitespace: true
               minifyJS: true
               minifyCSS: true
-            });
-            result
+            });###
+            src
         files:
           '<%= compiledFolder %>/templates.js': '<%= srcFolder %>/templates/**/*.html'
 
@@ -138,9 +138,12 @@ module.exports = (grunt) ->
     
     stylus:
       all:
+        options:
+          compress: false
+          linenos: false
         files:
-          '<%= compiledFolder %>/customizer.css': '<%= srcFolder %>/styles/**.styl'
-          '<%= distFolder %>/customizer.css': '<%= compiledFolder %>/**/*.css'
+          '<%= compiledFolder %>/customizer.css': '<%= srcFolder %>/styles/customizer.styl'
+          '<%= distFolder %>/customizer.css': '<%= srcFolder %>/styles/customizer.styl'
       
     clean:
       compiled:

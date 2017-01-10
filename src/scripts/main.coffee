@@ -93,6 +93,34 @@ fabric.Object::set
 
 
 
+class CustomizerProductModel extends Backbone.DeepModel
+  sync: -> 
+    # noop
+    # noop
+
+  defaults: ()->
+    # { order: CustomizerCollection.nextOrder() }
+
+
+
+class CustomizerProductCollection extends Backbone.Collection
+  nextOrder : 0
+  initialize: (options)-> 
+    {@parentView} = options
+    @on 'add', @copyCid
+
+  model: CustomizerProductModel
+
+  comparator: (model) ->
+    model.get('order') 
+  _order_by: 'order'
+
+  copyCid: (model) ->
+    model.cid = model.attributes.cid
+   
+
+
+
 class CustomizerModel extends Backbone.DeepModel
   sync: -> 
     # noop
@@ -221,6 +249,30 @@ class ModelView extends Backbone.View
 
   showModel :->
     @$el.fadeIn(500)
+
+
+class ChnageProductView extends Backbone.View
+  className : 'pc-change-product-wraper'
+  events:
+    'click li': 'focusEditView'
+    'click .pc-layers-delete': 'remove'
+    'click .pc-layers-lock-unlock': 'lockUnlock'
+
+  initialize: (options) ->
+    {@parentView} = options
+    @canvas = @parentView.canvas;
+
+  unselect : ->
+    @$el.find('.pc-layers-contianer li').removeClass('active')
+
+  render: ->
+    layers = @canvas.getObjects()
+
+    $el = Customizer.templates["view/product-view"]({views : layers})
+    @$el.html($el)
+    @setSortable()
+    return @
+
 
 
 class ViewLayerView extends Backbone.View
@@ -1046,7 +1098,7 @@ class CustomizerView extends Backbone.View
     'click .canvas-actions .preview': 'saveImage'
   
   initialize: (options) ->
-    {selector, @customizer, @bootstrapData, settings} = options
+    {selector, @customizer, @bootstrapData, settings, @productViewData} = options
     if selector?
       @setElement jQuery(selector) 
 
@@ -1099,10 +1151,14 @@ class CustomizerView extends Backbone.View
     @collection.bind 'add', @addOne, @
     @collection.bind 'reset', @reset, @
     @collection.bind 'change', @handleFormUpdate, @
-    #@collection.bind 'destroy add reset', @hideShowNoResponseFields, @
+
+
+    @productViewCollection = new CustomizerProductCollection({parentView : @})
+    @productViewCollection.bind 'add', @addOneProductView, @
+    @productViewCollection.bind 'reset', @resetProductView, @
 
     @render()
-
+    @reSizeWindow()
     @renderFontsCSS()
     
     @bindSaveEvent()
@@ -1119,24 +1175,41 @@ class CustomizerView extends Backbone.View
     @listenTo @canvas, "before:selection:cleared", @beforeSelectionCleared
     @listenTo @canvas, "after:render", (evt)-> @calcOffset()
     
-    @listenTo jQuery(window) "resize", @reSizeWindow()
+    jQuery(window).on 'resize', @reSizeWindow.bind(@)
 
-    @collection.reset(@bootstrapData)
+    if @bootstrapData.views?
+      @productViewCollection.reset(@productViewData.views)
+    else if @bootstrapData.fields?
+      @collection.reset(@bootstrapData.fields)
+
+    console.log @collection
+
+
+  addOneProductView :()->
+    #@addOne
+  resetProductView :()->
+    if(@productViewCollection.models.length > 0){
+      activeView = @productViewCollection.models[0]
+      @reset()
+    }
+
   
   reSizeWindow : ()->
     originalWidth = 600;
+    originalHeight = 480;
     width = @$el.find('.pc-canvas-waraper .pc-canvas').innerWidth();
-    #width = if (window.innerWidth > 0) then window.innerWidth else screen.width;
 
     widthRatio = width / originalWidth ;
    
-    width = @canvas.getWidth() * widthRatio;
-    height = @canvas.getWidth() * widthRatio;
+    width = originalWidth * widthRatio;
+    height = originalHeight * widthRatio;
 
-    @canvas.setWidth width
-    @canvas.setHeight height
+    @canvas.wrapperEl.style.transform = "scale(#{widthRatio})";
+    @canvas.wrapperEl.style.transformOrigin = "0 0";
 
-    console.log widthRatio;
+    @canvas.wrapperEl.parentElement.style.height = height+"px";
+
+
 
   fullscreen : (ev)->
     if(jQuery(ev.currentTarget).prop("tagName") is 'span')
@@ -1146,8 +1219,11 @@ class CustomizerView extends Backbone.View
 
     $el.toggleClass('mif-shrink mif-enlarge')
     @$el.toggleClass('fullscreen')
+
+
+    @reSizeWindow()
    
-    if @$el.hasClass('fullscreen')
+    ###if @$el.hasClass('fullscreen')
       @oldCanvasHeight = @canvas.getHeight()
       @oldCanvasWidth = @canvas.getWidth()
       
@@ -1159,7 +1235,7 @@ class CustomizerView extends Backbone.View
       @canvas.setWidth(@$el.find('.pc-canvas').width())
     else
       @canvas.setHeight(@oldCanvasHeight)
-      @canvas.setWidth(@oldCanvasWidth)
+      @canvas.setWidth(@oldCanvasWidth)###
 
   realWidth : (obj)->
       clone = obj.clone();
