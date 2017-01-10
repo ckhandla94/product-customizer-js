@@ -1,0 +1,5 @@
+<%= Customizer.templates['edit/header']() %>
+<% if(Customizer.fields[rf.get(Customizer.options.mappings.OBJECT)] !== undefined){ %>
+	<%= Customizer.fields[rf.get(Customizer.options.mappings.OBJECT)].edit({rf: rf}) %>
+<% } %>
+<%= Customizer.templates['edit/footer']() %>

@@ -1,0 +1,159 @@
+<!doctype html>
+<html>
+<head>
+  <title>Form Builder</title>
+  <meta name="description" content="">
+  <link rel="stylesheet" href="vendor/css/vendor.css" />
+  <link rel="stylesheet" href="dist/customizer.css" />
+  
+</head>
+<body>
+
+  <div class='customizer-main'></div>
+  <style type="text/css">
+      .customizer-main{
+        margin: 0 auto;
+        max-width: 1170px;
+      }
+  </style>
+  <!-- <canvas id="canvas" width="300" height="300"></canvas> -->
+
+  <div class='fb-json'><code></code></div>
+  <script type="text/javascript" src="bower_components/jquery/jquery.js"></script>
+  <script type="text/javascript" src="vendor/js/vendor.js"></script>
+  <script type="text/javascript" src="dist/customizer.js"></script>
+
+  <script type="text/javascript">
+  var session = sessionStorage.getItem('bootstrapData');
+
+  if(session === undefined || session === null || session === ""){
+    session = "[]";
+  }
+
+  var data = JSON.parse(session);
+
+    $(function(){
+
+        // console.log(data.fields);
+        customizer = new Customizer({
+        selector: '.customizer-main',
+        bootstrapData: data.fields,
+        settings : {
+          imageUploadUrl : 'upload.php',
+          administration : true,
+          boundingBoxCoords : 'Color',
+
+          maxTextLayer : -1,
+          maxImageLayer : -1,
+
+          fonts : [
+            {
+              url : 'fonts/sweetheartscript.ttf',
+              name : 'Swee the Art'
+            },
+            {
+              url : 'fonts/Vine Monograms Open Bold.ttf',
+              name : 'Vine Monograms Open'
+            },
+            {
+              url : 'fonts/Mission-Script.ttf',
+              name : 'Mission'
+            },
+            {
+              url : 'fonts/PHARMACY.ttf',
+              name : 'PHARMACY'
+            },
+            {
+              url : 'fonts/ShesAllThat.ttf',
+              name : 'Shes All That'
+            }
+          ],
+          images : {
+            backgrounds : [
+              {
+                full : 'images/background/1.png',
+              },
+              {
+                options : {
+                  width : 150,
+                  height : 150
+                },
+                full : 'images/background/Anchor-Cutting-Board.png',
+              },
+              {
+                options : {
+                  width : 150,
+                  height : 150
+                },
+                full : 'images/background/Polka Dot Cutting Board.png',
+              }
+            ],
+            clipArts : [
+              {
+                full : 'images/cliparts/1.png',
+              },
+              {
+                full : 'images/cliparts/2.png',
+              },
+              {
+                full : 'images/cliparts/3.png',
+              },
+              {
+                full : 'images/cliparts/4.png',
+              },
+              {
+                full : 'images/cliparts/5.png',
+              },
+              {
+                options : {
+                  width : 150,
+                  height : 150
+                },
+                thumb : 'images/cliparts/Tag-circle-lined-berry-pink.png',
+                full : 'images/cliparts/Tag-circle-lined-berry-pink.png',
+              },
+              {
+                options : {
+                  width : 150,
+                  height : 150
+                },
+                thumb : 'images/cliparts/Tag-ornate-berry-pink.png',
+                full : 'images/cliparts/Tag-ornate-berry-pink.png',
+              }
+            ]  
+          }
+        }
+      });
+
+      customizer.on('save', function(payload){
+        // $('.fb-json code').html(payload);
+        console.log(payload);
+        sessionStorage.setItem('bootstrapData', payload);
+      })
+
+
+
+
+      customizer.on('image-upload', function(view, evt, data){
+        //console.log(view, evt, data);
+      })
+
+      customizer.on('added-uploaded-image', function(view, data){
+        //console.log(view, evt, data);
+      })
+
+      customizer.on('removed-added-image', function(view, data){
+        //console.log(view, evt, data);
+      })
+
+
+      customizer.on('removed-uploaded-image', function(view, data){
+        //console.log(view, evt, data);
+      })
+
+
+    });
+  </script>
+
+</body>
+</html>

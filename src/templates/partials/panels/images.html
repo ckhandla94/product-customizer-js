@@ -1,0 +1,22 @@
+<div class='fb-tab-pane active' id='pc-backgrounds-panel'>
+  <div class='fb-add-field-types'>
+    <div class='section'>
+      	<% _.each(Customizer.images, function(category){ %>
+      		<% _.each(_.sortBy(category, 'order'), function(f){ %>
+        		<a data-field-id="<%= f.id %>" data-field-type="<%= f.type %>" class="<%= f.type %>-image assets">
+					<% if(f.addButton === undefined || f.addButton === null || f.addButton === ""){ %>
+			            <% if(f.thumb === undefined || f.thumb === null || f.thumb === ""){ %>
+			              	<img src="<%= f.full %>">
+			            <% }else{ %>
+			              	<img src="<%= f.thumb %>">
+			            <% } %>
+			        <% }else{ %>
+			            <%= f.addButton %>
+			        <% } %>
+			    </a>
+
+        	<% }); %>
+      	<% }); %>
+    </div>
+  </div>
+</div>

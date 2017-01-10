@@ -1,0 +1,32 @@
+<div class='fb-left'>
+	<div class='pc-assets'>
+	  <ul class='fb-tabs'>
+	    <li class='active'><a data-target='#pc-backgrounds-panel'><span class="mif-images"></span> Images</a></li>
+	    <li><a data-target='#pc-text-panel'><i class="fa fa-file-text"></i> Text</a></li>
+	    <li><a data-target='#pc-upload-image-panel'><span class="fa fa fa-upload"></span> Upload</a></li>
+	  </ul>
+
+	  <div class='fb-tab-content'>
+	    <%= Customizer.templates['partials/panels/images']() %>
+	    <%= Customizer.templates['partials/panels/text']() %>
+	    <%= Customizer.templates['partials/panels/upload-image']() %>
+	  </div>
+	</div>
+</div>
+<div class='fb-right'>
+	<%= Customizer.templates['partials/canvas']() %>
+
+	<%= Customizer.templates['partials/edit']() %>
+</div>
+<%= Customizer.templates['partials/layers']() %>
+<div class='fb-clear'></div>
+
+<div class='fb-save-wrapper'>
+  <button class='js-save-data <%= Customizer.options.BUTTON_CLASS %>'></button>
+</div>
+<div class="pc-loader-container">
+	<div class="pc-loading-inner">
+		<div class="pc-loading-icon"><!-- <span class="mif-spinner2 mif-ani-spin"></span> --><span class="mif-spinner3 mif-ani-spin"></span></div>
+		<div class="pc-loading-text">Loading...</div>
+	</div>
+</div>
