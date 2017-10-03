@@ -1,0 +1,35 @@
+<style type="text/css">
+    <% 
+    jQuery.each(Customizer.fonts, function(index,font){
+        var font_str = [];
+        jQuery.each(font.src, function(type, path){
+            switch(type){
+                case 'eot':
+                 format = "format('embedded-opentype')";
+                 url = "#iefix";
+                 break;
+                case 'woff':
+                 format = "format('woff')";
+                 url = "";
+                 break;
+                case 'ttf':
+                 format = "format('truetype')";
+                 url = "";
+                 break;
+                case 'svg':
+                 format = "format('svg')";
+                 url = "#"+font.name;
+                 break;
+            }
+            font_str.push("url('"+path+"') "+format);
+        }); 
+        %>
+        @font-face{
+            font-family:'<%= font.name %>';    
+            <%= (font_str.length > 0) ? 'src:'+font_str.join(', ')+";" : "" %>
+            font-weight:normal;
+            font-style:normal;
+        }
+    <% }); %>
+</style>
+</style>

@@ -1,0 +1,12 @@
+<div class='pc-color-wrapper'>
+	<% if(rf.get(Customizer.options.mappings.LAYER_DATA+'.type') == 'text'){
+		color = rf.get(Customizer.options.mappings.LAYER_DATA+'.fill')
+	}else{
+		if(rf.get(Customizer.options.mappings.LAYER_DATA+'.filters') !== undefined && rf.get(Customizer.options.mappings.LAYER_DATA+'.filters').length > 0){
+			color = rf.get(Customizer.options.mappings.LAYER_DATA+'.filters')[0].color
+		}else{
+			color = ""
+		}
+	}%>
+  	<div class="colorselector"><div class="background-color" style="background-color:<%= color %>"></div></div>
+</div>

@@ -1,0 +1,45 @@
+<div class='pc-style-wrapper left-border'>
+	<% if(rf.get(Customizer.options.mappings.LAYER_DATA+".type") == 'text'){ %>
+  	<div class="pc-style-icon font-familty toggle-div" data-target="#font-family"><i class="fa fa-font" aria-hidden="true"></i></div>
+  	<div class="pc-style-icon text-bold"><span class="mif-bold"></span></div>
+  	<div class="pc-style-icon text-italic"><span class="mif-italic"></span></div>
+  	<div class="pc-style-icon text-underline"><span class="mif-underline"></span></div>
+  	<% } %>
+  	<div class="pc-style-icon rotate-left"><i class="fa fa-rotate-left"></i></div>
+  	<div class="pc-style-icon rotate-right"><i class="fa fa-rotate-right"></i></div>  
+</div>
+
+<% fonts = []
+jQuery.each(Customizer.fonts, function(index,font){
+	if(rf.get(Customizer.options.mappings.LAYER_DATA+".fontFamily") == font.name){ 
+		selected = "selected='selected'";
+	}else{
+		selected = "";
+	}
+	fonts.push("<option value='"+font.name+"' "+selected+" style='font-family:\""+font.name+"\"'>"+font.displayName+"</option>");
+}); %>
+<div id="font-family" class="tool-tip" style="display: none;">
+	<div class="tool-tip-container-inner">
+		<div class="tool-tip-title">Font</div>
+		<div class="tool-tip-wraper">
+			<div class="font-familty-wraper">
+				<div class="pc-input-container pc-full-width">
+					<label class="input-label">Select Font Familty</label>
+					<div class="input-fields select">
+						<select class="text-font-family">
+							<%= fonts.join("") %>
+						</select>
+					</div>
+					
+				</div>
+
+				<div class="pc-input-container pc-full-width">
+					<label class="input-label">Font Size</label>
+					<div class="input-fields select">
+						<input type="number" class="text-font-size" value="<%= rf.get(Customizer.options.mappings.LAYER_DATA+".fontSize") %>" class="text-font-family">
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

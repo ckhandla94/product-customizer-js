@@ -1,0 +1,41 @@
+{
+  "name": "product-customizer-js",
+  "version": "1.0.0",
+  "authors": [
+    "chetan <ckhandla94@gmail.com>"
+  ],
+  "maintainers": [
+    {
+      "name": "Chetan Khandla",
+      "email": "ckhandla94@gmail.com"
+    }
+  ],
+  "description": "Product customizer for the web.",
+  "main": "Gruntfile.coffee",
+  "scripts": {
+    "test": "grunt test"
+  },
+  "devDependencies": {
+    "grunt": "~1.0.1",
+    "grunt-browser-sync": "^2.2.0",
+    "grunt-contrib-clean": "~1.0.0",
+    "grunt-contrib-coffee": "~1.0.0",
+    "grunt-contrib-concat": "~1.0.1",
+    "grunt-contrib-cssmin": "~1.0.2",
+    "grunt-contrib-jst": "~1.0.0",
+    "grunt-contrib-stylus": "^1.2.0",
+    "grunt-contrib-uglify": "~2.0.0",
+    "grunt-contrib-watch": "~1.0.0",
+    "grunt-karma": "~2.0.0",
+    "grunt-release": "~0.14.0",
+    "html-minifier": "^3.2.3",
+    "karma": "^1.3.0",
+    "karma-chrome-launcher": "~2.0.0",
+    "karma-coffee-preprocessor": "~1.0.1",
+    "karma-firefox-launcher": "~1.0.0",
+    "karma-mocha": "~1.3.0",
+    "karma-phantomjs-launcher": "~1.0.2",
+    "karma-safari-launcher": "~1.0.0",
+    "mocha": "~3.2.0"
+  }
+}

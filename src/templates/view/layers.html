@@ -1,0 +1,48 @@
+<div class="pc-container">
+	<div class='pc-title handle'><span class="mif-stack"></span> Layers</div>
+  	<div class='pc-body'>
+  		<ul class="pc-layers-contianer">
+  			<% if(layers.length > 0){
+	  			_.each(_.sortBy(layers, 'order').reverse(), function(_layer){
+	  				%>
+	  			<% layer = _layer.toJSON(Customizer.options.jsonArgs) %>
+				<% active = _layer.canvas.getActiveObject() %>
+		  		<li 
+		  			style="<%= (Customizer.options.settings.administration == false && _layer.hideLayer) || (_layer.displayInLayerBar !== undefined && _layer.displayInLayerBar == false) ? 'display:none' : "" %>" 
+		  			class="layers <%= (active !== undefined && active !== null && active.id == _layer.id) ? 'active' : '' %> <%= (Customizer.options.settings.administration == false && (_layer.hideLayer == true || _layer.unlockable == false || _layer.removable == false)) ? 'unsortable' : '' %>" 
+		  			data-id="<%= _layer.id %>">
+				    <span class="pc-image-contianer">
+				    	<% if(layer.type == 'text'){ %>
+				    		<i class="fa fa-text-width"></i>
+				    	<% }else{ %>
+				    		<img width=50  src="<%= layer.src %>">
+				    	<% } %>
+				    </span>
+				    <span class="pc-layer-title">
+				    	<% if(_layer.title !== undefined && _layer.title !== null ){ %>
+				    		<%= _layer.id %> - <%= _layer.title %>
+				    	<% }else{ %>
+					    	<% if(layer.type == 'text'){ %>
+					    		<%= _layer.id %> - <%= layer.text.substring(0,15) %>
+					    	<% }else{ %>
+								<%= _layer.id %> - <%= layer.type %>
+					    	<% } %>
+						<% }%>
+				    </span>
+					<span class="pc-layers-action">
+						<% if(Customizer.options.settings.administration == true || layer.removable == true){%>
+			  				<a href="javascript:" class="pc-layers-delete"><i class="fa fa-trash-o fa-1"> </i></a>
+			  			<% } %>
+			  			<% if(Customizer.options.settings.administration == true || layer.unlockable == true){%>
+							<a href="javascript:" class="pc-layers-lock-unlock"><i class="fa <%= _layer.locked == true ? 'fa-lock' : 'fa-unlock-alt' %>"></i></a>
+						<% } %>
+		  			</span>
+		  		</li>
+		  		<% }); %>
+
+		  	<% }else{ %>
+				<li class="layers no-found">No layer found.</li>
+		  	<% } %>
+	  	</ul>
+  	</div>
+</div>
