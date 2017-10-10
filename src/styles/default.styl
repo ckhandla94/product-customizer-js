@@ -25,17 +25,17 @@ $image = "../images"
 .pull-right
 	float: right
 
+
 .fb-save-wrapper 
 	position: absolute
 	right: 20px
 	bottom: 10px
 	top:auto
 	box-sizing: border-box
-
-.fb-save-wrapper 
+	display none
 	+respond-below(767px)
 		margin 10px auto
-		display table
+		display none
 		position unset
 
 .fb-button
@@ -270,11 +270,12 @@ $image = "../images"
 		margin: 0;
 		min-height: 100%;
 		overflow: hidden;
-		padding: 0 0 5px 5px;
+		padding: 0 0 0 5px;
 		width: 76%;
 		
 		+respond-below(769px)
 			width 100%
+			padding: 0 ;
 			border:none;
 			
 		.pc-canvas
@@ -490,6 +491,28 @@ $image = "../images"
 			position: relative;
 			width: 100%;
 
+			.inner-upload-zone
+				color: #000;
+				padding: 10px;
+				background: rgba(0,0,0,0.2);
+				border-radius: 5px;
+				margin: 0 10px;
+			
+			.image-preview
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				width: auto;
+				height: auto;
+				background-size: cover;
+				background-repeat: no-repeat;
+				background-position: center;
+				opacity: 0.6;
+				z-index: -1;
+			
+
 			.pc-upload-image
 				bottom: 0;
 				height: 100%;
@@ -500,6 +523,8 @@ $image = "../images"
 				top: 0;
 				width: 100%;
 				z-index: 9999;
+
+				
 			
 			& span 
 				display: table;

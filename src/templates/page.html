@@ -2,36 +2,25 @@
 <div class='fb-left'>
 	<div class='pc-assets'>
 	  <ul class='fb-tabs'>
-	  	<% if(Customizer.options.settings.allowUploadImage){ %>
 	    <li class='active'><a data-target='#pc-upload-image-panel'><span class="fa fa fa-upload"></span> Background </a></li>
-	    <% } %>
+	
 	    <li><a data-target='#pc-backgrounds-panel'><i class="fa fa-picture-o"></i>  Images</a></li>
-	    <% if(Customizer.options.settings.allowAddText){ %>
-	    <!-- <li><a data-target='#pc-text-panel'><i class="fa fa-file-text"></i> Text</a></li>
-	    <% } %> -->
+
 	    
 	  </ul>
 
 	  <div class='fb-tab-content'>
-	  	<% if(Customizer.options.settings.allowUploadImage){ %>
-	    	<%= Customizer.templates['partials/panels/upload-image']() %>
-	    <% } %>
-
+	   
 	    <%= Customizer.templates['partials/panels/images']() %>
-		
-		<!-- <% if(Customizer.options.settings.allowAddText){ %>
-	    	<%= Customizer.templates['partials/panels/text']() %>
-	    <% } %> -->
+
 	    
 	  </div>
 	</div>
 </div>
 <div class='fb-right'>
 	<%= Customizer.templates['partials/canvas']() %>
-
-	<%= Customizer.templates['partials/edit']() %>
 </div>
-<!-- <%= Customizer.templates['partials/layers']() %> -->
+
 <div class='fb-clear'></div>
 
 <div class='fb-save-wrapper'>

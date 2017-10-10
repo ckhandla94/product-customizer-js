@@ -30,6 +30,9 @@
     "rivets": "~0.5.13",
     "font-awesome": "~4.0.0",
     "bower-webfontloader": "^1.6.6",
-    "jspdf": "^1.3.5"
+    "jspdf": "^1.3.5",
+    "fabric.js": "fabric#^1.7.19",
+    "Croppie": "croppie#^2.5.0",
+    "fabric-customise-controls": "^0.3.5"
   }
 }

@@ -45,6 +45,58 @@
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
+  fabric.Object.prototype.set({
+    cornerSize: 40,
+    transparentCorners: false,
+    borderColor: '#16A085',
+    cornerColor: '#16A085'
+  });
+
+  fabric.Canvas.prototype.customiseControls({
+    tr: {
+      settings: {
+        cornerSize: 45
+      },
+      action: 'remove',
+      cursor: 'pointer'
+    }
+  }, function() {
+    canvas.renderAll();
+  });
+
+  fabric.Object.prototype.customiseCornerIcons({
+    tr: {
+      icon: 'data:image/png;base64,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'
+    },
+    tl: {
+      icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC0AAAAtCAYAAAA6GuKaAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QoKDAQb09JvzgAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAABJSURBVFjD7dAxDQAgEATBBxHowwc1PtCHCbDwDQXJbH3F5CIkSVJEyQ7bmuc1ZveR8tQfn4aGhoaGhoaGhoaGhoaGhoaWJEnJLtqsBDIRk+QiAAAAAElFTkSuQmCC'
+    },
+    mt: {
+      icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC0AAAAtCAYAAAA6GuKaAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QoKDAQb09JvzgAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAABJSURBVFjD7dAxDQAgEATBBxHowwc1PtCHCbDwDQXJbH3F5CIkSVJEyQ7bmuc1ZveR8tQfn4aGhoaGhoaGhoaGhoaGhoaWJEnJLtqsBDIRk+QiAAAAAElFTkSuQmCC'
+    },
+    mb: {
+      icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC0AAAAtCAYAAAA6GuKaAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QoKDAQb09JvzgAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAABJSURBVFjD7dAxDQAgEATBBxHowwc1PtCHCbDwDQXJbH3F5CIkSVJEyQ7bmuc1ZveR8tQfn4aGhoaGhoaGhoaGhoaGhoaWJEnJLtqsBDIRk+QiAAAAAElFTkSuQmCC'
+    },
+    mr: {
+      icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC0AAAAtCAYAAAA6GuKaAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QoKDAQb09JvzgAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAABJSURBVFjD7dAxDQAgEATBBxHowwc1PtCHCbDwDQXJbH3F5CIkSVJEyQ7bmuc1ZveR8tQfn4aGhoaGhoaGhoaGhoaGhoaWJEnJLtqsBDIRk+QiAAAAAElFTkSuQmCC'
+    },
+    ml: {
+      icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC0AAAAtCAYAAAA6GuKaAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QoKDAQb09JvzgAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAABJSURBVFjD7dAxDQAgEATBBxHowwc1PtCHCbDwDQXJbH3F5CIkSVJEyQ7bmuc1ZveR8tQfn4aGhoaGhoaGhoaGhoaGhoaWJEnJLtqsBDIRk+QiAAAAAElFTkSuQmCC'
+    },
+    bm: {
+      icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC0AAAAtCAYAAAA6GuKaAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QoKDAQb09JvzgAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAABJSURBVFjD7dAxDQAgEATBBxHowwc1PtCHCbDwDQXJbH3F5CIkSVJEyQ7bmuc1ZveR8tQfn4aGhoaGhoaGhoaGhoaGhoaWJEnJLtqsBDIRk+QiAAAAAElFTkSuQmCC'
+    },
+    bl: {
+      icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC0AAAAtCAYAAAA6GuKaAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QoKDAQb09JvzgAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAABJSURBVFjD7dAxDQAgEATBBxHowwc1PtCHCbDwDQXJbH3F5CIkSVJEyQ7bmuc1ZveR8tQfn4aGhoaGhoaGhoaGhoaGhoaWJEnJLtqsBDIRk+QiAAAAAElFTkSuQmCC'
+    },
+    br: {
+      icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC0AAAAtCAYAAAA6GuKaAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QoKDAQb09JvzgAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAABJSURBVFjD7dAxDQAgEATBBxHowwc1PtCHCbDwDQXJbH3F5CIkSVJEyQ7bmuc1ZveR8tQfn4aGhoaGhoaGhoaGhoaGhoaWJEnJLtqsBDIRk+QiAAAAAElFTkSuQmCC'
+    },
+    mtr: {
+      icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC0AAAAtCAYAAAA6GuKaAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QoKDAQb09JvzgAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAABJSURBVFjD7dAxDQAgEATBBxHowwc1PtCHCbDwDQXJbH3F5CIkSVJEyQ7bmuc1ZveR8tQfn4aGhoaGhoaGhoaGhoaGhoaWJEnJLtqsBDIRk+QiAAAAAElFTkSuQmCC'
+    }
+  });
+
   fabric.Canvas.prototype.getItemByMyID = function(myID) {
     var i, len, object, objects;
     object = null;
@@ -134,13 +186,6 @@
     ctx.closePath();
     ctx.restore();
   };
-
-  fabric.Object.prototype.set({
-    transparentCorners: false,
-    borderColor: '#16A085',
-    cornerColor: '#16A085',
-    cornerSize: 7
-  });
 
   CustomizerProductModel = (function(superClass) {
     extend(CustomizerProductModel, superClass);
@@ -368,630 +413,6 @@
 
   })(Backbone.View);
 
-
-  /*class ViewLayerView extends Backbone.View
-    className : 'pc-layers-wraper'
-    events:
-      'click li': 'focusEditView'
-      'click .pc-layers-delete': 'remove'
-      'click .pc-layers-lock-unlock': 'lockUnlock'
-  
-    initialize: (options) ->
-      {@parentView} = options
-      @canvas = @parentView.canvas;
-  
-    unselect : ->
-      @$el.find('.pc-layers-contianer li').removeClass('active')
-  
-    render: ->
-      layers = @canvas.getObjects()
-  
-      $el = Customizer.templates["view/layers"]({layers : layers})
-      @$el.html($el)
-      @setSortable()
-      return @
-  
-    focusEditView: (ev)->
-      id = jQuery(ev.currentTarget).data('id')
-      obj = @canvas.getItemByMyID(id);
-      @canvas.setActiveObject(obj);
-      @canvas.renderAll();
-  
-  
-    lockUnlock: (ev)->
-      if(jQuery(ev.currentTarget).prop("tagName") is 'li')
-        id = jQuery(ev.currentTarget).data('id')
-        $el = jQuery(ev.currentTarget)
-      else
-        id = jQuery(ev.currentTarget).closest('li').data('id')
-        $el = jQuery(ev.currentTarget).closest('li')
-  
-      object = @canvas.getItemByMyID(id);
-      if object.locked is false     
-        object.set(
-          selection: true
-          selectable: false
-          lockScalingX  : true
-          lockScalingY  : true
-          lockUniScaling  : true
-          lockRotation  : true
-          lockMovementX : true
-          lockMovementY : true
-          locked  : true
-          hasBorders: false
-          hasControls: false
-          hasRotatingPoint: false
-          hoverCursor : 'default'
-  
-          isResizable: false
-          isDraggable: false
-        )
-        $el.find('.fa-unlock-alt').removeClass('fa-unlock-alt').addClass('fa-lock')
-      else
-        object.set(
-          selection: false
-          selectable: true
-          lockScalingX  : false
-          lockScalingY  : false
-          lockUniScaling  : false
-          lockRotation  : false
-          lockMovementX : false
-          lockMovementY : false
-          locked  : false
-          hasBorders: true
-          hasControls: true
-          hasRotatingPoint: true
-          isResizable: true
-          isDraggable: true
-  
-        )
-        $el.find('.fa-lock').removeClass('fa-lock').addClass('fa-unlock-alt')
-  
-      @canvas.discardActiveObject()
-      @canvas.renderAll();
-      @parentView.updateModel(id)
-  
-  
-    remove: (ev)->
-      if(jQuery(ev.currentTarget).prop("tagName") is 'li')
-        id = jQuery(ev.currentTarget).data('id')
-        $el = jQuery(ev.currentTarget)
-      else
-        id = jQuery(ev.currentTarget).closest('li').data('id')
-        $el = jQuery(ev.currentTarget).closest('li')
-  
-      obj = @canvas.getItemByMyID(id);
-      obj.remove()
-      $el.remove()
-      @parentView.getModel(id).destroy()
-      @parentView.handleFormUpdate()
-  
-    scrollLayerWrapper: ($layerContainer) ->
-      #return unless $responseFieldEl[0]
-      if typeof @$layerContainer is 'undefined' or @$layerContainer.length is 0
-        return
-  
-      li = jQuery(@$layerContainer).find('li.active')
-  
-      if typeof li is 'undefined' or li.length is 0
-        return
-  
-      bottom = @$layerContainer.offset().top + @$layerContainer.height()
-  
-      if (li.offset().top + li.height()) > bottom
-        jQuery(@$layerContainer).animate({
-            scrollTop: li.offset().top
-        }, 200);
-  
-    setSortable: ->
-  
-      @$layerContainer = @$el.find('.pc-layers-contianer')
-      if !@$layerContainer
-        return;
-      @$layerContainer.sortable('destroy') if @$layerContainer.hasClass('ui-sortable')
-      @scroll = ""
-      _this = @
-  
-      @$layerContainer.sortable
-        forcePlaceholderSize: true
-        placeholder: 'sortable-placeholder'
-        containment: "parent",
-        scrollSpeed: 2
-        items: "li:not(.unsortable)"
-        start: (e, ui )->
-          ui.placeholder.height(ui.helper.height());
-        
-        stop: (e, ui) =>
-          total = jQuery(e.target).find('li').length;
-          jQuery(e.target).find('li').each((index)-> 
-            i = total - (index + 1)
-            id = jQuery(@).data('id')
-  
-            model = _this.parentView.getModel(id)
-  
-            object = _this.canvas.getItemByMyID(id);
-            object.moveTo(i);
-  
-            model.set(Customizer.options.mappings.LAYER_DATA+'.order', i)
-            model.set(Customizer.options.mappings.LAYER_DATA+'.zIndex', i)
-            model.set('order', i)
-            model.trigger 'change'
-  
-            _this.parentView.bringToppedElementsToFront();
-          )
-          
-          return true
-        update: (e, ui) =>
-          jQuery(e.target).find('li').each((i)-> 
-             jQuery(@).data('order', i + 1);
-             jQuery(@).attr('data-order', i + 1);
-          )
-  
-        scroll: true,
-        scrollSensitivity: 80,
-        scrollSpeed: 3,
-        cursor: "move",
-        tolerance: "pointer"
-  
-    forceRender: (id)-> 
-      scrolled_val = @$el.scrollTop().valueOf();
-      @render()
-   */
-
-
-  /*class EditLayerView extends Backbone.View
-    className : 'pc-edit-layer-wraper'
-    events:
-      'click .align-bottom': 'alignBottom'
-      'click .align-top': 'alignTop'
-      'click .vertical-align-center': 'verticalCenter'
-      'click .align-left': 'alignLeft'
-      'click .align-right': 'alignRight'
-      'click .hoizontal-align-center': 'horizontalCenter'
-      'click .toggle-div': 'toggle'
-  
-  
-      'change .text-font-family': 'fontFamily'
-      'keyup .text-font-size': 'fontSize'
-      'click .text-bold': 'textBold'
-      'click .text-italic': 'textItalic'
-      'click .text-underline': 'textUnderline'
-      'click .rotate-left': 'rotateLeft'
-      'click .rotate-right': 'rotateRight'
-      'click .reset-layer': 'resetLayer'
-  
-      'change .checkbox-removable': 'isRemovable'
-      'change .checkbox-draggable': 'isDraggable'
-      'change .checkbox-rotatable': 'isRotatable'
-      'change .checkbox-unlockable': 'isUnlockable'
-      'change .checkbox-resizable': 'isResizable'
-      'change .checkbox-hide-layer': 'isHideLayer'
-      'change .checkbox-stay-on-top': 'stayOnTop'
-  
-      'keyup .pc_allowed_colors': 'allowedColors'
-      'keyup .pc_layer_name': 'changeLayerName'
-      'keyup .pc_default_color': 'defaultColor'
-  
-  
-      'change #enable_bounding': 'boundingEnable'
-      'change #another_element_bounding': 'elementBoundingEnable'
-      'keyup .input_another_element_bounding_name': 'boundingElementName'
-      'keyup .bounding_coords': 'boundingBoxCoords'
-      'change .input_bounding_box_mode': 'boundingMode'
-  
-    initialize: (options) ->
-      {@parentView} = options
-      {@layer} = options
-      {@model} = options.layer
-      {@canvas} = options.layer
-     
-    destroy : ->
-      if@$el?
-        @$el.find('.colorselector').spectrum('destroy');
-        @$el.remove();
-  
-    render: ->
-      $el = Customizer.templates["edit/base"]({layer : @layer, rf : @model})
-  
-      @$el.html($el)
-      @setColorPicker();
-  
-      @buindSetting()
-      return @
-    
-    toggle : (e)->
-      _this = @;
-  
-      target = jQuery(e.currentTarget).data('target')
-      @parentView.$el.find(target).slideToggle();
-  
-      if jQuery(target).hasClass('tool-tip')  
-        jQuery('.toggle-div').each(()->
-          if e.currentTarget isnt @
-            target = jQuery(@).data('target')
-            if jQuery(target).hasClass('tool-tip')
-              _this.parentView.$el.find(target).slideUp();
-        )
-  
-    isRemovable : (e)->
-      obj = @canvas.getActiveObject();
-      if(jQuery(e.currentTarget).is(':checked'))
-        @update_layer_data obj,'removable', true
-      else
-        @update_layer_data obj,'removable', false
-  
-    isUnlockable : (e)->
-      obj = @canvas.getActiveObject();
-      if(jQuery(e.currentTarget).is(':checked'))
-        @update_layer_data obj,'unlockable', true
-      else
-        @update_layer_data obj,'unlockable', false
-  
-    isHideLayer : (e)->
-      obj = @canvas.getActiveObject();
-      if(jQuery(e.currentTarget).is(':checked'))
-        @update_layer_data obj,'hideLayer', true
-      else
-        @update_layer_data obj,'hideLayer', false
-  
-    boundingEnable : (e)->
-      obj = @canvas.getActiveObject();
-      parent = jQuery(e.currentTarget).closest('.pc-define-bounding')
-      if(jQuery(e.currentTarget).is(':checked'))
-        @update_layer_data(obj,
-          'boundingEnable': true
-          )
-        
-      else
-        @update_layer_data(obj,
-          'boundingEnable': false
-          )
-  
-      @parentView.setBoundry(obj, @parentView)
-  
-    elementBoundingEnable : (e)->
-      obj = @canvas.getActiveObject();
-      parent = jQuery(e.currentTarget).closest('.pc-define-bounding')
-      if(jQuery(e.currentTarget).is(':checked'))
-        @update_layer_data(obj,
-          #'boundingEnable': true
-          'elementBoundingEnable': true
-          'boundingElementName': parent.find('[name="another_element_bounding_name"]').val()
-          'boundingCoordsLeft' : ""
-          'boundingCoordsTop' : ""
-          'boundingCoordsWidth' : ""
-          'boundingCoordsHeight'  : ""
-          #'boundingMode': parent.find('[name="bounding_box_mode"]').val()
-          )
-      else
-        @update_layer_data(obj,
-          #'boundingEnable': true
-          'elementBoundingEnable': false
-          'boundingElementName': ""
-          'boundingCoordsLeft': parent.find('[name="bounding_coords_left"]').val()
-          'boundingCoordsTop': parent.find('[name="bounding_coords_top"]').val()
-          'boundingCoordsWidth': parent.find('[name="bounding_coords_width"]').val()
-          'boundingCoordsHeight': parent.find('[name="bounding_coords_height"]').val()
-          #'boundingMode': parent.find('[name="bounding_box_mode"]').val()
-        )
-      
-  
-      @parentView.setBoundry(obj, @parentView)
-  
-    boundingElementName : (e)->
-      obj = @canvas.getActiveObject();
-      @update_layer_data obj, 'boundingElementName', e.currentTarget.value
-      @parentView.setBoundry(obj, @parentView)
-  
-    boundingBoxCoords : (e)->
-      obj = @canvas.getActiveObject();
-      coord = jQuery(e.currentTarget).data('coord')
-  
-      @update_layer_data obj, "boundingCoords#{coord}" , e.currentTarget.value
-      
-      @parentView.setBoundry(obj, @parentView)
-     
-    boundingMode : (e)->
-      obj = @canvas.getActiveObject();
-      @update_layer_data obj, 'boundingMode',e.currentTarget.value
-      @parentView.setBoundry(obj, @parentView)
-     
-  
-    isResizable : (e)->
-      obj = @canvas.getActiveObject();
-      if(obj.locked is true)
-        return
-  
-      if(jQuery(e.currentTarget).is(':checked'))
-        @update_layer_data(obj,
-          isResizable : true 
-          lockScalingX : false
-          lockScalingY : false
-          hasControls: true
-        )
-      else
-        @update_layer_data(obj, 
-          isResizable : false 
-          lockScalingX : true
-          lockScalingY : true
-          hasControls: false
-        )
-  
-    stayOnTop : (e)->
-      obj = @canvas.getActiveObject();
-  
-      if(jQuery(e.currentTarget).is(':checked'))
-        @update_layer_data obj, {'stayOnTop': true,  evented : false}
-      else
-        @update_layer_data obj, {'stayOnTop': false,  evented : true}
-  
-      @bringToppedElementsToFront();
-      @parentView.refreshLayer(obj)
-  
-  
-    defaultColor : (e)->
-      obj = @canvas.getActiveObject();
-      @update_layer_data obj, {'defaultColor': jQuery(e.currentTarget).val()}
-  
-  
-    
-    allowedColors : (e)->
-      obj = @canvas.getActiveObject();
-      colors = jQuery(e.currentTarget).val()
-      colors = colors.split(',');
-      colors.map (x,y,z)-> z[y] = x.trim()
-      colors = (colors.filter (i) -> /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(i))
-      @update_layer_data obj, {'allowedColors': colors}
-    
-    changeLayerName : (e)->
-      obj = @canvas.getActiveObject();
-      value = jQuery(e.currentTarget).val()
-      #obj.set(value)
-      obj.model.set 'title', value
-      @update_layer_data obj, {'title': value}
-  
-  
-    isDraggable : (e)->
-      obj = @canvas.getActiveObject();
-      if(obj.locked is true)
-        return
-  
-      if(jQuery(e.currentTarget).is(':checked'))
-        @update_layer_data(obj,
-          isDraggable : true 
-          lockMovementX : false
-          lockMovementY : false
-        )
-      else
-        @update_layer_data(obj, 
-          isDraggable : false 
-          lockMovementX : true
-          lockMovementY : true
-        )
-  
-    isRotatable : (e)->
-      obj = @canvas.getActiveObject();
-      if(obj.locked is true)
-        return
-      if(jQuery(e.currentTarget).is(':checked'))
-        @update_layer_data(obj,
-            'lockRotation': false
-            hasRotatingPoint: true
-          )
-      else
-        @update_layer_data(obj,
-            'lockRotation': true 
-            hasRotatingPoint: false
-          )
-    
-    
-    buindSetting : ()->
-      rivets.bind(@parentView.$el.find('#admin-setting-container'), {model : @model});
-  
-   
-  
-    setColorPicker: ()->
-      _this = @
-      obj =  @canvas.getActiveObject();
-      colorPickerArgs = 
-        preferredFormat: "hex3"
-        showInput : true
-        showButtons : false
-        clickoutFiresChange : true
-        hideAfterPaletteSelect : true
-        showInitial : true
-        chooseText : "Ok"
-        change : (color)-> 
-          colorPickerArgs.move(color)
-        move :(color)->
-          hex = color.toHexString(); 
-          jQuery(@).find('.background-color').css({'background-color' : hex})
-          jQuery('.colorselector .background-color').css('backgroundColor', "##{hex}")   
-          if _this.layer.model.get(Customizer.options.mappings.LAYER_DATA+'.type') is 'text'
-            _this.update_layer_data(_this.layer , 'fill',"##{hex}")
-          else
-            _this.applyFilterValue obj, 0, 'color', "#{hex}"
-      
-      allowedColors = @layer.model.get(Customizer.options.mappings.LAYER_DATA+'.allowedColors')
-      if allowedColors isnt undefined and allowedColors isnt null and allowedColors isnt "" and allowedColors.length > 0
-        defaultColor = @layer.model.get(Customizer.options.mappings.LAYER_DATA+'.defaultColor')
-        defaultColor = if defaultColor isnt undefined and defaultColor isnt null and defaultColor isnt "" then defaultColor else allowedColors[0]
-        if _this.layer.model.get(Customizer.options.mappings.LAYER_DATA+'.type') is 'text'
-          color = @layer.model.get(Customizer.options.mappings.LAYER_DATA+'.fill')
-        else
-          filters = @layer.model.get(Customizer.options.mappings.LAYER_DATA+'.filters')
-          if filters.length > 0
-            color = filters[0].color
-          else
-            color = defaultColor
-        colorPickerArgs.color = color
-        colorPickerArgs.showPaletteOnly = true
-        colorPickerArgs.showPalette = true
-        colorPickerArgs.palette = allowedColors
-      else
-        if _this.layer.model.get(Customizer.options.mappings.LAYER_DATA+'.type') is 'text'
-          color = @layer.model.get(Customizer.options.mappings.LAYER_DATA+'.fill')
-        else
-          filters = @layer.model.get(Customizer.options.mappings.LAYER_DATA+'.filters')
-          if filters.length > 0
-            color = filters[0].color
-          else
-            color = '#000'
-        colorPickerArgs.color = color
-  
-      _this.$el.find('.colorselector').spectrum colorPickerArgs
-  
-    applyFilterValue : (obj, index, prop, value) ->
-      if obj is undefined
-        obj = @canvas.getActiveObject();
-      if obj isnt undefined and obj isnt null
-        if obj.filters[index]
-          obj.filters[index][prop] = value;
-        else
-          obj.filters.push(
-              new fabric.Image.filters.Tint(
-                color: value
-              )
-            )
-        obj.applyFilters(@canvas.renderAll.bind(@canvas));
-        obj.model.set Customizer.options.mappings.LAYER_DATA+".filters", obj.filters
-        obj.model.trigger 'change'
-    
-    fontFamily : (e)->
-      obj = @canvas.getActiveObject();
-      if obj is undefined
-        return
-      @update_layer_data obj, 'fontFamily',  e.currentTarget.value
-      font = obj.toJSON().fontSize
-      @update_layer_data obj, 'fontSize',  parseInt(font) + 1
-      @update_layer_data obj, 'fontSize',  font
-    
-    fontSize : (e)->
-      obj = @canvas.getActiveObject();
-      if obj is undefined
-        return
-      @update_layer_data obj, 'fontSize',  e.currentTarget.value
-      
-  
-    textBold : (e)->
-      obj = @canvas.getActiveObject();
-      if obj is undefined
-        return
-      @update_layer_data obj, 'fontWeight',  if obj.getFontWeight() is 'bold' then 'normal' else 'bold'
-  
-    textItalic : (e)->
-      obj = @canvas.getActiveObject();
-      if obj is undefined
-        return
-      @update_layer_data obj, 'fontStyle',  if obj.getFontStyle() is 'italic' then 'normal' else 'italic'
-  
-    textUnderline : (e)->
-      obj = @canvas.getActiveObject();
-      if obj is undefined
-        return
-      @update_layer_data obj, 'textDecoration',  if obj.getTextDecoration() is 'underline' then 'none' else  'underline'
-  
-    rotateLeft : (e)->
-      obj = @canvas.getActiveObject();
-      if obj is undefined
-        return
-  
-      resetOrigin = false;
-      if (obj.originX isnt 'center' or obj.originY isnt 'center') and obj.centeredRotation
-        obj.setOriginToCenter and obj.setOriginToCenter()
-        resetOrigin = true
-  
-  
-      angle = obj.getAngle()
-      angle += 5
-      @update_layer_data obj, 'angle',  angle    
-      if resetOrigin
-          obj.setCenterToOrigin and obj.setCenterToOrigin();
-      
-  
-    rotateRight : (e)->
-      obj = @canvas.getActiveObject();
-      if obj is undefined
-        return
-  
-      resetOrigin = false;
-      if (obj.originX isnt 'center' or obj.originY isnt 'center') and obj.centeredRotation
-        obj.setOriginToCenter and obj.setOriginToCenter()
-        resetOrigin = true
-  
-      angle = obj.getAngle()
-      angle -= 5
-      @update_layer_data obj, 'angle',  angle
-  
-      if resetOrigin
-          obj.setCenterToOrigin and obj.setCenterToOrigin();
-  
-  
-    alignBottom : (e)->
-      obj = @canvas.getActiveObject();
-      if obj is undefined
-        return
-      @update_layer_data obj, 'top',  (this.canvas.height - obj.getHeight())
-  
-    alignTop : (e)->
-      obj = @canvas.getActiveObject();
-      if obj is undefined
-        return
-      @update_layer_data obj, 'top', 0
-  
-    alignLeft : (e)->
-      obj = @canvas.getActiveObject();
-      if obj is undefined
-        return
-      @update_layer_data obj, 'left', 0
-  
-    alignRight : (e)->
-      obj = @canvas.getActiveObject();
-      if obj is undefined
-        return
-      @update_layer_data obj, 'left', (this.canvas.width - obj.getWidth())
-  
-  
-    horizontalCenter : (e)->
-      obj = @canvas.getActiveObject();
-      if obj is undefined
-        return
-      @update_layer_data(obj, 'left', ((@canvas.width / 2) - (obj.getWidth() / 2)))
-  
-    verticalCenter : (e)->
-      obj = @canvas.getActiveObject();
-      if obj is undefined
-        return
-      @update_layer_data(obj, 'top', ((@canvas.height / 2) - (obj.getHeight() / 2)))
-        
-    center : (e)->
-      obj = @canvas.getActiveObject();
-      if obj is undefined
-        return
-      top =  (@canvas.height / 2) - (obj.getHeight() / 2)
-      left = (@canvas.width / 2) - (obj.getWidth() / 2)
-      @update_layer_data(obj, {top : top, left : left})
-            
-  
-    update_layer_data : (obj, key, value)->
-  
-      if(typeof key is 'object')
-        jQuery.each(key, (k, v)->
-          obj.set k, v
-          obj.model.set Customizer.options.mappings.LAYER_DATA+"."+k, v
-        )
-      else
-        obj.set key, value
-        obj.model.set Customizer.options.mappings.LAYER_DATA+"."+key, value
-  
-      obj.setCoords();
-      @canvas.renderAll();
-      obj.model.trigger 'change'
-  
-    forceRender: (id)-> 
-      @render()
-   */
-
   CanvasView = (function() {
     function CanvasView() {}
 
@@ -1023,8 +444,6 @@
         obj.set('order', order);
       }
       this.parentView.updateModel(obj.model.get('cid'));
-      this.parentView.setBoundry(obj, this.parentView);
-      this.parentView.updateBoundry();
       return this.resetOrders();
     };
 
@@ -1075,7 +494,17 @@
         url = template.imageDate;
       }
       return img = fabric.Image.fromURL(template.full, function(image) {
-        var defaultOptions, filters, model;
+        var defaultOptions, filters, model, sch, scw;
+        scw = obj.canvas.width / image.width;
+        if (scw < 1) {
+          image.width = obj.canvas.width;
+          image.height = image.height * scw;
+        }
+        sch = obj.canvas.height / image.height;
+        if (sch < 1) {
+          image.height = obj.canvas.height;
+          image.width = image.width * sch;
+        }
         defaultOptions = Customizer.options.settings.canvas.object.image !== void 0 && typeof Customizer.options.settings.canvas.object.image === 'object' ? Customizer.options.settings.canvas.object.image : {};
         defaultOptions = jQuery.extend(true, {}, defaultOptions, {
           width: image.width,
@@ -1096,7 +525,6 @@
         _this.update_layer(image, options);
         obj.canvas.renderAll();
         model = obj.model;
-        console.log(model);
         _this.update_layer_data(image, model.attributes);
         if (model.get('isResizable') === false) {
           _this.update_layer_data(image, {
@@ -1242,7 +670,8 @@
       'click .canvas-actions .zoom-reset': function(e) {
         return this.canvas.setZoom(1);
       },
-      'click .canvas-actions .preview': 'saveImage'
+      'click .canvas-actions .preview': 'saveImage',
+      'click .canvas-actions .social_share_popop': 'social_share_popop'
     };
 
     CustomizerView.prototype.initialize = function(options) {
@@ -1316,10 +745,6 @@
       this.listenTo(this.canvas, "mouse:down", function(o) {
         return this.isDown = true;
       });
-      this.listenTo(this.canvas, "object:selected", this.objectSelected);
-      this.listenTo(this.canvas, "object:modified", this.objectModified);
-      this.listenTo(this.canvas, "object:scaling", this.objectScaling);
-      this.listenTo(this.canvas, "before:selection:cleared", this.beforeSelectionCleared);
       this.listenTo(this.canvas, "after:render", function(evt) {
         return this.calcOffset();
       });
@@ -1333,8 +758,8 @@
 
     CustomizerView.prototype.reSizeWindow = function() {
       var height, originalHeight, originalWidth, width, widthRatio;
-      originalWidth = 600;
-      originalHeight = 480;
+      originalWidth = 1920;
+      originalHeight = 1080;
       width = this.$el.find('.pc-canvas-waraper .pc-canvas').innerWidth();
       widthRatio = width / originalWidth;
       width = originalWidth * widthRatio;
@@ -1354,35 +779,10 @@
       $el.toggleClass('mif-shrink mif-enlarge');
       this.$el.toggleClass('fullscreen');
       return this.reSizeWindow();
-
-      /*if @$el.hasClass('fullscreen')
-        @oldCanvasHeight = @canvas.getHeight()
-        @oldCanvasWidth = @canvas.getWidth()
-        
-        offset = @$el.find('.canvas-actions').outerHeight(true)
-        @canvas.setHeight(@$el.height() - offset - 8)
-        
-        
-      
-        @canvas.setWidth(@$el.find('.pc-canvas').width())
-      else
-        @canvas.setHeight(@oldCanvasHeight)
-        @canvas.setWidth(@oldCanvasWidth)
-       */
-    };
-
-    CustomizerView.prototype.realWidth = function(obj) {
-      var clone, width;
-      clone = obj.clone();
-      clone.css("visibility", "hidden");
-      jQuery('body').append(clone);
-      width = clone.outerWidth();
-      clone.remove();
-      return width;
     };
 
     CustomizerView.prototype.render = function() {
-      var canvas, defaultCanvasArgs, el, j, len1, ref, subview;
+      var _this, canvas, defaultCanvasArgs, el, j, len1, ref, subview;
       this.$el.html(Customizer.templates['page']());
       this.loader = this.$el.find('.pc-loader-container');
       this.loader.show();
@@ -1400,7 +800,9 @@
         hoverCursor: 'pointer',
         controlsAboveOverlay: true,
         centeredScaling: false,
-        preserveObjectStacking: true
+        preserveObjectStacking: true,
+        width: 1920,
+        height: 1080
       };
       if (Customizer.options.settings.canvas === void 0) {
         Customizer.options.settings.canvas = {};
@@ -1409,39 +811,33 @@
       canvas = new fabric.Canvas(el[0], this.canvasAttr);
       this.canvas = canvas;
       this.reSetCanvasSize();
+      _this = this;
+      $(document).on('click', '.js-social-share', function(e) {
+        console.log(this);
+        e.preventDefault();
+        return _this.getBlob(function(blob) {
+          return _this.openSocialSharePopup(e, blob);
+        });
+      });
       this.loader.hide();
       return this;
     };
 
     CustomizerView.prototype.reSetCanvasSize = function() {
-      var h, w;
-      this.canvas.setWidth(600);
-      this.canvas.setHeight(500);
-      return;
-      h = this.$el.find('.pc-canvas').height();
-      w = this.$el.find('.pc-canvas').width();
-      if (this.canvasAttr.height !== void 0 && this.canvasAttr.height > 0) {
-        this.canvas.setHeight(this.canvasAttr.height);
-      } else {
-        this.canvas.setHeight(500);
-      }
-      if (this.canvasAttr.width !== void 0 && this.canvasAttr.width > 0) {
-        return this.canvas.setWidth(this.canvasAttr.width);
-      } else {
-        return this.canvas.setWidth(w);
-      }
+      this.canvas.setWidth(1920);
+      return this.canvas.setHeight(1080);
     };
 
 
     /*randerLayers : (canvas)->
-      layers = @canvas.getObjects()
+    		layers = @canvas.getObjects()
     
-      @layersView = new ViewLayerView
-        parentView: @
-        canvas: @canvas
+    		@layersView = new ViewLayerView
+    			parentView: @
+    			canvas: @canvas
     
-      $el = @layersView.render().$el
-      @$el.find('#pc-layers').html($el)
+    		$el = @layersView.render().$el
+    		@$el.find('#pc-layers').html($el)
      */
 
     CustomizerView.prototype.renderFontsCSS = function() {
@@ -1497,118 +893,113 @@
       }
     };
 
-    CustomizerView.prototype.objectSelected = function(evt) {
-
-      /*view = evt.target.canvas.parentView
-      view.setLayersActive(evt.target)
-      console.log view
-      @layersEditView = new EditLayerView
-        parentView: view
-        layer: evt.target
-      
-      $el = @layersEditView.render().$el
-      view.$el.find('#pc-edit-layer').html($el)
-       */
+    CustomizerView.prototype.social_share_popop = function(e) {
+      var modelView;
+      console.log(e);
+      modelView = new ModelView();
+      return modelView.alert('<a class="share-button js-social-share" data-share-url="http://mightymedia.nl" data-share-network="twitter" data-share-text="Share this awesome link on Twitter" data-share-title="Twitter Share" data-share-via="" data-share-tags="" data-share-media="" href="#">Share on Twitter</a> <a class="share-button js-social-share" data-share-url="http://mightymedia.nl" data-share-network="facebook" data-share-text="Share this awesome link on Facebook" data-share-title="Facebook Share" data-share-via="" data-share-tags="" data-share-media="" href="#">Share on Facebook</a> <a class="share-button js-social-share" data-share-url="http://mightymedia.nl" data-share-network="linkedin" data-share-text="Share this awesome link on LinkedIn" data-share-title="LinkedIn Share" data-share-via="" data-share-tags="" data-share-media="" href="#">Share on LinkedIn</a> <a class="share-button js-social-share" data-share-url="http://mightymedia.nl" data-share-network="googleplus" data-share-text="Share this awesome link on Google+" data-share-title="Google+ Share" data-share-via="" data-share-tags="" data-share-media="" href="#">Share on Google+</a> <a class="share-button js-social-share" data-share-url="http://mightymedia.nl" data-share-network="pinterest" data-share-text="Share this awesome link on Pinterest" data-share-title="Pinterest Share" data-share-via="" data-share-tags="" data-share-media="" href="#">Share on Pinterest</a> <a class="share-button js-social-share" data-share-url="http://mightymedia.nl" data-share-network="reddit" data-share-text="Share this awesome link on Reddit" data-share-title="Reddit Share" data-share-via="" data-share-tags="" data-share-media="" href="#">Share on Reddit</a> ', 'Share');
     };
 
-    CustomizerView.prototype.beforeSelectionCleared = function(evt) {
-      var view;
-      if (evt === void 0 || evt.target === void 0 || evt.target === null) {
-
-      } else {
-        view = evt.target.canvas.parentView;
-        if (view !== void 0) {
-          if (this.layersEditView !== void 0) {
-            this.layersEditView.destroy();
-          }
-          if (view.layersView !== void 0) {
-            return view.layersView.unselect();
-          }
-        }
-      }
-    };
-
-    CustomizerView.prototype.objectModified = function(evt) {
-      var fontSize, old, view;
-      view = evt.target.canvas.parentView;
-      view.updateModel(evt.target.id);
-      if (evt.target.object === 'text') {
-        old = evt.target.scaleX;
-        return fontSize = (evt.target.fontSize * old).toFixed(0);
-      }
-    };
-
-    CustomizerView.prototype.objectScaling = function(evt) {};
-
-    CustomizerView.prototype.updateBoundry = function(view) {
-      var clipRect;
-      if (view === void 0) {
-        view = this;
-      }
-      clipRect = _.filter(view.canvas.getObjects(), function(obj) {
-        return obj.clipFor !== void 0 && obj.clipFor !== null && obj.clipFor !== "";
+    CustomizerView.prototype.openSocialSharePopup = function(e, blob) {
+      var doShare, height, imgData, left, networkShareUrl, self, shareMedia, shareNetwork, shareTags, shareText, shareTitle, shareUrl, shareVia, top, width;
+      self = this;
+      imgData = this.exportCanvas().toDataURL({
+        format: 'jpeg'
       });
-      if (clipRect.length > 0) {
-        return _.each(clipRect, function(obj) {
-          return view.setBoundry(obj);
-        });
+      doShare = false;
+      shareUrl = window.location;
+      shareNetwork = $(e.currentTarget).data('share-network');
+      shareText = $(e.currentTarget).data('share-text');
+      shareTitle = $(e.currentTarget).data('share-title');
+      shareVia = $(e.currentTarget).data('share-via');
+      shareTags = $(e.currentTarget).data('share-tags');
+      shareMedia = imgData;
+      networkShareUrl = '';
+      if (typeof shareUrl !== 'undefined' && typeof shareNetwork !== 'undefined') {
+        doShare = true;
       }
-    };
-
-    CustomizerView.prototype.setBoundry = function(object, view) {
-      var boundRect, boundingBox, params;
-      params = object.toJSON(Customizer.options.jsonArgs);
-      if (params.boundingEnable === false) {
-        delete object.clipTo;
-        return;
-      }
-      if (view !== void 0) {
-        view = this;
-      }
-      if (params.boundingMode === 'clipping') {
-        object.set('clipName', params.boundingElementName);
-        return this.setCliping(object);
-      } else {
-        boundingBox = view.getBoundingBoxCoords(object);
-        if (!boundingBox) {
-          boundingBox = object.canvas;
-        }
-        return boundRect = object.getBoundingRect();
-      }
-    };
-
-    CustomizerView.prototype.getBoundingBoxCoords = function(element) {
-      var bbRect, i, name, object, objects, params;
-      params = element.toJSON(Customizer.options.jsonArgs);
-      if (params.boundingEnable) {
-        if (typeof params.boundingElement === 'object') {
-          return {
-            left: params.boundingCoordsTop,
-            top: params.boundingCoordsLeft,
-            width: params.boundingCoordsWidth,
-            height: params.boundingCoordsHeight
-          };
-        } else {
-          objects = element.canvas.getObjects();
-          i = 0;
-          while (i < objects.length) {
-            object = objects[i];
-            name = object.title === void 0 ? object.id : object.title;
-            if (params.boundingElementName === name) {
-              bbRect = object.getBoundingRect();
-              return {
-                left: bbRect.left,
-                top: bbRect.top,
-                width: bbRect.width,
-                height: bbRect.height
-              };
-              break;
+      if (doShare === true) {
+        switch (shareNetwork) {
+          case 'facebook':
+            networkShareUrl = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(shareUrl);
+            break;
+          case 'googleplus':
+            networkShareUrl = 'https://plus.google.com/share?url=' + encodeURIComponent(shareUrl);
+            break;
+          case 'linkedin':
+            networkShareUrl = 'https://www.linkedin.com/shareArticle?mini=true&url=' + encodeURIComponent(shareUrl) + '&source=' + encodeURIComponent(shareUrl);
+            if (typeof shareTitle !== 'undefined' && shareTitle !== '') {
+              networkShareUrl += '&title=' + encodeURIComponent(shareTitle);
             }
-            ++i;
-          }
+            if (typeof shareText !== 'undefined' && shareText !== '') {
+              networkShareUrl += '&summary=' + encodeURIComponent(shareText);
+            }
+            break;
+          case 'pinterest':
+            networkShareUrl = 'https://www.pinterest.com/pin/create/button/?url=' + encodeURIComponent(shareUrl);
+            if (typeof shareMedia !== 'undefined' && shareMedia !== '') {
+              networkShareUrl += '&media=' + encodeURIComponent(shareMedia);
+            }
+            if (typeof shareText !== 'undefined' && shareText !== '') {
+              networkShareUrl += '&description=' + encodeURIComponent(shareText);
+            }
+            if (typeof shareTags !== 'undefined' && shareTags !== '') {
+              networkShareUrl += '&hashtags=' + shareTags;
+            }
+            break;
+          case 'reddit':
+            networkShareUrl = 'http://www.reddit.com/submit/?url=' + encodeURIComponent(shareUrl);
+            break;
+          case 'twitter':
+            networkShareUrl = 'https://twitter.com/intent/tweet?&url=' + encodeURIComponent(shareUrl);
+            if (typeof shareText !== 'undefined' && shareText !== '') {
+              networkShareUrl += '&text=' + encodeURIComponent(shareText);
+            }
+            if (typeof shareVia !== 'undefined' && shareVia !== '') {
+              networkShareUrl += '&via=' + encodeURIComponent(shareVia);
+            }
+            if (typeof shareTags !== 'undefined' && shareTags !== '') {
+              networkShareUrl += '&hashtags=' + shareTags;
+            }
+            break;
+          default:
+            return false;
         }
       }
-      return false;
+      if (doShare) {
+        console.log(blob);
+        console.log(networkShareUrl);
+        width = 500;
+        height = 300;
+        left = screen.width / 2 - (width / 2);
+        top = screen.height / 2 - (height / 2);
+        window.open(networkShareUrl, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,width=' + width + ',height=' + height + ',top=' + top + ',left=' + left);
+      }
+    };
+
+    CustomizerView.prototype.dataURLtoBlob = function(dataUrl, callback) {
+      var req;
+      req = new XMLHttpRequest;
+      req.open('GET', dataUrl);
+      req.responseType = 'arraybuffer';
+      req.onload = function(e) {
+        var mime;
+        mime = this.getResponseHeader('content-type');
+        callback(new Blob([this.response], {
+          type: mime
+        }));
+      };
+      req.send();
+    };
+
+    CustomizerView.prototype.getBlob = function(callback) {
+      var imgData;
+      imgData = this.exportCanvas().toDataURL({
+        format: 'jpeg'
+      });
+      return this.dataURLtoBlob(imgData, function(blob) {
+        callback(blob);
+      });
     };
 
     CustomizerView.prototype.setCliping = function(obj) {
@@ -1633,12 +1024,12 @@
       }
 
       /*unless !Customizer.options.AUTOSAVE
-        setInterval =>
-          @saveForm.call(@)
-        , 5000
+      			setInterval =>
+      				@saveForm.call(@)
+      			, 5000
       
-      jQuery(window).bind 'beforeunload', =>
-        if @formSaved then undefined else Customizer.options.dict.UNSAVED_CHANGES
+      		jQuery(window).bind 'beforeunload', =>
+      			if @formSaved then undefined else Customizer.options.dict.UNSAVED_CHANGES
        */
     };
 
@@ -1655,11 +1046,11 @@
       }
 
       /*if(li.length is 0)
-        @randerLayers()
-      else
-        if(!li.hasClass('active'))
-          @$el.find('#pc-layers ul > li').removeClass('active')
-          li.addClass('active')
+      			@randerLayers()
+      		else
+      			if(!li.hasClass('active'))
+      				@$el.find('#pc-layers ul > li').removeClass('active')
+      				li.addClass('active')
        */
     };
 
@@ -1676,14 +1067,6 @@
       }
       return model.trigger('change');
     };
-
-
-    /*refreshLayer: (obj)-> 
-      @bringToppedElementsToFront();
-      if(obj isnt undefined)
-        obj.setCoords();
-      @canvas.renderAll()
-     */
 
     CustomizerView.prototype.bringToppedElementsToFront = function() {
       var bringToFrontObj, i, object, objects;
@@ -1809,55 +1192,6 @@
       return rf;
     };
 
-
-    /*removeLayer: (obj) ->
-      if typeof obj isnt 'object'
-        obj = @canvas.getItemByMyID(obj);
-    
-      obj.remove()
-      @randerLayers()
-      @canvas.renderAll();
-      @getModel(obj.id).destroy()
-      @handleFormUpdate()
-     */
-
-
-    /*updateLayer: (obj, key, value) ->
-      if typeof obj isnt 'object'
-        obj = @canvas.getItemByMyID(obj);
-    
-      if(typeof key is 'object')
-        jQuery.each(key, (k, v)->
-          obj.set k, v
-          obj.model.set Customizer.options.mappings.LAYER_DATA+"."+k, v
-        )
-      else
-        obj.set key, value
-        obj.model.set Customizer.options.mappings.LAYER_DATA+"."+key, value
-    
-      obj.setCoords();
-      obj.model.trigger 'change'
-      @canvas.renderAll();
-     */
-
-    CustomizerView.prototype.setDraggable = function() {
-
-      /*$draggable = @$el.find(".draggable")
-      $draggable.draggable(
-        handle: ".handle" 
-        containment: '.customizer-main'
-      )
-       */
-    };
-
-
-    /*addTextLayer: (e) ->
-      text = jQuery(e.currentTarget).closest('.fb-text-field-wrapper').find('.pc-text')
-      attrs = {text : text.val()}
-      text = text.val "" 
-      @createField Customizer.helpers.defaultLayersAttrs('text', 'text', attrs)
-     */
-
     CustomizerView.prototype.addImageLayer = function(data) {
       var _addNew, _replace, _this, obj;
       _this = this;
@@ -1867,7 +1201,6 @@
       if (obj[0] !== void 0) {
         obj = obj[0];
       }
-      console.log(obj);
       _replace = function(obj) {
         fabric.util.loadImage(data.full, function(img) {
           obj.setElement(img);
@@ -1921,37 +1254,64 @@
     };
 
     CustomizerView.prototype.background_upload_image = function(files) {
-      var _this, image_data, reader;
+      var $preview, $ul, _this, image_data, is_update, reader, setCanvasImage;
       image_data = "";
       _this = this;
+      $ul = _this.$el.find('.pd-upload-zone');
+      $preview = $ul.find('.image-preview');
+      setCanvasImage = function() {
+        return _this.$uploadCrop.croppie('result', {
+          type: 'base64',
+          size: {
+            width: 1920,
+            height: 1080
+          }
+        }).then(function(image_data) {
+          $preview.css('background-image', "url('" + image_data + "')");
+          return _this.canvas.setBackgroundImage(image_data, _this.canvas.renderAll.bind(_this.canvas), {
+            width: _this.canvas.width,
+            height: _this.canvas.height,
+            originX: 'left',
+            originY: 'top'
+          });
+        });
+      };
+      is_update = false;
       if (files && files[0]) {
         reader = new FileReader();
+        if (_this.$uploadCrop !== void 0) {
+          _this.$uploadCrop.croppie('destroy');
+        }
+        _this.$uploadCrop = $('#upload-image').croppie({
+          showZoomer: false,
+          viewport: {
+            width: 192,
+            height: 108
+          },
+          boundary: {
+            width: "100%",
+            height: 200
+          },
+          update: function(croppe) {
+            return is_update = true;
+          }
+        });
+        setInterval((function(_this) {
+          return function() {
+            if (is_update) {
+              is_update = false;
+              return setCanvasImage();
+            }
+          };
+        })(this), 1000);
         reader.onload = function(e) {
-          var $ul, del, li, session_data, span;
           image_data = e.target.result;
-          $ul = _this.$el.find('.uploaded-image-container ul');
-          session_data = {};
-          session_data.id = 0;
-          session_data.url = image_data;
-          session_data.path = data.path;
-          del = jQuery('<span class="delete-contianer"><span class="mif-bin"></span></span>').on('click', function() {
-            var data, li;
-            li = jQuery(this).closest('li');
-            data = jQuery(li).data('image-data');
-            _this.updateSession(null);
-            _this.customizer.trigger('remove-uploaded-image', _this, li);
-            return li.remove();
+          $('.upload-image').addClass('ready');
+          return _this.$uploadCrop.croppie('bind', {
+            url: e.target.result
+          }).then(function() {
+            return setCanvasImage();
           });
-          span = jQuery("<span class='image-contianer'><img class='thumb' src='" + image_data + "'/></span>").on('click', function() {
-            var data, li;
-            li = jQuery(this).closest('li');
-            data = jQuery(li).data('image-data');
-            return _this.add_uploaded_image(data);
-          });
-          li = jQuery("<li data-type='dataImage'></li>").data('image-data', session_data).append(span).append(del);
-          $ul.prepend(li);
-          _this.customizer.trigger('image-upload', _this, data, li);
-          return _this.updateSession(session_data);
         };
         return reader.readAsDataURL(files[0]);
       }
@@ -2248,10 +1608,10 @@
 
 
     /*@registerText: () ->
-      opts =
-        type : 'text'
-        object : 'text'
-      Customizer.text = opts
+    		opts =
+    			type : 'text'
+    			object : 'text'
+    		Customizer.text = opts
      */
 
     Customizer.registerImage = function() {
@@ -2319,42 +1679,16 @@
 this["Customizer"] = this["Customizer"] || {};
 this["Customizer"]["templates"] = this["Customizer"]["templates"] || {};
 
-this["Customizer"]["templates"]["edit/administration"] = function(obj) {obj || (obj = {});var __t, __p = '', __e = _.escape;with (obj) {__p += '<div class=\'pc-administration-wrapper pull-right\'>\r\n  \t<div class="pc-style-icon admin-settings toggle-div" data-target="#admin-setting-container" ><i class="fa fa-gear"></i></span></div>\r\n</div>\r\n<div id="admin-setting-container" class="tool-tip" style="display:none">\r\n\t<div class="tool-tip-container-inner">\r\n\t\t' +((__t = ( Customizer.templates['edit/settings']({rf : rf}) )) == null ? '' : __t) +'\r\n\t</div>\r\n</div>\r\n';}return __p};
-
-this["Customizer"]["templates"]["edit/base"] = function(obj) {obj || (obj = {});var __t, __p = '', __e = _.escape, __j = Array.prototype.join;function print() { __p += __j.call(arguments, '') }with (obj) {__p +=((__t = ( Customizer.templates['edit/header']() )) == null ? '' : __t) +'\n'; if(Customizer.fields[rf.get(Customizer.options.mappings.OBJECT)] !== undefined){ ;__p += '\n\t' +((__t = ( Customizer.fields[rf.get(Customizer.options.mappings.OBJECT)].edit({rf: rf}) )) == null ? '' : __t) +'\n'; } ;__p += '\n' +((__t = ( Customizer.templates['edit/footer']() )) == null ? '' : __t);}return __p};
-
-this["Customizer"]["templates"]["edit/color-picker"] = function(obj) {obj || (obj = {});var __t, __p = '', __e = _.escape, __j = Array.prototype.join;function print() { __p += __j.call(arguments, '') }with (obj) {__p += '<div class=\'pc-color-wrapper\'>\r\n\t'; if(rf.get(Customizer.options.mappings.LAYER_DATA+'.type') == 'text'){		color = rf.get(Customizer.options.mappings.LAYER_DATA+'.fill')	}else{		if(rf.get(Customizer.options.mappings.LAYER_DATA+'.filters') !== undefined && rf.get(Customizer.options.mappings.LAYER_DATA+'.filters').length > 0){			color = rf.get(Customizer.options.mappings.LAYER_DATA+'.filters')[0].color		}else{			color = ""		}	};__p += '\r\n  \t<div class="colorselector"><div class="background-color" style="background-color:' +((__t = ( color )) == null ? '' : __t) +'"></div></div>\r\n</div>';}return __p};
-
-this["Customizer"]["templates"]["edit/footer"] = function(obj) {obj || (obj = {});var __t, __p = '', __e = _.escape;with (obj) {__p += '';}return __p};
-
-this["Customizer"]["templates"]["edit/header"] = function(obj) {obj || (obj = {});var __t, __p = '', __e = _.escape;with (obj) {__p += '';}return __p};
-
-this["Customizer"]["templates"]["edit/settings"] = function(obj) {obj || (obj = {});var __t, __p = '', __e = _.escape;with (obj) {__p += '<div class=\'pc-settings-wrapper\'>\r\n\r\n\t<ul class=\'fb-tabs\'>\r\n\t    <li class=\'active\'><a data-target=\'#element-bounding-panel\'>Bounding Box</a></li>\r\n\t    <li><a data-target=\'#modifications-panel\'>Modifications</a></li>\r\n\t    <li><a data-target=\'#other-settings-panel\'>Other</a></li>\r\n  \t</ul>\r\n\r\n  \t<div class=\'fb-tab-content\'>\r\n\t    <div id="element-bounding-panel" class="fb-tab-pane active">\r\n\r\n\t\t\t<div class="pc-input-container input-checkbox">\r\n\t\t\t\t<label class="input-label" for="enable_bounding">Enable bounding box</label>\r\n\t\t\t\t<div class="input-fields checkbox"> \r\n\t\t\t\t\t<input type="checkbox" class="toggle-div" data-target="#pc-define-bounding" id="enable_bounding" name="enable_bounding" ' +((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".boundingEnable") == true ? 'checked' : '' )) == null ? '' : __t) +'>\r\n\t\t\t\t</div>\r\n\t\t\t</div>\r\n\t\t\t<div id="pc-define-bounding" class="pc-define-bounding"  ' +((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".boundingEnable") == true ? '' : 'style="display:none"' )) == null ? '' : __t) +'>\r\n\r\n\t\t\t\t<div class="pc-input-container input-checkbox">\r\n\t\t\t\t\t<label class="input-label" for="another_element_bounding">Use another element as bounding box</label>\r\n\t\t\t\t\t<div class="input-fields checkbox"> \r\n\t\t\t\t\t\t<input type="checkbox" class="toggle-div" data-target=".pc-define-bounding-name, .pc-define-bounding-coords" id="another_element_bounding" name="another_element_bounding" ' +((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".elementBoundingEnable") == true ? 'checked' : '' )) == null ? '' : __t) +'>\r\n\t\t\t\t\t</div>\r\n\t\t\t\t</div>\r\n\r\n\t\t\t\t\r\n\t\t\t\t<div class="pc-define-bounding-name" ' +((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".elementBoundingEnable") == true ? '' : 'style="display:none"' )) == null ? '' : __t) +'>\r\n\r\n\t\t\t\t\t<div class="pc-input-container pc-full-width">\r\n\t\t\t\t\t\t<label class="input-label">Define Bounding Box</label>\r\n\t\t\t\t\t\t<div class="input-fields text"> \r\n\t\t\t\t\t\t\t<input class="input_another_element_bounding_name" type="text" name="another_element_bounding_name" value="' +((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".boundingElementName") )) == null ? '' : __t) +'">\r\n\t\t\t\t\t\t</div>\r\n\t\t\t\t\t\t<div class="description">Name when you have entered while adding<!-- or id of the layer (I.e. "c1", "c2", "c3", ...) -->.</div>\r\n\t\t\t\t\t</div>\r\n\t\t\t\t</div>\r\n\t\t\t\t<div class="pc-define-bounding-coords" ' +((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".elementBoundingEnable") == true ? 'style="display:none"' : '' )) == null ? '' : __t) +'>\r\n\t\t\t\t\t<div class="pc-input-container pc-full-width">\r\n\t\t\t\t\t\t<label class="input-label">Define Bounding Box Coords</label>\r\n\t\t\t\t\t\t<div class="input-fields text"> \r\n\t\t\t\t\t\t\t<div class="pc-input-container pc-half-width">\r\n\t\t\t\t\t\t\t\t<label class="input-label">Left</label>\r\n\t\t\t\t\t\t\t\t<input class="bounding_coords" data-coord="Left"  type="text" name="bounding_coords_x" value="' +((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".boundingCoordsLeft") )) == null ? '' : __t) +'">\r\n\t\t\t\t\t\t\t</div>\r\n\t\t\t\t\t\t\t<div class="pc-input-container pc-half-width">\r\n\t\t\t\t\t\t\t\t<label class="input-label">Top</label>\r\n\t\t\t\t\t\t\t\t<input class="bounding_coords" data-coord="Top" type="text" name="bounding_coords_y" value="' +((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".boundingCoordsTop") )) == null ? '' : __t) +'">\r\n\t\t\t\t\t\t\t</div>\r\n\t\t\t\t\t\t</div>\r\n\r\n\t\t\t\t\t\t<div class="input-fields text"> \r\n\t\t\t\t\t\t\t<div class="pc-input-container pc-half-width">\r\n\t\t\t\t\t\t\t\t<label class="input-label">Width</label>\r\n\t\t\t\t\t\t\t\t<input class="bounding_coords" data-coord="Width" type="text" name="bounding_coords_width" value="' +((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".boundingCoordsWidth") )) == null ? '' : __t) +'">\r\n\t\t\t\t\t\t\t</div>\r\n\t\t\t\t\t\t\t<div class="pc-input-container pc-half-width">\r\n\t\t\t\t\t\t\t\t<label class="input-label">Height</label>\r\n\t\t\t\t\t\t\t\t<input class="bounding_coords" data-coord="Height" type="text" name="bounding_coords_height" value="' +((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".boundingCoordsHeight") )) == null ? '' : __t) +'">\r\n\t\t\t\t\t\t\t</div>\r\n\t\t\t\t\t\t</div>\r\n\t\t\t\t\t\t\r\n\t\t\t\t\t</div>\r\n\t\t\t\t</div>\r\n\r\n\r\n\t\t\t\t<div class="pc-input-container pc-full-width">\r\n\t\t\t\t\t<label class="input-label">Mode</label> \r\n\t\t\t\t\t<div class="input-fields select">\r\n\t\t\t\t\t\t<select class="input_bounding_box_mode" name="bounding_box_mode">\r\n\t\t\t\t\t\t\t<option value="inside" ' +((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".boundingMode") == 'inside' ? 'selected' : '' )) == null ? '' : __t) +'>Inside</option>\r\n\t\t\t\t\t\t\t<option value="clipping" ' +((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".boundingMode") == 'clipping' ? 'selected' : '' )) == null ? '' : __t) +'>Clipping</option>\r\n\t\t\t\t\t\t</select>\r\n\t\t\t\t\t</div>\r\n\t\t\t\t</div>\r\n\t\t\t</div>\r\n\t\t</div>\r\n\r\n\r\n\t\t<div id="modifications-panel" class="fb-tab-pane">\r\n\t\t\t<div class="checkbox-group">\r\n\t\t\t\t<div class="pc-input-container  pc-half-width">\r\n\t\t\t\t\t<label class="input-label"><input class="checkbox-draggable" ' +((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".isDraggable") == true ? 'checked' : '' )) == null ? '' : __t) +' type="checkbox"> Draggable</label>\r\n\t\t\t\t</div>\r\n\t\t\t\t<div class="pc-input-container  pc-half-width">\r\n\t\t\t\t\t<label class="input-label"><input class="checkbox-rotatable" ' +((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".lockRotation") == false ? 'checked' : '' )) == null ? '' : __t) +' type="checkbox"> Rotatable</label>\r\n\r\n\t\t\t\t</div>\r\n\t\t\t\t<div class="pc-input-container  pc-half-width">\r\n\t\t\t\t\t<label class="input-label"><input class="checkbox-resizable" ' +((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".isResizable") == true ? 'checked' : '' )) == null ? '' : __t) +' type="checkbox"> Resizable</label>\r\n\t\t\t\t</div>\r\n\r\n\t\t\t\t<div class="pc-input-container pc-half-width">\r\n\t\t\t\t\t<label class="input-label"><input class="checkbox-hide-layer" ' +((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".hideLayer") == true ? 'checked' : '' )) == null ? '' : __t) +' type="checkbox"> Hide Layer</label>\r\n\t\t\t\t</div>\r\n\r\n\t\t\t\t<div class="pc-input-container  pc-half-width">\r\n\t\t\t\t\t<label class="input-label"><input class="checkbox-removable" ' +((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".removable") == true ? 'checked' : '' )) == null ? '' : __t) +' type="checkbox"> Removable</label>\r\n\t\t\t\t</div>\r\n\r\n\t\t\t\t<div class="pc-input-container  pc-half-width">\r\n\t\t\t\t\t<label class="input-label"><input class="checkbox-unlockable" ' +((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".unlockable") == true ? 'checked' : '' )) == null ? '' : __t) +' type="checkbox"> Unlockable</label>\r\n\t\t\t\t</div>\r\n\t\t\t\t<div class="pc-input-container  pc-half-width">\r\n\t\t\t\t\t<label class="input-label"> <input class="checkbox-stay-on-top" ' +((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".stayOnTop") == true ? 'checked' : '' )) == null ? '' : __t) +' type="checkbox"> Stay On Top</label>\r\n\t\t\t\t</div> \r\n\t\t\t</div>\r\n\t\t</div>\r\n\r\n\r\n\t\t<div id="other-settings-panel" class="fb-tab-pane">\r\n\t\t\t<div class="pc-input-container pc-full-width">\r\n\t\t\t\t<label class="input-label">Layer Name</label>\r\n\t\t\t\t<div class="input-fields text"> \r\n\t\t\t\t\t<input class="pc_layer_name" type="text" value="' +((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".title") )) == null ? '' : __t) +'">\r\n\t\t\t\t</div>\r\n\t\t\t</div>\r\n\r\n\t\t\t<div class="pc-input-container pc-full-width">\r\n\t\t\t\t<label class="input-label">Allowed Colors</label>\r\n\t\t\t\t<div class="input-fields text"> \r\n\t\t\t\t\t<input class="pc_allowed_colors" type="text" value="' +((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".allowedColors") )) == null ? '' : __t) +'">\r\n\t\t\t\t</div>\r\n\t\t\t\t<div class="description">Add hexadecimal code of the color. For add multiple colors used comma(,).</div>\r\n\t\t\t</div>\r\n\t\t\t<div class="pc-input-container pc-full-width">\r\n\t\t\t\t<label class="input-label">Default color</label>\r\n\t\t\t\t<div class="input-fields text"> \r\n\t\t\t\t\t<input class="pc_default_color" type="text" value="' +((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".defaultColor") )) == null ? '' : __t) +'">\r\n\t\t\t\t</div>\r\n\t\t\t\t<div class="description">Add hexadecimal code of the color. I.e. "#000000, #FFF"</div>\r\n\t\t\t</div>\r\n\t\t</div>\r\n  \t</div>\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\t\r\n\r\n\t\r\n\r\n\r\n\r\n  \t<!-- <div class="pc-style-icon bring-forward"></div> -->\r\n  \t \r\n</div>';}return __p};
-
-this["Customizer"]["templates"]["edit/text-alignment"] = function(obj) {obj || (obj = {});var __t, __p = '', __e = _.escape;with (obj) {__p += '<div class=\'pc-alignment-wrapper left-border\'>\r\n  \t<div class="pc-style-icon align-top"><span class="mif-vertical-align-top"></span></div>\r\n  \t<div class="pc-style-icon align-right"><span class="mif-vertical-align-top rotate90"></span></div>\r\n  \t<div class="pc-style-icon align-bottom"><span class="mif-vertical-align-bottom"></span></div>\r\n  \t<div class="pc-style-icon align-left"><span class="mif-vertical-align-bottom rotate90"></span></div>\r\n\r\n  \t<div class="pc-style-icon vertical-align-center"><span class="mif-vertical-align-center"></span></div>\r\n  \t<div class="pc-style-icon hoizontal-align-center"><span class="mif-vertical-align-center rotate90"></span></div>\r\n</div>';}return __p};
-
-this["Customizer"]["templates"]["edit/text-style"] = function(obj) {obj || (obj = {});var __t, __p = '', __e = _.escape, __j = Array.prototype.join;function print() { __p += __j.call(arguments, '') }with (obj) {__p += '<div class=\'pc-style-wrapper left-border\'>\r\n\t'; if(rf.get(Customizer.options.mappings.LAYER_DATA+".type") == 'text'){ ;__p += '\r\n  \t<div class="pc-style-icon font-familty toggle-div" data-target="#font-family"><i class="fa fa-font" aria-hidden="true"></i></div>\r\n  \t<div class="pc-style-icon text-bold"><span class="mif-bold"></span></div>\r\n  \t<div class="pc-style-icon text-italic"><span class="mif-italic"></span></div>\r\n  \t<div class="pc-style-icon text-underline"><span class="mif-underline"></span></div>\r\n  \t'; } ;__p += '\r\n  \t<div class="pc-style-icon rotate-left"><i class="fa fa-rotate-left"></i></div>\r\n  \t<div class="pc-style-icon rotate-right"><i class="fa fa-rotate-right"></i></div>  \r\n</div>\r\n\r\n'; fonts = []jQuery.each(Customizer.fonts, function(index,font){	if(rf.get(Customizer.options.mappings.LAYER_DATA+".fontFamily") == font.name){ 		selected = "selected='selected'";	}else{		selected = "";	}	fonts.push("<option value='"+font.name+"' "+selected+" style='font-family:\""+font.name+"\"'>"+font.displayName+"</option>");}); ;__p += '\r\n<div id="font-family" class="tool-tip" style="display: none;">\r\n\t<div class="tool-tip-container-inner">\r\n\t\t<div class="tool-tip-title">Font</div>\r\n\t\t<div class="tool-tip-wraper">\r\n\t\t\t<div class="font-familty-wraper">\r\n\t\t\t\t<div class="pc-input-container pc-full-width">\r\n\t\t\t\t\t<label class="input-label">Select Font Familty</label>\r\n\t\t\t\t\t<div class="input-fields select">\r\n\t\t\t\t\t\t<select class="text-font-family">\r\n\t\t\t\t\t\t\t' +((__t = ( fonts.join("") )) == null ? '' : __t) +'\r\n\t\t\t\t\t\t</select>\r\n\t\t\t\t\t</div>\r\n\t\t\t\t\t\r\n\t\t\t\t</div>\r\n\r\n\t\t\t\t<div class="pc-input-container pc-full-width">\r\n\t\t\t\t\t<label class="input-label">Font Size</label>\r\n\t\t\t\t\t<div class="input-fields select">\r\n\t\t\t\t\t\t<input type="number" class="text-font-size" value="' +((__t = ( rf.get(Customizer.options.mappings.LAYER_DATA+".fontSize") )) == null ? '' : __t) +'" class="text-font-family">\r\n\t\t\t\t\t</div>\r\n\t\t\t\t</div>\r\n\t\t\t</div>\r\n\t\t</div>\r\n\t</div>\r\n</div>';}return __p};
-
-this["Customizer"]["templates"]["page"] = function(obj) {obj || (obj = {});var __t, __p = '', __e = _.escape, __j = Array.prototype.join;function print() { __p += __j.call(arguments, '') }with (obj) {__p += '\n<div class=\'fb-left\'>\n\t<div class=\'pc-assets\'>\n\t  <ul class=\'fb-tabs\'>\n\t  \t'; if(Customizer.options.settings.allowUploadImage){ ;__p += '\n\t    <li class=\'active\'><a data-target=\'#pc-upload-image-panel\'><span class="fa fa fa-upload"></span> Background </a></li>\n\t    '; } ;__p += '\n\t    <li><a data-target=\'#pc-backgrounds-panel\'><i class="fa fa-picture-o"></i>  Images</a></li>\n\t    '; if(Customizer.options.settings.allowAddText){ ;__p += '\n\t    <!-- <li><a data-target=\'#pc-text-panel\'><i class="fa fa-file-text"></i> Text</a></li>\n\t    '; } ;__p += ' -->\n\t    \n\t  </ul>\n\n\t  <div class=\'fb-tab-content\'>\n\t  \t'; if(Customizer.options.settings.allowUploadImage){ ;__p += '\n\t    \t' +((__t = ( Customizer.templates['partials/panels/upload-image']() )) == null ? '' : __t) +'\n\t    '; } ;__p += '\n\n\t    ' +((__t = ( Customizer.templates['partials/panels/images']() )) == null ? '' : __t) +'\n\t\t\n\t\t<!-- '; if(Customizer.options.settings.allowAddText){ ;__p += '\n\t    \t' +((__t = ( Customizer.templates['partials/panels/text']() )) == null ? '' : __t) +'\n\t    '; } ;__p += ' -->\n\t    \n\t  </div>\n\t</div>\n</div>\n<div class=\'fb-right\'>\n\t' +((__t = ( Customizer.templates['partials/canvas']() )) == null ? '' : __t) +'\n\n\t' +((__t = ( Customizer.templates['partials/edit']() )) == null ? '' : __t) +'\n</div>\n<!-- ' +((__t = ( Customizer.templates['partials/layers']() )) == null ? '' : __t) +' -->\n<div class=\'fb-clear\'></div>\n\n<div class=\'fb-save-wrapper\'>\n  <button class=\'js-save-data ' +((__t = ( Customizer.options.BUTTON_CLASS )) == null ? '' : __t) +'\'></button>\n</div>\n<div class="pc-loader-container">\n\t<div class="pc-loading-inner">\n\t\t<div class="pc-loading-icon"><!-- <span class="mif-spinner2 mif-ani-spin"></span> --><span class="mif-spinner3 mif-ani-spin"></span></div>\n\t\t<div class="pc-loading-text">Loading...</div>\n\t</div>\n</div>';}return __p};
+this["Customizer"]["templates"]["page"] = function(obj) {obj || (obj = {});var __t, __p = '', __e = _.escape;with (obj) {__p += '\n<div class=\'fb-left\'>\n\t<div class=\'pc-assets\'>\n\t  <ul class=\'fb-tabs\'>\n\t    <li class=\'active\'><a data-target=\'#pc-upload-image-panel\'><span class="fa fa fa-upload"></span> Background </a></li>\n\t\n\t    <li><a data-target=\'#pc-backgrounds-panel\'><i class="fa fa-picture-o"></i>  Images</a></li>\n\n\t    \n\t  </ul>\n\n\t  <div class=\'fb-tab-content\'>\n\t   \n\t    ' +((__t = ( Customizer.templates['partials/panels/images']() )) == null ? '' : __t) +'\n\n\t    \n\t  </div>\n\t</div>\n</div>\n<div class=\'fb-right\'>\n\t' +((__t = ( Customizer.templates['partials/canvas']() )) == null ? '' : __t) +'\n</div>\n\n<div class=\'fb-clear\'></div>\n\n<div class=\'fb-save-wrapper\'>\n  <button class=\'js-save-data ' +((__t = ( Customizer.options.BUTTON_CLASS )) == null ? '' : __t) +'\'></button>\n</div>\n<div class="pc-loader-container">\n\t<div class="pc-loading-inner">\n\t\t<div class="pc-loading-icon"><!-- <span class="mif-spinner2 mif-ani-spin"></span> --><span class="mif-spinner3 mif-ani-spin"></span></div>\n\t\t<div class="pc-loading-text">Loading...</div>\n\t</div>\n</div>';}return __p};
 
 this["Customizer"]["templates"]["partials/add_field"] = function(obj) {obj || (obj = {});var __t, __p = '', __e = _.escape, __j = Array.prototype.join;function print() { __p += __j.call(arguments, '') }with (obj) {__p += '<div class=\'fb-tab-pane active\' id=\'addField\'>\n  <div class=\'fb-add-field-types\'>\n    <div class=\'section\'>\n      '; _.each(_.sortBy(Customizer.inputFields, 'order'), function(f){ ;__p += '\n        <a data-field-type="' +((__t = ( f.field_type )) == null ? '' : __t) +'" class="' +((__t = ( Customizer.options.BUTTON_CLASS )) == null ? '' : __t) +'">\n          ' +((__t = ( f.addButton )) == null ? '' : __t) +'\n        </a>\n      '; }); ;__p += '\n    </div>\n\n    <div class=\'section\'>\n      '; _.each(_.sortBy(Customizer.nonInputFields, 'order'), function(f){ ;__p += '\n        <a data-field-type="' +((__t = ( f.field_type )) == null ? '' : __t) +'" class="' +((__t = ( Customizer.options.BUTTON_CLASS )) == null ? '' : __t) +'">\n          ' +((__t = ( f.addButton )) == null ? '' : __t) +'\n        </a>\n      '; }); ;__p += '\n    </div>\n  </div>\n</div>\n';}return __p};
 
-this["Customizer"]["templates"]["partials/canvas"] = function(obj) {obj || (obj = {});var __t, __p = '', __e = _.escape;with (obj) {__p += '<div class="pc-canvas-waraper">\n<div class="pc-title canvas-actions">\n\t<div class="pc-icon-inline download" data-title="Download PDF file"><span class="fa fa-file-o"></span></div>\n\t<div class="pc-icon-inline preview" data-title="Preview"><span class="fa fa-eye"></span></div>\n\t<div class="pc-icon-inline-seprater"></div>\n\t<div class="pc-icon-inline zoom-in" data-title="Zoom-in"><span class="fa fa-search-plus "></span></div>\n\t<div class="pc-icon-inline zoom-out" data-title="Zoom-out"><span class="fa fa-search-minus"></span></div>\n\t<div class="pc-icon-inline zoom-reset" data-title="Reset zoom"><span class="fa fa-search"></span></div>\n\t<div class="pc-icon-inline-seprater" ></div>\n\t<div class="pc-icon-inline fullscreen pull-right" data-title="Fullscreen"><span class="fa fa-arrows-alt"></span></div>\n</div>\n<div class=\'pc-canvas\'></div>\n</div>\n';}return __p};
+this["Customizer"]["templates"]["partials/canvas"] = function(obj) {obj || (obj = {});var __t, __p = '', __e = _.escape;with (obj) {__p += '<style>\n.custom-share-button {\n  font-family: "Roboto", Helvetica, Arial, sans-serif;\n  color: #fff;\n  background-color: #55acee;\n  padding: .8em 1.2em;\n  border-radius: 3px;\n  display: inline-block;\n}\n.custom-share-button-icon,\n.custom-share-button-label {\n  display: inline-block;\n  vertical-align: middle;\n}\n.custom-share-button-icon {\n  width: 1em;\n  height: 1em;\n  margin-right: .2em;\n}\n.custom-share-button-icon path { fill: #fff; }\n.custom-share-button-label {\n  font-size: .9em;\n  font-weight: 500;\n}\n.custom-share-button:hover { background-color: #70b7ec; }\n</style>\n\n<div class="pc-canvas-waraper">\n<div class="pc-title canvas-actions">\n\t<div class="pc-icon-inline download" data-title="Download PDF file"><span class="fa fa-file-o"></span></div>\n\t<div class="pc-icon-inline preview" data-title="Preview"><span class="fa fa-eye"></span></div>\n\t<div class="pc-icon-inline-seprater"></div>\n\t<div class="pc-icon-inline zoom-in" data-title="Zoom-in"><span class="fa fa-search-plus "></span></div>\n\t<div class="pc-icon-inline zoom-out" data-title="Zoom-out"><span class="fa fa-search-minus"></span></div>\n\t<div class="pc-icon-inline zoom-reset" data-title="Reset zoom"><span class="fa fa-search"></span></div>\n\t<div class="pc-icon-inline-seprater" ></div>\n\t\n\t<div class="pc-icon-inline social_share_popop"> <span class="fa fa-share"></span> </div>\n\n\n\n\t<div class="pc-icon-inline-seprater" ></div>\n\t<div class="pc-icon-inline fullscreen pull-right" data-title="Fullscreen"><span class="fa fa-arrows-alt"></span></div>\n</div>\n<div class=\'pc-canvas\'></div>\n</div>';}return __p};
 
-this["Customizer"]["templates"]["partials/edit"] = function(obj) {obj || (obj = {});var __t, __p = '', __e = _.escape;with (obj) {__p += '<div id="pc-edit-layer" class=\'draggable pc-edit-layer\'></div>\n';}return __p};
+this["Customizer"]["templates"]["partials/panels/images"] = function(obj) {obj || (obj = {});var __t, __p = '', __e = _.escape, __j = Array.prototype.join;function print() { __p += __j.call(arguments, '') }with (obj) {__p += '<div class=\'fb-tab-pane active\' id=\'pc-upload-image-panel\'>\n  <div class=\'fb-upload-image-field-wrapper\'>\n  \t<div class="input-field-container">\n\t  \t<label>Background Image</label>\n\t  \t<div class="pd-upload-zone">\n\t  \t\t<div class="inner-upload-zone">\n\t\t         <span class="fa fa fa-upload"></span>\n\t\t\t\t <span >Click or drop images here</span>\n\t        </div>\n\t        <div class="image-preview"></div>\n\t  \t\t<input type="file" class="pc-upload-image">\n\t  \t</div>\n\n\t  \t<div id="upload-image"></div>\n\t</div>\n  </div>\n</div>\n\n<div class=\'fb-tab-pane \' id=\'pc-backgrounds-panel\'>\n  <div class=\'fb-add-field-types\'>\n    <div class=\'section\'>\n      \t'; _.each(Customizer.images, function(category){ ;__p += '\n      \t\t'; _.each(_.sortBy(category, 'order'), function(f){ ;__p += '\n        \t\t<a data-field-id="' +((__t = ( f.id )) == null ? '' : __t) +'" data-field-type="' +((__t = ( f.type )) == null ? '' : __t) +'" class="' +((__t = ( f.type )) == null ? '' : __t) +'-image assets">\n\t\t\t\t\t'; if(f.addButton === undefined || f.addButton === null || f.addButton === ""){ ;__p += '\n\t\t\t            '; if(f.thumb === undefined || f.thumb === null || f.thumb === ""){ ;__p += '\n\t\t\t              \t<img src="' +((__t = ( f.full )) == null ? '' : __t) +'">\n\t\t\t            '; }else{ ;__p += '\n\t\t\t              \t<img src="' +((__t = ( f.thumb )) == null ? '' : __t) +'">\n\t\t\t            '; } ;__p += '\n\t\t\t        '; }else{ ;__p += '\n\t\t\t            ' +((__t = ( f.addButton )) == null ? '' : __t) +'\n\t\t\t        '; } ;__p += '\n\t\t\t    </a>\n\n        \t'; }); ;__p += '\n      \t'; }); ;__p += '\n    </div>\n  </div>\n</div>\n';}return __p};
 
-this["Customizer"]["templates"]["partials/layers"] = function(obj) {obj || (obj = {});var __t, __p = '', __e = _.escape;with (obj) {__p += '<div id="pc-layers" class=\'draggable pc-layersbar\'>\n\t\n</div>\n';}return __p};
-
-this["Customizer"]["templates"]["partials/panels/images"] = function(obj) {obj || (obj = {});var __t, __p = '', __e = _.escape, __j = Array.prototype.join;function print() { __p += __j.call(arguments, '') }with (obj) {__p += '<div class=\'fb-tab-pane \' id=\'pc-backgrounds-panel\'>\n  <div class=\'fb-add-field-types\'>\n    <div class=\'section\'>\n      \t'; _.each(Customizer.images, function(category){ ;__p += '\n      \t\t'; _.each(_.sortBy(category, 'order'), function(f){ ;__p += '\n        \t\t<a data-field-id="' +((__t = ( f.id )) == null ? '' : __t) +'" data-field-type="' +((__t = ( f.type )) == null ? '' : __t) +'" class="' +((__t = ( f.type )) == null ? '' : __t) +'-image assets">\n\t\t\t\t\t'; if(f.addButton === undefined || f.addButton === null || f.addButton === ""){ ;__p += '\n\t\t\t            '; if(f.thumb === undefined || f.thumb === null || f.thumb === ""){ ;__p += '\n\t\t\t              \t<img src="' +((__t = ( f.full )) == null ? '' : __t) +'">\n\t\t\t            '; }else{ ;__p += '\n\t\t\t              \t<img src="' +((__t = ( f.thumb )) == null ? '' : __t) +'">\n\t\t\t            '; } ;__p += '\n\t\t\t        '; }else{ ;__p += '\n\t\t\t            ' +((__t = ( f.addButton )) == null ? '' : __t) +'\n\t\t\t        '; } ;__p += '\n\t\t\t    </a>\n\n        \t'; }); ;__p += '\n      \t'; }); ;__p += '\n    </div>\n  </div>\n</div>\n';}return __p};
-
-this["Customizer"]["templates"]["partials/panels/text"] = function(obj) {obj || (obj = {});var __t, __p = '', __e = _.escape;with (obj) {__p += '<div class=\'fb-tab-pane\' id=\'pc-text-panel\'>\n  <div class=\'fb-text-field-wrapper\'>\n  \t<div class="input-field-container">\n\t  \t<label>Text</label>\n\t  \t<textarea class="pc-text" placeholder="Please enter text"></textarea>\n\t</div>\n\t<div class="input-field-container">\n\t\t<input type="button" class="add-text fb-button pull-right" value="Add">\n\t</div>\n  </div>\n</div>';}return __p};
-
-this["Customizer"]["templates"]["partials/panels/upload-image"] = function(obj) {obj || (obj = {});var __t, __p = '', __e = _.escape;with (obj) {__p += '<div class=\'fb-tab-pane active\' id=\'pc-upload-image-panel\'>\n  <div class=\'fb-upload-image-field-wrapper\'>\n  \t<div class="input-field-container">\n\t  \t<label>Background Image</label>\n\t  \t<div class="pd-upload-zone">\n\t  \t\t<div class="inner-upload-zone">\n\t\t         <span class="fa fa fa-upload"></span>\n\t\t\t\t <span data-defaulttext="Click or drop images here">Click or drop images here</span>\n\t        </div>\n\t  \t\t<input type="file" class="pc-upload-image">\n\t  \t</div>\n\t</div>\n\t<div class="uploaded-image-container">\n\t\t<ul></ul>\n\t</div>\n  </div>\n</div>';}return __p};
-
-this["Customizer"]["templates"]["partials/text-fonts-css"] = function(obj) {obj || (obj = {});var __t, __p = '', __e = _.escape, __j = Array.prototype.join;function print() { __p += __j.call(arguments, '') }with (obj) {__p += '<style type="text/css">\r\n    ';     jQuery.each(Customizer.fonts, function(index,font){        var font_str = [];        jQuery.each(font.src, function(type, path){            switch(type){                case 'eot':                 format = "format('embedded-opentype')";                 url = "#iefix";                 break;                case 'woff':                 format = "format('woff')";                 url = "";                 break;                case 'ttf':                 format = "format('truetype')";                 url = "";                 break;                case 'svg':                 format = "format('svg')";                 url = "#"+font.name;                 break;            }            font_str.push("url('"+path+"') "+format);        });         ;__p += '\r\n        @font-face{\r\n            font-family:\'' +((__t = ( font.name )) == null ? '' : __t) +'\';    \r\n            ' +((__t = ( (font_str.length > 0) ? 'src:'+font_str.join(', ')+";" : "" )) == null ? '' : __t) +'\r\n            font-weight:normal;\r\n            font-style:normal;\r\n        }\r\n    '; }); ;__p += '\r\n</style>\r\n</style>';}return __p};
-
-this["Customizer"]["templates"]["view/edit"] = function(obj) {obj || (obj = {});var __t, __p = '', __e = _.escape;with (obj) {__p += '';}return __p};
+this["Customizer"]["templates"]["partials/text-fonts-css"] = function(obj) {obj || (obj = {});var __t, __p = '', __e = _.escape, __j = Array.prototype.join;function print() { __p += __j.call(arguments, '') }with (obj) {__p += '<style type="text/css">\n    ';     jQuery.each(Customizer.fonts, function(index,font){        var font_str = [];        jQuery.each(font.src, function(type, path){            switch(type){                case 'eot':                 format = "format('embedded-opentype')";                 url = "#iefix";                 break;                case 'woff':                 format = "format('woff')";                 url = "";                 break;                case 'ttf':                 format = "format('truetype')";                 url = "";                 break;                case 'svg':                 format = "format('svg')";                 url = "#"+font.name;                 break;            }            font_str.push("url('"+path+"') "+format);        });         ;__p += '\n        @font-face{\n            font-family:\'' +((__t = ( font.name )) == null ? '' : __t) +'\';    \n            ' +((__t = ( (font_str.length > 0) ? 'src:'+font_str.join(', ')+";" : "" )) == null ? '' : __t) +'\n            font-weight:normal;\n            font-style:normal;\n        }\n    '; }); ;__p += '\n</style>\n</style>';}return __p};
 
 this["Customizer"]["templates"]["view/layers"] = function(obj) {obj || (obj = {});var __t, __p = '', __e = _.escape, __j = Array.prototype.join;function print() { __p += __j.call(arguments, '') }with (obj) {__p += '<div class="pc-container">\n\t<div class=\'pc-title handle\'><span class="mif-stack"></span> Layers</div>\n  \t<div class=\'pc-body\'>\n  \t\t<ul class="pc-layers-contianer">\n  \t\t\t'; if(layers.length > 0){	  			_.each(_.sortBy(layers, 'order').reverse(), function(_layer){	  				;__p += '\n\t  \t\t\t'; layer = _layer.toJSON(Customizer.options.jsonArgs) ;__p += '\n\t\t\t\t'; active = _layer.canvas.getActiveObject() ;__p += '\n\t\t  \t\t<li \n\t\t  \t\t\tstyle="' +((__t = ( (Customizer.options.settings.administration == false && _layer.hideLayer) || (_layer.displayInLayerBar !== undefined && _layer.displayInLayerBar == false) ? 'display:none' : "" )) == null ? '' : __t) +'" \n\t\t  \t\t\tclass="layers ' +((__t = ( (active !== undefined && active !== null && active.id == _layer.id) ? 'active' : '' )) == null ? '' : __t) +' ' +((__t = ( (Customizer.options.settings.administration == false && (_layer.hideLayer == true || _layer.unlockable == false || _layer.removable == false)) ? 'unsortable' : '' )) == null ? '' : __t) +'" \n\t\t  \t\t\tdata-id="' +((__t = ( _layer.id )) == null ? '' : __t) +'">\n\t\t\t\t    <span class="pc-image-contianer">\n\t\t\t\t    \t'; if(layer.type == 'text'){ ;__p += '\n\t\t\t\t    \t\t<i class="fa fa-text-width"></i>\n\t\t\t\t    \t'; }else{ ;__p += '\n\t\t\t\t    \t\t<img width=50  src="' +((__t = ( layer.src )) == null ? '' : __t) +'">\n\t\t\t\t    \t'; } ;__p += '\n\t\t\t\t    </span>\n\t\t\t\t    <span class="pc-layer-title">\n\t\t\t\t    \t'; if(_layer.title !== undefined && _layer.title !== null ){ ;__p += '\n\t\t\t\t    \t\t' +((__t = ( _layer.id )) == null ? '' : __t) +' - ' +((__t = ( _layer.title )) == null ? '' : __t) +'\n\t\t\t\t    \t'; }else{ ;__p += '\n\t\t\t\t\t    \t'; if(layer.type == 'text'){ ;__p += '\n\t\t\t\t\t    \t\t' +((__t = ( _layer.id )) == null ? '' : __t) +' - ' +((__t = ( layer.text.substring(0,15) )) == null ? '' : __t) +'\n\t\t\t\t\t    \t'; }else{ ;__p += '\n\t\t\t\t\t\t\t\t' +((__t = ( _layer.id )) == null ? '' : __t) +' - ' +((__t = ( layer.type )) == null ? '' : __t) +'\n\t\t\t\t\t    \t'; } ;__p += '\n\t\t\t\t\t\t'; };__p += '\n\t\t\t\t    </span>\n\t\t\t\t\t<span class="pc-layers-action">\n\t\t\t\t\t\t'; if(Customizer.options.settings.administration == true || layer.removable == true){;__p += '\n\t\t\t  \t\t\t\t<a href="javascript:" class="pc-layers-delete"><i class="fa fa-trash-o fa-1"> </i></a>\n\t\t\t  \t\t\t'; } ;__p += '\n\t\t\t  \t\t\t'; if(Customizer.options.settings.administration == true || layer.unlockable == true){;__p += '\n\t\t\t\t\t\t\t<a href="javascript:" class="pc-layers-lock-unlock"><i class="fa ' +((__t = ( _layer.locked == true ? 'fa-lock' : 'fa-unlock-alt' )) == null ? '' : __t) +'"></i></a>\n\t\t\t\t\t\t'; } ;__p += '\n\t\t  \t\t\t</span>\n\t\t  \t\t</li>\n\t\t  \t\t'; }); ;__p += '\n\n\t\t  \t'; }else{ ;__p += '\n\t\t\t\t<li class="layers no-found">No layer found.</li>\n\t\t  \t'; } ;__p += '\n\t  \t</ul>\n  \t</div>\n</div>';}return __p};
 
-this["Customizer"]["templates"]["view/popup"] = function(obj) {obj || (obj = {});var __t, __p = '', __e = _.escape, __j = Array.prototype.join;function print() { __p += __j.call(arguments, '') }with (obj) {__p += '<div class="pc-modal">\n\t<div class="model-inner">\n\t\t<div class="modal-heder pc-title">\n\t\t\t'; if(modal.title){ ;__p += '\n\t\t\t<div class="pc-title-text">' +((__t = ( modal.title )) == null ? '' : __t) +'</div>\n\t\t\t'; } ;__p += '\n\t\t\t<div class="pc-model-close"><a href="javascript:" class="close"><span class="mif-cross"></span></a></div>\n\t\t</div>\n\t\t<div class="pc-model-body">\n\t\t\t' +((__t = ( modal.body )) == null ? '' : __t) +'\n\t\t</div>\n\t</div>\n</div>';}return __p};
+this["Customizer"]["templates"]["view/popup"] = function(obj) {obj || (obj = {});var __t, __p = '', __e = _.escape, __j = Array.prototype.join;function print() { __p += __j.call(arguments, '') }with (obj) {__p += '<div class="pc-modal">\n\t<div class="model-inner">\n\t\t<div class="modal-heder pc-title">\n\t\t\t'; if(modal.title){ ;__p += '\n\t\t\t<div class="pc-title-text">' +((__t = ( modal.title )) == null ? '' : __t) +'</div>\n\t\t\t'; } ;__p += '\n\t\t\t<div class="pc-model-close"><a href="javascript:" class="close"><span class="fa fa-times "></span></a></div>\n\t\t</div>\n\t\t<div class="pc-model-body">\n\t\t\t' +((__t = ( modal.body )) == null ? '' : __t) +'\n\t\t</div>\n\t</div>\n</div>';}return __p};

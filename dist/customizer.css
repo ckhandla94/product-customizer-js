@@ -449,11 +449,12 @@ font-size
   bottom: 10px;
   top: auto;
   box-sizing: border-box;
+  display: none;
 }
 @media all and (max-width: 766px) {
   .fb-save-wrapper {
     margin: 10px auto;
-    display: table;
+    display: none;
     position: unset;
   }
 }
@@ -703,12 +704,13 @@ font-size
   margin: 0;
   min-height: 100%;
   overflow: hidden;
-  padding: 0 0 5px 5px;
+  padding: 0 0 0 5px;
   width: 76%;
 }
 @media all and (max-width: 768px) {
   .customizer-main .fb-right {
     width: 100%;
+    padding: 0;
     border: none;
   }
 }
@@ -964,6 +966,27 @@ font-size
   padding-top: 30px;
   position: relative;
   width: 100%;
+}
+.customizer-main .fb-upload-image-field-wrapper .pd-upload-zone .inner-upload-zone {
+  color: #000;
+  padding: 10px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 5px;
+  margin: 0 10px;
+}
+.customizer-main .fb-upload-image-field-wrapper .pd-upload-zone .image-preview {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: auto;
+  height: auto;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.6;
+  z-index: -1;
 }
 .customizer-main .fb-upload-image-field-wrapper .pd-upload-zone .pc-upload-image {
   bottom: 0;

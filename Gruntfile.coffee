@@ -111,8 +111,9 @@ module.exports = (grunt) ->
             'bower_components/fabric-customise-controls/dist/customiseControls.min.js'
             'bower_components/jspdf/dist/jspdf.min.js'
             'bower_components/spectrum/spectrum.js'
-            #'bower_components/jquery-colorpicker/colorpicker.min.js'
             'bower_components/bower-webfontloader/webfont.js'
+            'bower_components/Croppie/croppie.min.js'
+            'node_modules/jquery-social-share/jquery.simpleSocialShare.min.js'
             'js/canvasResize.js'
             'footer.js'
           ]
@@ -136,6 +137,7 @@ module.exports = (grunt) ->
             'bower_components/font-awesome/css/font-awesome.css'
             'bower_components/metro/build/css/metro-icons.min.css'
             'bower_components/spectrum/spectrum.css'
+            'bower_components/Croppie/croppie.css'
             #'bower_components/jquery-colorpicker/css/colorpicker.min.css' 
           ]
 

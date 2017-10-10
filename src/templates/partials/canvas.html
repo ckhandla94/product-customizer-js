@@ -1,3 +1,30 @@
+<style>
+.custom-share-button {
+  font-family: "Roboto", Helvetica, Arial, sans-serif;
+  color: #fff;
+  background-color: #55acee;
+  padding: .8em 1.2em;
+  border-radius: 3px;
+  display: inline-block;
+}
+.custom-share-button-icon,
+.custom-share-button-label {
+  display: inline-block;
+  vertical-align: middle;
+}
+.custom-share-button-icon {
+  width: 1em;
+  height: 1em;
+  margin-right: .2em;
+}
+.custom-share-button-icon path { fill: #fff; }
+.custom-share-button-label {
+  font-size: .9em;
+  font-weight: 500;
+}
+.custom-share-button:hover { background-color: #70b7ec; }
+</style>
+
 <div class="pc-canvas-waraper">
 <div class="pc-title canvas-actions">
 	<div class="pc-icon-inline download" data-title="Download PDF file"><span class="fa fa-file-o"></span></div>
@@ -6,6 +33,12 @@
 	<div class="pc-icon-inline zoom-in" data-title="Zoom-in"><span class="fa fa-search-plus "></span></div>
 	<div class="pc-icon-inline zoom-out" data-title="Zoom-out"><span class="fa fa-search-minus"></span></div>
 	<div class="pc-icon-inline zoom-reset" data-title="Reset zoom"><span class="fa fa-search"></span></div>
+	<div class="pc-icon-inline-seprater" ></div>
+	
+	<div class="pc-icon-inline social_share_popop"> <span class="fa fa-share"></span> </div>
+
+
+
 	<div class="pc-icon-inline-seprater" ></div>
 	<div class="pc-icon-inline fullscreen pull-right" data-title="Fullscreen"><span class="fa fa-arrows-alt"></span></div>
 </div>
