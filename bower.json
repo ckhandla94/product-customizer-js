@@ -29,6 +29,7 @@
     "backbone-deep-model": "~0.10.4",
     "rivets": "~0.5.13",
     "font-awesome": "~4.0.0",
-    "bower-webfontloader": "^1.6.6"
+    "bower-webfontloader": "^1.6.6",
+    "jspdf": "^1.3.5"
   }
 }

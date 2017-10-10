@@ -251,31 +251,7 @@ class ModelView extends Backbone.View
     @$el.fadeIn(500)
 
 
-class ChnageProductView extends Backbone.View
-  className : 'pc-change-product-wraper'
-  events:
-    'click li': 'focusEditView'
-    'click .pc-layers-delete': 'remove'
-    'click .pc-layers-lock-unlock': 'lockUnlock'
-
-  initialize: (options) ->
-    {@parentView} = options
-    @canvas = @parentView.canvas;
-
-  unselect : ->
-    @$el.find('.pc-layers-contianer li').removeClass('active')
-
-  render: ->
-    layers = @canvas.getObjects()
-
-    $el = Customizer.templates["view/product-view"]({views : layers})
-    @$el.html($el)
-    @setSortable()
-    return @
-
-
-
-class ViewLayerView extends Backbone.View
+###class ViewLayerView extends Backbone.View
   className : 'pc-layers-wraper'
   events:
     'click li': 'focusEditView'
@@ -442,10 +418,10 @@ class ViewLayerView extends Backbone.View
   forceRender: (id)-> 
     scrolled_val = @$el.scrollTop().valueOf();
     @render()
+###
 
 
-
-class EditLayerView extends Backbone.View
+###class EditLayerView extends Backbone.View
   className : 'pc-edit-layer-wraper'
   events:
     'click .align-bottom': 'alignBottom'
@@ -492,8 +468,9 @@ class EditLayerView extends Backbone.View
     {@canvas} = options.layer
    
   destroy : ->
-     @$el.find('.colorselector').spectrum('destroy');
-     @$el.remove();
+    if@$el?
+      @$el.find('.colorselector').spectrum('destroy');
+      @$el.remove();
 
   render: ->
     $el = Customizer.templates["edit/base"]({layer : @layer, rf : @model})
@@ -546,23 +523,7 @@ class EditLayerView extends Backbone.View
       @update_layer_data(obj,
         'boundingEnable': true
         )
-      ###if jQuery('.input_another_element_bounding_name').is(':checked')
-        @update_layer_data(obj,
-          'boundingEnable': true
-          #'elementBoundingEnable': true
-          #'boundingElementName': parent.find('[name="another_element_bounding_name"]').val()
-          'boundingMode': parent.find('[name="bounding_box_mode"]').val()
-          )
-      else
-        @update_layer_data(obj,
-          'boundingEnable': true
-          #'elementBoundingEnable': false
-          #'boundingCoordsLeft': parent.find('[name="bounding_coords_left"]').val()
-          #'boundingCoordsTop': parent.find('[name="bounding_coords_top"]').val()
-          #'boundingCoordsWidth': parent.find('[name="bounding_coords_width"]').val()
-          #'boundingCoordsHeight': parent.find('[name="bounding_coords_height"]').val()
-          #'boundingMode': parent.find('[name="bounding_box_mode"]').val()
-        )###
+      
     else
       @update_layer_data(obj,
         'boundingEnable': false
@@ -760,7 +721,7 @@ class EditLayerView extends Backbone.View
           color = '#000'
       colorPickerArgs.color = color
 
-    @$el.find('.colorselector').spectrum colorPickerArgs
+    _this.$el.find('.colorselector').spectrum colorPickerArgs
 
   applyFilterValue : (obj, index, prop, value) ->
     if obj is undefined
@@ -911,7 +872,7 @@ class EditLayerView extends Backbone.View
 
   forceRender: (id)-> 
     @render()
-
+###
 class CanvasView
 
   initialize: (options) ->
@@ -939,9 +900,9 @@ class CanvasView
 
     @parentView.setBoundry(obj, @parentView)
     @parentView.updateBoundry();
-    @parentView.randerLayers()
+    #@parentView.randerLayers()
 
-    @parentView.refreshLayer(obj)
+    #@parentView.refreshLayer(obj)
     @resetOrders()
 
 
@@ -1018,6 +979,64 @@ class CanvasView
       _this.update_layer(image, options);
       obj.canvas.renderAll()
 
+      model = obj.model;
+      console.log(model)
+
+
+      _this.update_layer_data(image, model.attributes);
+
+      if(model.get('isResizable') == false)
+        _this.update_layer_data(image, {
+          isResizable : false 
+          lockScalingX : true
+          lockScalingY : true
+        })
+      else
+        _this.update_layer_data(image, {
+          isResizable : true 
+          lockScalingX : false
+          lockScalingY : false
+        })
+
+
+      if(model.get('isDraggable') == false)
+        _this.update_layer_data(image, {
+            isDraggable : false 
+            lockMovementX : true
+            lockMovementY : true
+          })
+      else
+        _this.update_layer_data(image, {
+          isDraggable : true 
+          lockMovementX : false
+          lockMovementY : false
+        })
+
+      if(model.get('hasControls') == false)
+        _this.update_layer_data(image, {
+            hasControls: false
+          })
+      else
+        _this.update_layer_data(image, {
+          hasControls: true
+        })
+
+
+
+  update_layer_data : (obj, key, value)->
+
+    if(typeof key is 'object')
+      jQuery.each(key, (k, v)->
+        obj.set k, v
+        obj.model.set Customizer.options.mappings.LAYER_DATA+"."+k, v
+      )
+    else
+      obj.set key, value
+      obj.model.set Customizer.options.mappings.LAYER_DATA+"."+key, value
+
+    obj.setCoords();
+    obj.canvas.renderAll();
+    obj.model.trigger 'change'
 
   setFilterValue : (obj, filters) ->
     if(filters)
@@ -1088,7 +1107,7 @@ class CustomizerView extends Backbone.View
     'click .js-save-data': 'saveForm'
     'click .fb-tabs a': 'showTab'
     'click .fb-add-field-types a': 'addField'
-    'click #pc-text-panel .add-text': 'addTextLayer'
+    #'click #pc-text-panel .add-text': 'addTextLayer'
     'change #pc-upload-image-panel .pc-upload-image': 'uploadImages'
     'click .canvas-actions .fullscreen': 'fullscreen'
     'click .canvas-actions .download': 'savePDF'
@@ -1143,7 +1162,7 @@ class CustomizerView extends Backbone.View
     if @settings.fonts.length > 0 and Customizer.options.settings.canvas.object.text.fontFamily is undefined
       Customizer.options.settings.canvas.object.text.fontFamily = @settings.fonts[0]
 
-    Customizer.registerText()
+    #Customizer.registerText()
     Customizer.registerImage()
 
 
@@ -1177,12 +1196,13 @@ class CustomizerView extends Backbone.View
     
     jQuery(window).on 'resize', @reSizeWindow.bind(@)
 
-    if @bootstrapData.views?
-      @productViewCollection.reset(@productViewData.views)
-    else if @bootstrapData.fields?
-      @collection.reset(@bootstrapData.fields)
+    #if @bootstrapData.views?
+    #  @productViewCollection.reset(@productViewData.views)
+    #else if @bootstrapData.fields?
+    
+    @collection.reset(@bootstrapData)
 
-    console.log @collection
+    #console.log @collection
 
 
   #addOneProductView :()->
@@ -1278,8 +1298,8 @@ class CustomizerView extends Backbone.View
 
     @canvas = canvas
     @reSetCanvasSize();
-    @randerLayers()
-    @randerUploadedImages()
+    #@randerLayers()
+    #@randerUploadedImages()
 
     @loader.hide()
     return @
@@ -1301,7 +1321,7 @@ class CustomizerView extends Backbone.View
     else  
       @canvas.setWidth(w)
 
-  randerLayers : (canvas)->
+  ###randerLayers : (canvas)->
     layers = @canvas.getObjects()
 
     @layersView = new ViewLayerView
@@ -1309,7 +1329,7 @@ class CustomizerView extends Backbone.View
       canvas: @canvas
 
     $el = @layersView.render().$el
-    @$el.find('#pc-layers').html($el) 
+    @$el.find('#pc-layers').html($el) ###
 
   renderFontsCSS : ()->
     @settings.fonts
@@ -1358,14 +1378,15 @@ class CustomizerView extends Backbone.View
       alert("Error description: " + e.message);
 
   objectSelected: (evt)->
-    view = evt.target.canvas.parentView
+    ###view = evt.target.canvas.parentView
     view.setLayersActive(evt.target)
+    console.log view
     @layersEditView = new EditLayerView
       parentView: view
       layer: evt.target
 
     $el = @layersEditView.render().$el
-    view.$el.find('#pc-edit-layer').html($el)
+    view.$el.find('#pc-edit-layer').html($el)###
 
 
   beforeSelectionCleared: (evt)->
@@ -1390,7 +1411,7 @@ class CustomizerView extends Backbone.View
     if evt.target.object is 'text'
       old = evt.target.scaleX;
       fontSize = (evt.target.fontSize * old).toFixed(0);
-      view.updateLayer(evt.target, {fontSize : fontSize, scaleX : 1, scaleY : 1})
+      #view.updateLayer(evt.target, {fontSize : fontSize, scaleX : 1, scaleY : 1})
     
   objectScaling : (evt)->
     #object = evt.target
@@ -1486,12 +1507,12 @@ class CustomizerView extends Backbone.View
     if(@$el.find('#pc-layers ul > li'))
       li = @$el.find('#pc-layers ul > li').filter( (i, li)-> jQuery(li).data('id') is obj.id )  
 
-    if(li.length is 0)
+    ###if(li.length is 0)
       @randerLayers()
     else
       if(!li.hasClass('active'))
         @$el.find('#pc-layers ul > li').removeClass('active')
-        li.addClass('active')
+        li.addClass('active')###
 
   updateModel: (id)-> 
     obj = @canvas.getItemByMyID id
@@ -1507,11 +1528,11 @@ class CustomizerView extends Backbone.View
     model.trigger 'change'
 
 
-  refreshLayer: (obj)-> 
+  ###refreshLayer: (obj)-> 
     @bringToppedElementsToFront();
     if(obj isnt undefined)
       obj.setCoords();
-    @canvas.renderAll()
+    @canvas.renderAll()###
 
   bringToppedElementsToFront : ()->
     objects = @canvas.getObjects()
@@ -1628,7 +1649,7 @@ class CustomizerView extends Backbone.View
     @handleFormUpdate()
     rf
 
-  removeLayer: (obj) ->
+  ###removeLayer: (obj) ->
     if typeof obj isnt 'object'
       obj = @canvas.getItemByMyID(obj);
 
@@ -1636,9 +1657,9 @@ class CustomizerView extends Backbone.View
     @randerLayers()
     @canvas.renderAll();
     @getModel(obj.id).destroy()
-    @handleFormUpdate()
+    @handleFormUpdate()###
 
-  updateLayer: (obj, key, value) ->
+  ###updateLayer: (obj, key, value) ->
     if typeof obj isnt 'object'
       obj = @canvas.getItemByMyID(obj);
 
@@ -1653,7 +1674,7 @@ class CustomizerView extends Backbone.View
 
     obj.setCoords();
     obj.model.trigger 'change'
-    @canvas.renderAll();
+    @canvas.renderAll();###
 
   setDraggable: ->
     ###$draggable = @$el.find(".draggable")
@@ -1662,30 +1683,34 @@ class CustomizerView extends Backbone.View
       containment: '.customizer-main'
     )###
     
-  addTextLayer: (e) ->
+  ###addTextLayer: (e) ->
     text = jQuery(e.currentTarget).closest('.fb-text-field-wrapper').find('.pc-text')
     attrs = {text : text.val()}
     text = text.val "" 
-    @createField Customizer.helpers.defaultLayersAttrs('text', 'text', attrs)
+    @createField Customizer.helpers.defaultLayersAttrs('text', 'text', attrs)###
 
 
   addImageLayer: (data) ->
     _this = @
-    
-    _replace = ()->
+    obj = _.where(@canvas.getObjects(), { name: 'background' });
+    if(obj[0] != undefined)
+      obj = obj[0];
+
+
+    console.log obj;
+
+    #obj =  @canvas.getActiveObject();
+    _replace = (obj)->
       fabric.util.loadImage( data.full, (img) ->
         obj.setElement img 
 
         obj.canvas.renderAll();
         obj.model.set 'full', data.full
-
-        _this.updateLayer obj, {src : data.full, width : img.width, 
-        height : img.height}
       )
       return;
       
     _addNew = ()->
-      _addImageLayer = (value)->
+      _addImageLayer = ()->
         newData = jQuery.extend(true, {}, data)
 
         if(newData.url and newData.full is undefined)
@@ -1693,119 +1718,82 @@ class CustomizerView extends Backbone.View
 
         if newData.id isnt undefined
           delete newData.id
+      
+        return _this.createField Customizer.helpers.defaultLayersAttrs('img', 'image', newData)
         
-        if(value isnt undefined)
-          newData.title = value
-
-        _this.createField Customizer.helpers.defaultLayersAttrs('img', 'image', newData)
-
-      if(Customizer.options.settings.administration)
-        model = new ModelView().prompt('Please enter name.', 'Name', (value)->
-          _addImageLayer(value)
-        )
-      else
-        _addImageLayer()
+      return _addImageLayer()
 
 
-    obj =  @canvas.getActiveObject();
-    if obj isnt undefined and obj isnt null and obj isnt ""
-      if Customizer.options.settings.replaceImage is true
-        _replace()
-      else if Customizer.options.settings.replaceImage is 'confirm'
-        new ModelView().confirm('Are you want to replace the image?', 'Replace', (value)->
-            if value is true
-              _replace()
-            else
-              _addNew()
-          )
-      else
-        _addNew()
+    if obj != undefined && obj != null && obj.name != undefined
+      _replace(obj)
     else
-      _addNew()
+      obj = _addNew();
+
 
   uploadImages: (evt) ->
-    @ajax_upload_image(evt.target.files)
+
+    @background_upload_image(evt.target.files)
+    #@ajax_upload_image(evt.target.files)
 
   randerUploadedImages : ()->
     uploadImages = sessionStorage.getItem('uploadImages');
-    if uploadImages is undefined or uploadImages is null
+    if uploadImages == undefined || uploadImages == null
+      uploadImages = {};
+    
+    @add_uploaded_image(uploadImages)
+    #@randerUploadedImage(data)
+
+  updateSession : (data)->
+    if data is undefined or uploadImages is null
       uploadImages = {}
     else   
-      uploadImages = JSON.parse(uploadImages)
-    
-    _this = @
-    _this.LastUploadImageId = 0
-    if uploadImages is undefined or uploadImages is null or uploadImages is ""
-      uploadImages = {}
-    else
-      jQuery.each(uploadImages, (id, data)->
-        _this.LastUploadImageId = data.id
+      uploadImages = data;
 
-        if data
-          _this.randerUploadedImage(data, data.id)
-      )
-    
-  randerUploadedImage : (data, id)->
-    _this = @
-
-    $ul = @$el.find('.uploaded-image-container ul')
-    session_data = {}
-
-    if(id is undefined)
-      id = _this.LastUploadImageId
-      id = if parseInt(id) > 0 then parseInt(id) else 0
-      next_id = id + 1
-      _this.LastUploadImageId = next_id;
-    else
-      id = if parseInt(id) > 0 then parseInt(id) else 1
-      next_id = id
-
-    session_data.id = next_id
-    session_data.url = data.url
-    session_data.moved = if data.moved is 'true' then 'true' else 'false'
-    session_data.path = data.path
-    del = jQuery('<span class="delete-contianer"><span class="mif-bin"></span></span>').on('click', ()->
-        li = jQuery(@).closest('li')
-        data = jQuery(li).data('image-data')
-        
-        if(data.moved isnt 'true')
-          _this.ajax_remove_image(data)
-
-        _this.updateSession null, data.id
-
-        _this.customizer.trigger 'remove-uploaded-image', _this, li
-        li.remove();
-      )
-
-    span = jQuery("<span class='image-contianer'><img class='thumb' src='#{data.url}'/></span>").on('click', ()->
-      li = jQuery(@).closest('li')
-      data = jQuery(li).data('image-data')
-      _this.add_uploaded_image(data, li)
-    )
-
-    li = jQuery("<li data-id='#{next_id}' data-type='dataImage'></li>").data('image-data',session_data).append(span).append(del)
-    $ul.prepend li
-
-    _this.customizer.trigger 'image-upload', _this, data, li
-
-    _this.updateSession session_data, session_data.id
- 
-    if(_this.LastUploadImageId < session_data.id)
-      _this.LastUploadImageId = session_data.id
-
-  updateSession : (data, id)->
-    uploadImages = sessionStorage.getItem('uploadImages');
-    if uploadImages is undefined or uploadImages is null
-      uploadImages = {}
-    else   
-      uploadImages = JSON.parse(uploadImages)
-
-    if(uploadImages[id] isnt undefined and data is null)
-        delete uploadImages[id]
-    else
-      uploadImages[id] = data
 
     sessionStorage.setItem 'uploadImages', JSON.stringify(uploadImages)
+
+  background_upload_image : (files)->
+    image_data = "";
+    _this = @
+    if files && files[0]
+        reader = new FileReader();
+
+        reader.onload = (e)->
+            image_data = e.target.result;
+
+            $ul = _this.$el.find('.uploaded-image-container ul')
+       
+            session_data = {}
+
+            session_data.id = 0
+            session_data.url = image_data
+            session_data.path = data.path
+            
+            del = jQuery('<span class="delete-contianer"><span class="mif-bin"></span></span>').on('click', ()->
+                li = jQuery(@).closest('li')
+                data = jQuery(li).data('image-data')
+                _this.updateSession null
+                _this.customizer.trigger 'remove-uploaded-image', _this, li
+                li.remove();
+              )
+
+            span = jQuery("<span class='image-contianer'><img class='thumb' src='#{image_data}'/></span>").on('click', ()->
+              li = jQuery(@).closest('li')
+              data = jQuery(li).data('image-data')
+              _this.add_uploaded_image(data)
+            )
+
+            li = jQuery("<li data-type='dataImage'></li>").data('image-data',session_data).append(span).append(del)
+            $ul.prepend li
+
+            _this.customizer.trigger 'image-upload', _this, data, li
+
+            _this.updateSession session_data
+
+        reader.readAsDataURL(files[0]);
+
+
+        
 
   ajax_upload_image : (files)->
     formData = new FormData(jQuery('<form></from>')[0])
@@ -1852,36 +1840,18 @@ class CustomizerView extends Backbone.View
       success: (data) ->  _this.loader.hide()
       error: ()->  _this.loader.hide()
 
-  add_uploaded_image : (file, li)->
+  add_uploaded_image : (file)->
 
     _this = @
-    if file.moved is 'true'
-      _this.addImageLayer({full : file.url})
-      return
-
-    
-    jQuery.ajax
-      url : @settings.imageUploadUrl
-      type : "post"
-      data : {action : 'pc_added_uploaded_image', file : file}
-      dataType : 'json'
-      beforeSend: ()-> _this.loader.show()
-      success: (data) -> 
-        if data.status is 'success'
-          if(li isnt undefined)
-            old_data = li.data('image-data');
-            data.id = old_data.id
-            data.moved = 'true'
-            _this.updateSession data, old_data.id
-            li.data('image-data', data)
-            _this.addImageLayer({full : data.url})
-
-          _this.loader.hide()
-        else
-          _this.loader.hide()
-
-      error: ()-> 
-        _this.loader.hide()
+    #if file.moved is 'true'
+    _this.addImageLayer({
+      full : file.url 
+      fit : true
+      name : 'background'
+      isResizable : false 
+      hasControls: false
+      isDraggable : false 
+    })
 
 
   handleFormUpdate: ->
@@ -2054,11 +2024,11 @@ class Customizer
       object : 'text'
     Customizer.shape = opts
 
-  @registerText: () ->
+  ###@registerText: () ->
     opts =
       type : 'text'
       object : 'text'
-    Customizer.text = opts
+    Customizer.text = opts###
 
   @registerImage: () ->
     opts =

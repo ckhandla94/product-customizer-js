@@ -2,24 +2,27 @@
 <div class='fb-left'>
 	<div class='pc-assets'>
 	  <ul class='fb-tabs'>
-	    <li class='active'><a data-target='#pc-backgrounds-panel'><span class="mif-images"></span> Images</a></li>
+	  	<% if(Customizer.options.settings.allowUploadImage){ %>
+	    <li class='active'><a data-target='#pc-upload-image-panel'><span class="fa fa fa-upload"></span> Background </a></li>
+	    <% } %>
+	    <li><a data-target='#pc-backgrounds-panel'><i class="fa fa-picture-o"></i>  Images</a></li>
 	    <% if(Customizer.options.settings.allowAddText){ %>
-	    <li><a data-target='#pc-text-panel'><i class="fa fa-file-text"></i> Text</a></li>
-	    <% } %>
-	    <% if(Customizer.options.settings.allowUploadImage){ %>
-	    <li><a data-target='#pc-upload-image-panel'><span class="fa fa fa-upload"></span> Upload</a></li>
-	    <% } %>
+	    <!-- <li><a data-target='#pc-text-panel'><i class="fa fa-file-text"></i> Text</a></li>
+	    <% } %> -->
+	    
 	  </ul>
 
 	  <div class='fb-tab-content'>
-	    <%= Customizer.templates['partials/panels/images']() %>
-		
-		<% if(Customizer.options.settings.allowAddText){ %>
-	    	<%= Customizer.templates['partials/panels/text']() %>
-	    <% } %>
-	    <% if(Customizer.options.settings.allowUploadImage){ %>
+	  	<% if(Customizer.options.settings.allowUploadImage){ %>
 	    	<%= Customizer.templates['partials/panels/upload-image']() %>
 	    <% } %>
+
+	    <%= Customizer.templates['partials/panels/images']() %>
+		
+		<!-- <% if(Customizer.options.settings.allowAddText){ %>
+	    	<%= Customizer.templates['partials/panels/text']() %>
+	    <% } %> -->
+	    
 	  </div>
 	</div>
 </div>
@@ -28,7 +31,7 @@
 
 	<%= Customizer.templates['partials/edit']() %>
 </div>
-<%= Customizer.templates['partials/layers']() %>
+<!-- <%= Customizer.templates['partials/layers']() %> -->
 <div class='fb-clear'></div>
 
 <div class='fb-save-wrapper'>

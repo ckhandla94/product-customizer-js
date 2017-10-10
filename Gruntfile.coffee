@@ -113,6 +113,7 @@ module.exports = (grunt) ->
             'bower_components/spectrum/spectrum.js'
             #'bower_components/jquery-colorpicker/colorpicker.min.js'
             'bower_components/bower-webfontloader/webfont.js'
+            'js/canvasResize.js'
             'footer.js'
           ]
 
