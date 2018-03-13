@@ -45,112 +45,26 @@
           maxTextLayer : -1,
           maxImageLayer : -1,
 
-          fonts : [
-            {
-              url : 'fonts/sweetheartscript.ttf',
-              name : 'Swee the Art'
-            },
-            {
-              url : 'fonts/Vine Monograms Open Bold.ttf',
-              name : 'Vine Monograms Open'
-            },
-            {
-              url : 'fonts/Mission-Script.ttf',
-              name : 'Mission'
-            },
-            {
-              url : 'fonts/PHARMACY.ttf',
-              name : 'PHARMACY'
-            },
-            {
-              url : 'fonts/ShesAllThat.ttf',
-              name : 'Shes All That'
-            }
-          ],
+          fonts : [ ],
           images : {
-            backgrounds : [
-              {
-                full : 'images/background/1.png',
-              },
-              {
-                options : {
-                  width : 150,
-                  height : 150
-                },
-                full : 'images/background/Anchor-Cutting-Board.png',
-              },
-              {
-                options : {
-                  width : 150,
-                  height : 150
-                },
-                full : 'images/background/Polka Dot Cutting Board.png',
-              }
-            ],
-            clipArts : [
-              {
-                full : 'images/cliparts/1.png',
-              },
-              {
-                full : 'images/cliparts/2.png',
-              },
-              {
-                full : 'images/cliparts/3.png',
-              },
-              {
-                full : 'images/cliparts/4.png',
-              },
-              {
-                full : 'images/cliparts/5.png',
-              },
-              {
-                options : {
-                  width : 150,
-                  height : 150
-                },
-                thumb : 'images/cliparts/Tag-circle-lined-berry-pink.png',
-                full : 'images/cliparts/Tag-circle-lined-berry-pink.png',
-              },
-              {
-                options : {
-                  width : 150,
-                  height : 150
-                },
-                thumb : 'images/cliparts/Tag-ornate-berry-pink.png',
-                full : 'images/cliparts/Tag-ornate-berry-pink.png',
-              }
-            ]  
+            backgrounds : [ ],
+            clipArts : [ ]  
           }
         }
       });
 
+      customizer.setImage({
+                options : {
+                  //width : 150,
+                  //height : 150
+                },
+                full : 'images/background/Polka Dot Cutting Board.png',
+              });
+
       customizer.on('save', function(payload){
-        // $('.fb-json code').html(payload);
         console.log(payload);
         sessionStorage.setItem('bootstrapData', payload);
       })
-
-
-
-
-      customizer.on('image-upload', function(view, evt, data){
-        //console.log(view, evt, data);
-      })
-
-      customizer.on('added-uploaded-image', function(view, data){
-        //console.log(view, evt, data);
-      })
-
-      customizer.on('removed-added-image', function(view, data){
-        //console.log(view, evt, data);
-      })
-
-
-      customizer.on('removed-uploaded-image', function(view, data){
-        //console.log(view, evt, data);
-      })
-
-
     });
 
   function reload(){

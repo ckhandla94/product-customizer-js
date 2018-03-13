@@ -1,54 +1,21 @@
 fabric.Object::set	
-	cornerSize: 40	
+	cornerSize: 15	
 	transparentCorners: false
 	borderColor: '#16A085'
 	cornerColor: '#16A085'
-
-
-fabric.Canvas::customiseControls {
-	tr:
-		settings: {
-			cornerSize: 45
-		},
-		action: 'remove'
-		cursor: 'pointer'
-}, ->
-	canvas.renderAll()
-	return
-
-fabric.Object::customiseCornerIcons({
-	tr: {
-		icon: 'data:image/png;base64,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'
-	}
-	tl: {
-		icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC0AAAAtCAYAAAA6GuKaAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QoKDAQb09JvzgAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAABJSURBVFjD7dAxDQAgEATBBxHowwc1PtCHCbDwDQXJbH3F5CIkSVJEyQ7bmuc1ZveR8tQfn4aGhoaGhoaGhoaGhoaGhoaWJEnJLtqsBDIRk+QiAAAAAElFTkSuQmCC'
-	},
-	mt: {
-		icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC0AAAAtCAYAAAA6GuKaAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QoKDAQb09JvzgAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAABJSURBVFjD7dAxDQAgEATBBxHowwc1PtCHCbDwDQXJbH3F5CIkSVJEyQ7bmuc1ZveR8tQfn4aGhoaGhoaGhoaGhoaGhoaWJEnJLtqsBDIRk+QiAAAAAElFTkSuQmCC'
-	},
-	mb: {
-		icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC0AAAAtCAYAAAA6GuKaAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QoKDAQb09JvzgAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAABJSURBVFjD7dAxDQAgEATBBxHowwc1PtCHCbDwDQXJbH3F5CIkSVJEyQ7bmuc1ZveR8tQfn4aGhoaGhoaGhoaGhoaGhoaWJEnJLtqsBDIRk+QiAAAAAElFTkSuQmCC'
-	},
-	mr: {
-		icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC0AAAAtCAYAAAA6GuKaAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QoKDAQb09JvzgAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAABJSURBVFjD7dAxDQAgEATBBxHowwc1PtCHCbDwDQXJbH3F5CIkSVJEyQ7bmuc1ZveR8tQfn4aGhoaGhoaGhoaGhoaGhoaWJEnJLtqsBDIRk+QiAAAAAElFTkSuQmCC'
-	},
-	ml: {
-		icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC0AAAAtCAYAAAA6GuKaAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QoKDAQb09JvzgAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAABJSURBVFjD7dAxDQAgEATBBxHowwc1PtCHCbDwDQXJbH3F5CIkSVJEyQ7bmuc1ZveR8tQfn4aGhoaGhoaGhoaGhoaGhoaWJEnJLtqsBDIRk+QiAAAAAElFTkSuQmCC'
-	},
-	bm: {
-		icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC0AAAAtCAYAAAA6GuKaAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QoKDAQb09JvzgAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAABJSURBVFjD7dAxDQAgEATBBxHowwc1PtCHCbDwDQXJbH3F5CIkSVJEyQ7bmuc1ZveR8tQfn4aGhoaGhoaGhoaGhoaGhoaWJEnJLtqsBDIRk+QiAAAAAElFTkSuQmCC'
-	},
-	bl: {
-		icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC0AAAAtCAYAAAA6GuKaAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QoKDAQb09JvzgAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAABJSURBVFjD7dAxDQAgEATBBxHowwc1PtCHCbDwDQXJbH3F5CIkSVJEyQ7bmuc1ZveR8tQfn4aGhoaGhoaGhoaGhoaGhoaWJEnJLtqsBDIRk+QiAAAAAElFTkSuQmCC'
-	},
-	br: {
-		icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC0AAAAtCAYAAAA6GuKaAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QoKDAQb09JvzgAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAABJSURBVFjD7dAxDQAgEATBBxHowwc1PtCHCbDwDQXJbH3F5CIkSVJEyQ7bmuc1ZveR8tQfn4aGhoaGhoaGhoaGhoaGhoaWJEnJLtqsBDIRk+QiAAAAAElFTkSuQmCC'
-	},
-	mtr: {
-		icon: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC0AAAAtCAYAAAA6GuKaAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QoKDAQb09JvzgAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAABJSURBVFjD7dAxDQAgEATBBxHowwc1PtCHCbDwDQXJbH3F5CIkSVJEyQ7bmuc1ZveR8tQfn4aGhoaGhoaGhoaGhoaGhoaWJEnJLtqsBDIRk+QiAAAAAElFTkSuQmCC'
-	},
+	hasRotatingPoint : false
 	
-});
+
+fabric.Object::setControlsVisibility
+	mt: false, 
+	mb: false, 
+	ml: false, 
+	mr: false, 
+	bl: true,
+	br: true, 
+	tl: true, 
+	tr: true,
+	mtr: false, 
 
 
 
@@ -297,78 +264,111 @@ class CanvasView
 	initialize: (options) ->
 		@parentView = options
 
-	resetOrders : ()->
-		layers = @parentView.canvas.getObjects()
-		layers.sort (a,b) ->
-			return if a.model.get('order') >= b.model.get('order') then 1 else -1
 
-		jQuery.each(layers, (index,layer)-> 
-			layer.moveTo(index) 
-		)
-		@parentView.canvas.renderAll()
-
-	update_layer: (obj, options)->
-		order = options.model.get(Customizer.options.mappings.LAYER_DATA+'.order')
-		
-		if order isnt undefined
-			obj.moveTo(order);
-			obj.set 'order', order
-
-
-		@parentView.updateModel obj.model.get('cid')
-
-	 
-		@resetOrders()
 
 
 	add: (obj)-> 
+		console.log obj
 		if obj.type is undefined
-			obj.type = obj.template.options.type 
-		@[obj.type](obj)
+			obj.type = obj.type 
+		new_obj = @[obj.type](obj);
 
 
-	text : (obj) ->
-		template = obj.template
-		options = template.options
 
-		defaultOptions = if Customizer.options.settings.canvas.object.text isnt undefined and typeof Customizer.options.settings.canvas.object.text is 'object' then Customizer.options.settings.canvas.object.text else {}
+	addPlaceholder: (canvas, _this)-> 
 
-		options = jQuery.extend(true, {}, @getDefault(defaultOptions, obj), options);
-		delete options.clipTo
-		if options.template.text
-			text = options.template.text
-		else
-			text = ""
+		options = _this.getDefault({
+			bringToFront: true
+			bottom: 0
+			left: 0
+			top: canvas.height - 60
+			width: canvas.width
+			height: 60
+			fill: '#fff'
+			hasBorders: false
+			hasControls: false
+			hasRotatingPoint: false
+			isDraggable: false
+			lockMovementX: true
+			lockMovementY: true
+		});
 
-		text = new fabric.IText(text, options);
-		obj.canvas.add(text)
-		@update_layer(text, options);
+		rect = new fabric.Rect(options);
+
+		text1 = new fabric.Text("PLANT TODAY TO ENJOY TOMORROW!", {
+			bringToFront: true,
+			fontSize: 22,
+			top: canvas.height - 50,
+			fontWidth:'bold',
+			hasBorders: false,
+			hasControls: false,
+			hasRotatingPoint: false,
+			isDraggable: false,
+			lockMovementX: true,
+			lockMovementY: true,
+			textAlign : "center",
+			#width: canvas.width
+		});
+		text2 = new fabric.Text("www.platingpuzzle.com", {
+			bringToFront: true,
+			fontSize: 20,
+			top: canvas.height - 30,
+			textAlign : "center",
+			#width: canvas.width,
+		});
+
+
+		group = new fabric.Group( [rect, text1, text2], {
+			bringToFront: true, 
+			#width: canvas.width,
+			hasBorders: false,
+			hasControls: false,
+			hasRotatingPoint: false,
+			isDraggable: false,
+			lockMovementX: true,
+			lockMovementY: true,
+		});
 		
 
-	rect: (obj)->
-		template = obj.template
-		options = template.options
-		
-		defaultOptions = if Customizer.options.settings.canvas.object.rect isnt undefined and typeof Customizer.options.settings.canvas.object.rect is 'object' then Customizer.options.settings.canvas.object.rect else {}
+		#text1_left = (group.width / 2) - (text1.width / 2)
+		#text1.set({left : text1_left })
 
-		options = jQuery.extend(true, {}, @getDefault(defaultOptions, obj), options);
-		delete options.clipTo
-		rect = new fabric.Rect(options)
-		obj.canvas.add(rect)
-		#.setActiveObject(rect)
-		@update_layer(rect, options);
+		#text1.set({left : 0})
+		text1.set({
+			#left: (group.width / 2),
+			#originX: 'left'
+		});
+		text1.setCoords();
+
+		#text1.set({left : 0})
+		text2.set({
+			#left: (group.width / 2),
+			#originX: 'left'
+		});
+		text2.setCoords();
+		
+		#group_left = (canvas.width / 2) - (group.width / 2)
+		#group.set({left : group_left })
+
+		console.log([canvas, group.width, text2.width])
+
+		canvas.add(group)
+		#canvas.add(rect)
+		canvas.renderAll()
+		
+
+
 
 	image: (obj) ->
 		_this = @
-		template = obj.template
-		options = template.options
+		options = obj.options
 
-		if template.full isnt undefined
-			url = template.full
-		else if template.imageDate isnt undefined
-			url = template.imageDate
+		if obj.full isnt undefined
+			url = obj.full
+		else if obj.imageDate isnt undefined
+			url = obj.imageDate
 
-		img = fabric.Image.fromURL template.full, (image)->
+		img = fabric.Image.fromURL obj.full, (image)->
 			
 			scw = obj.canvas.width / image.width;
 			
@@ -380,10 +380,8 @@ class CanvasView
 			if sch < 1
 				image.height = obj.canvas.height;
 				image.width = image.width * sch;
-			
-			defaultOptions = if Customizer.options.settings.canvas.object.image isnt undefined and typeof Customizer.options.settings.canvas.object.image is 'object' then Customizer.options.settings.canvas.object.image else {}
 
-			defaultOptions = jQuery.extend(true,{}, defaultOptions, {
+			defaultOptions = jQuery.extend(true,{}, Customizer.image, {
 				width : image.width
 				height : image.height
 			});
@@ -399,92 +397,16 @@ class CanvasView
 
 			image.set(options)
 			obj.canvas.add(image)
-			#.setActiveObject(image)
-
-			if(filters.length > 0)
-				_this.setFilterValue(image, filters)
-
-			_this.update_layer(image, options);
 			obj.canvas.renderAll()
 
 			model = obj.model;
 
-
-			_this.update_layer_data(image, model.attributes);
-
-			if(model.get('isResizable') == false)
-				_this.update_layer_data(image, {
-					isResizable : false 
-					lockScalingX : true
-					lockScalingY : true
-				})
-			else
-				_this.update_layer_data(image, {
-					isResizable : true 
-					lockScalingX : false
-					lockScalingY : false
-				})
-
-
-			if(model.get('isDraggable') == false)
-				_this.update_layer_data(image, {
-						isDraggable : false 
-						lockMovementX : true
-						lockMovementY : true
-					})
-			else
-				_this.update_layer_data(image, {
-					isDraggable : true 
-					lockMovementX : false
-					lockMovementY : false
-				})
-
-			if(model.get('hasControls') == false)
-				_this.update_layer_data(image, {
-						hasControls: false
-					})
-			else
-				_this.update_layer_data(image, {
-					hasControls: true
-				})
-
-
-
-	update_layer_data : (obj, key, value)->
-
-		if(typeof key is 'object')
-			jQuery.each(key, (k, v)->
-				obj.set k, v
-				obj.model.set Customizer.options.mappings.LAYER_DATA+"."+k, v
-			)
-		else
-			obj.set key, value
-			obj.model.set Customizer.options.mappings.LAYER_DATA+"."+key, value
-
-		obj.setCoords();
-		obj.canvas.renderAll();
-		obj.model.trigger 'change'
-
-	setFilterValue : (obj, filters) ->
-		if(filters)
-			jQuery.each(filters, (index, filter) ->
-				if obj.filters[index]
-					obj.filters[index] = filter;
-				else
-					obj.filters.push(
-							new fabric.Image.filters.Tint(filter)
-						)
-			)
-			obj.applyFilters(obj.canvas.renderAll.bind(obj.canvas));
-
-			obj.model.set Customizer.options.mappings.LAYER_DATA+".filters", obj.filters
-			obj.model.trigger 'change'
-
+	
 	getDefault : (options, obj)->
 		defaultOptions = {
-				id: obj.model.cid
-				model: obj.model
-				template: obj.template
+				#id: obj.model.cid ? obj.model.cid : null
+				#model: obj.model ? obj.model : {}
+				#template: obj.template ? obj.template : {}
 				locked : false
 				removable : true
 				hideLayer : false
@@ -502,25 +424,12 @@ class CanvasView
 				isResizable : true
 				isDraggable : true
 				lockRotation : false
+				hasBorders: true
+				hasControls: true
+				hasRotatingPoint: false
+				#lockMovementX: false
+				#lockMovementY: false
 			}
-
-		if Customizer.options.settings.boundingBoxCoords isnt undefined and Customizer.options.settings.boundingBoxCoords isnt null
-			defaultOptions.boundingEnable = true
-			if(typeof Customizer.options.settings.boundingBoxCoords is 'object')
-				defaultOptions.elementBoundingEnable = true
-				defaultOptions.boundingCoordsLeft = Customizer.options.settings.boundingBoxCoords.x
-				defaultOptions.boundingCoordsTop = Customizer.options.settings.boundingBoxCoords.y
-				defaultOptions.boundingCoordsWidth = Customizer.options.settings.boundingBoxCoords.width
-				defaultOptions.boundingCoordsHeight = Customizer.options.settings.boundingBoxCoords.height
-			else
-				defaultOptions.elementBoundingEnable = false
-				defaultOptions.boundingElementName = Customizer.options.settings.boundingBoxCoords
-
-		if Customizer.options.settings.administration is true
-			defaultOptions.administration = true
-		else
-			defaultOptions.administration = false
-			
 
 
 		jQuery.extend(true,{}, defaultOptions, options);
@@ -531,17 +440,10 @@ class CustomizerView extends Backbone.View
 	SUBVIEWS: []
 	canvasView : new CanvasView()
 	events:
-		'click .js-save-data': 'saveForm'
-		'click .fb-tabs a': 'showTab'
-		'click .fb-add-field-types a': 'addField'
-		#'click #pc-text-panel .add-text': 'addTextLayer'
-		'change #pc-upload-image-panel .pc-upload-image': 'uploadImages'
+		'change .pc-upload-image': 'uploadImages'
+		'click .change_background': 'change_background'
 		'click .canvas-actions .fullscreen': 'fullscreen'
 		'click .canvas-actions .download': 'savePDF'
-		'click .canvas-actions .zoom-in': (e)-> @canvas.setZoom(@canvas.getZoom() * 1.1 )
-		'click .canvas-actions .zoom-out': (e)-> @canvas.setZoom(@canvas.getZoom() / 1.1 )
-		'click .canvas-actions .zoom-reset': (e)-> @canvas.setZoom(1)
-		'click .canvas-actions .preview': 'saveImage'
 		'click .canvas-actions .social_share_popop': 'social_share_popop'
 	
 	initialize: (options) ->
@@ -550,10 +452,7 @@ class CustomizerView extends Backbone.View
 			@setElement jQuery(selector) 
 
 		defaultSettings =
-			administration : true
-			allowAddText : true
-			allowUploadImage : true
-			replaceImage : false,  # false, true, 'confirm'
+			administration : false
 			canvas :
 				object :
 					text  : {}
@@ -568,32 +467,7 @@ class CustomizerView extends Backbone.View
 
 		@settings = jQuery.extend(true, {},defaultSettings, settings);
 
-		if @settings?
-			 Customizer.options.settings = @settings
-
-		if @settings.images isnt undefined
-			if typeof @settings.images is 'object' or typeof @settings.images is 'array'
-				jQuery.each(@settings.images, (index, v)->
-					if v isnt undefined
-						if typeof v is 'object' or typeof v is 'array'
-								jQuery.each(v, (i, value)->
-									value.type  = if value.type is undefined then index else value.type
-									value.id    = if value.id is undefined then i else value.id
-									Customizer.registerImages index, value
-								)
-				)
-		if @settings.fonts isnt undefined
-			jQuery.each(@settings.fonts, (index, v)->
-				Customizer.registerFonts(v)
-			)
-
-		if @settings.fonts.length > 0 and Customizer.options.settings.canvas.object.text.fontFamily is undefined
-			Customizer.options.settings.canvas.object.text.fontFamily = @settings.fonts[0]
-
-		#Customizer.registerText()
-		Customizer.registerImage()
-
-
+	
 		@collection = new CustomizerCollection({parentView : @})
 		@collection.bind 'add', @addOne, @
 		@collection.bind 'reset', @reset, @
@@ -606,10 +480,8 @@ class CustomizerView extends Backbone.View
 
 		@render()
 		@reSizeWindow()
-		@renderFontsCSS()
 		
-		@bindSaveEvent()
-
+	
 
 		@canvas.parentView = @
 
@@ -618,24 +490,35 @@ class CustomizerView extends Backbone.View
 		@listenTo @canvas, "mouse:down", (o) -> @isDown = true;
 		@listenTo @canvas, "after:render", (evt)-> @calcOffset()
 		
+		@listenTo @canvas, "object:added", @updateOrder
+
+
+
+
+		
+		
+		
 		jQuery(window).on 'resize', @reSizeWindow.bind(@)
 
-		#if @bootstrapData.views?
-		#  @productViewCollection.reset(@productViewData.views)
-		#else if @bootstrapData.fields?
 		
 		@collection.reset(@bootstrapData)
 
-
-		#addOneProductView :()->
-			#@addOne
-		#resetProductView :()->
+	
 		if(@productViewCollection.models.length > 0)
 			activeView = @productViewCollection.models[0]
 			@reset()
 		
 
 	
+	updateOrder : (evt)->
+		canvas = evt.target.canvas;
+		objs = canvas.getObjects();
+		jQuery.each objs, (index, obj)->
+			if obj.bringToFront == true
+				console.log obj
+				canvas.bringForward(obj)
+		canvas.renderAll()
+
 	reSizeWindow : ()->
 		originalWidth = 1920;
 		originalHeight = 1080;
@@ -650,8 +533,6 @@ class CustomizerView extends Backbone.View
 		@canvas.wrapperEl.style.transformOrigin = "0 0";
 
 		@canvas.wrapperEl.parentElement.style.height = height+"px";
-
-
 
 	fullscreen : (ev)->
 		if(jQuery(ev.currentTarget).prop("tagName") is 'span')
@@ -672,9 +553,18 @@ class CustomizerView extends Backbone.View
 
 		@loader = @$el.find('.pc-loader-container')
 		@loader.show()
-		#@hideShowNoResponseFields()
-		new subview({parentView: @}).render() for subview in @SUBVIEWS
+		@renderCanvas()
+		_this = @;
+		$(document).on 'click','.js-social-share', (e) ->
+			e.preventDefault()
+			_this.getBlob((blob)->
+				_this.openSocialSharePopup(e, blob)
+			)
 
+		@loader.hide()
+		return @
+
+	renderCanvas : ()->
 		el = jQuery('<canvas/>')
 		@$el.find('.pc-canvas').html(el)
 		
@@ -699,41 +589,15 @@ class CustomizerView extends Backbone.View
 
 		@canvas = canvas
 		@reSetCanvasSize();
-		#@randerLayers()
-		#@randerUploadedImages()
 
-		_this = @;
+		@canvasView.addPlaceholder(@canvas, @canvasView)
 
-		
-
-		$(document).on 'click','.js-social-share', (e) ->
-			console.log(this);
-			e.preventDefault()
-			_this.getBlob((blob)->
-				_this.openSocialSharePopup(e, blob)
-			)
-
-		@loader.hide()
-		return @
 
 	reSetCanvasSize : ()->
 		@canvas.setWidth(1920)
 		@canvas.setHeight(1080)
 
-	###randerLayers : (canvas)->
-		layers = @canvas.getObjects()
 
-		@layersView = new ViewLayerView
-			parentView: @
-			canvas: @canvas
-
-		$el = @layersView.render().$el
-		@$el.find('#pc-layers').html($el) ###
-
-	renderFontsCSS : ()->
-		@settings.fonts
-		$el = Customizer.templates["partials/text-fonts-css"]()
-		@$el.prepend($el) 
 
 
 	saveImage : ()->
@@ -746,6 +610,46 @@ class CustomizerView extends Backbone.View
 		@canvas
 
 	savePDF : ()->
+		download = (filename, dataUrl) ->
+			element = document.createElement('a')
+			dataBlob = dataURLtoBlob(dataUrl)
+			element.setAttribute 'href', URL.createObjectURL(dataBlob)
+			element.setAttribute 'download', filename
+			element.style.display = 'none'
+			document.body.appendChild element
+			element.click()
+			clickHandler = undefined
+			element.addEventListener 'click',
+			clickHandler = ->
+				# ..and to wait a frame
+				requestAnimationFrame ->
+					URL.revokeObjectURL element.href
+					return
+				element.removeAttribute 'href'
+				element.removeEventListener 'click', clickHandler
+				return
+
+			document.body.removeChild element
+			return
+
+		# from Abhinav's answer at  https://stackoverflow.com/questions/37135417/download-canvas-as-png-in-fabric-js-giving-network-error/
+
+		dataURLtoBlob = (dataurl) ->
+			parts = dataurl.split(',')
+			mime = parts[0].match(/:(.*?);/)[1]
+			if parts[0].indexOf('base64') != -1
+				bstr = atob(parts[1])
+				n = bstr.length
+				u8arr = new Uint8Array(n)
+				while n--
+					u8arr[n] = bstr.charCodeAt(n)
+				new Blob([ u8arr ], type: mime)
+			else
+				raw = decodeURIComponent(parts[1])
+				new Blob([ raw ], type: mime)
+
+		
+
 		try 
 			width = @canvas.getWidth();
 			height = @canvas.getHeight();
@@ -756,29 +660,15 @@ class CustomizerView extends Backbone.View
 			@canvas.backgroundColor = $oldColor
 			@canvas.renderAll();
 
-			imgWidth = 210; 
-			pageHeight = 295;  
-			imgHeight = height * imgWidth / width;
-			heightLeft = imgHeight;
+			download("product.jpeg", imgData)
+			
 
-			doc = new jsPDF('p', 'mm');
-			position = 0;
-			doc.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-			heightLeft -= pageHeight;
-
-			while heightLeft >= 0
-				position = heightLeft - imgHeight;
-				doc.addPage();
-				doc.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-				heightLeft -= pageHeight;
-			finename = prompt 'Please enter file name' , 'Product'
-			doc.save(finename + '.pdf');
 		catch e
-			alert("Error description: " + e.message);
+			console.log("Error description: " + e.message);
 
 
 	social_share_popop : (e)->
-		console.log e;
+		
 		modelView = new ModelView();
 		modelView.alert('<a class="share-button js-social-share" data-share-url="http://mightymedia.nl" data-share-network="twitter" data-share-text="Share this awesome link on Twitter" data-share-title="Twitter Share" data-share-via="" data-share-tags="" data-share-media="" href="#">Share on Twitter</a> <a class="share-button js-social-share" data-share-url="http://mightymedia.nl" data-share-network="facebook" data-share-text="Share this awesome link on Facebook" data-share-title="Facebook Share" data-share-via="" data-share-tags="" data-share-media="" href="#">Share on Facebook</a> <a class="share-button js-social-share" data-share-url="http://mightymedia.nl" data-share-network="linkedin" data-share-text="Share this awesome link on LinkedIn" data-share-title="LinkedIn Share" data-share-via="" data-share-tags="" data-share-media="" href="#">Share on LinkedIn</a> <a class="share-button js-social-share" data-share-url="http://mightymedia.nl" data-share-network="googleplus" data-share-text="Share this awesome link on Google+" data-share-title="Google+ Share" data-share-via="" data-share-tags="" data-share-media="" href="#">Share on Google+</a> <a class="share-button js-social-share" data-share-url="http://mightymedia.nl" data-share-network="pinterest" data-share-text="Share this awesome link on Pinterest" data-share-title="Pinterest Share" data-share-via="" data-share-tags="" data-share-media="" href="#">Share on Pinterest</a> <a class="share-button js-social-share" data-share-url="http://mightymedia.nl" data-share-network="reddit" data-share-text="Share this awesome link on Reddit" data-share-title="Reddit Share" data-share-via="" data-share-tags="" data-share-media="" href="#">Share on Reddit</a> ', 'Share');
 
@@ -832,8 +722,7 @@ class CustomizerView extends Backbone.View
 				else
 					return false
 		if doShare
-			console.log blob
-			console.log networkShareUrl
+			
 			# Calculate the position of the popup so it’s centered on the screen.
 			#@windowPopup networkShareUrl, 500, 300
 			width = 500
@@ -866,43 +755,8 @@ class CustomizerView extends Backbone.View
 			callback(blob)
 			return
 
-
-	setCliping : (obj)->
-		clipRect = _.where(obj.canvas.getObjects(), { clipFor: obj.clipName })
-		if clipRect.length > 0
-			obj.clipTo = (ctx)-> return _.bind(clipByName, @)(ctx)
-		else if obj.clipTo isnt undefined
-			delete obj.clipTo
-
-
-	bindSaveEvent: ->
-		@formSaved = true
-		@saveFormButton = @$el.find(".js-save-data")
-		if @saveFormButton.length > 0
-			@saveFormButton.attr('disabled', true).text(Customizer.options.dict.ALL_CHANGES_SAVED)
-
-		###unless !Customizer.options.AUTOSAVE
-			setInterval =>
-				@saveForm.call(@)
-			, 5000
-
-		jQuery(window).bind 'beforeunload', =>
-			if @formSaved then undefined else Customizer.options.dict.UNSAVED_CHANGES###
-
 	reset: ->
 		@addAll()
-		
-
-	setLayersActive : (obj)->
-		if(@$el.find('#pc-layers ul > li'))
-			li = @$el.find('#pc-layers ul > li').filter( (i, li)-> jQuery(li).data('id') is obj.id )  
-
-		###if(li.length is 0)
-			@randerLayers()
-		else
-			if(!li.hasClass('active'))
-				@$el.find('#pc-layers ul > li').removeClass('active')
-				li.addClass('active')###
 
 	updateModel: (id)-> 
 		obj = @canvas.getItemByMyID id
@@ -918,109 +772,27 @@ class CustomizerView extends Backbone.View
 		model.trigger 'change'
 
 
-	bringToppedElementsToFront : ()->
-		objects = @canvas.getObjects()
-		bringToFrontObj = []
-		@canvas.renderAll();
-
-		i = 0
-		while i < objects.length
-			object = objects[i]
-			if object.model and object.model.get(Customizer.options.mappings.LAYER_DATA+".stayOnTop") is true
-				bringToFrontObj.push object
-			++i
-		i = 0
-		while i < bringToFrontObj.length
-			bringToFrontObj[i].bringToFront()
-			++i
-
-		return
-
-	renderOnFontLoaded : (fontName)->
-		_this = @
-		WebFont.load(
-			custom : 
-				families: [fontName]
-			fontactive: (familyName, fvd)->
-				jQuery('body').mouseup()
-				_this.canvas.renderAll() 
-		)
-
 	getModel: (id)-> 
 		@collection.find((model)-> model.cid is id)
 
-	showTab: (e) ->
-		$el = jQuery(e.currentTarget)
-		target = $el.data('target')
-		$el.closest('li').addClass('active').siblings('li').removeClass('active')
-		jQuery(target).addClass('active').siblings('.fb-tab-pane').removeClass('active')
-
 	addOne: (model, _, options) ->
-			if model.attributes[Customizer.options.mappings.LAYER_DATA] isnt undefined 
-				model.attributes.cid = model.cid
-				model.attributes[Customizer.options.mappings.LAYER_DATA].id = model.cid
-				model_option = model.get(Customizer.options.mappings.LAYER_DATA)
-				model_option.object = model.get('object')
-				model_option.name = model.get('name')
-				model_option.type = model.get('type')
-				if model.get('title')
-					model_option.title = model.get('title')
-					model_option.clipFor = model.get('title')
-			else
-				model_option = {}
+		
+		console.log(options)
 
+		new_options = jQuery.extend(true,{}, options.options);
+		
 
-			if model.get(Customizer.options.mappings.OBJECT) is 'text'
-				template = Customizer.text
-				model_option.text = model.get('text')
-
-			else if model.get(Customizer.options.mappings.OBJECT) is 'image'
-				template = Customizer.image
-				template.full = model.get('full')
-				if model.get('title')
-					template.title = model.get('title')
-					template.clipFor = model.get('title')
-
-			else
-				template = {}
-				template.object = model_option.object
-				template.type = model_option.type
-				template.title = model_option.title
-				template.clipFor = model_option.title
-				
-				if model.get('options') isnt undefined
-					template.options = jQuery.extend(true,{}, template.options, model.get('options'));
-				else
-					template.options = model_option
-				
-		 
-
-			newTemplate = jQuery.extend(true,{}, template);
-
-			if newTemplate.options is undefined or newTemplate.options is null
-				newTemplate.options = {}
-
-
-			newTemplate.options = jQuery.extend(true,{}, newTemplate.options, model_option);
-
-			@canvasView.add(
-				type : newTemplate.object
-				template : newTemplate
-				model : model
-				canvas : @canvas
-			)
+		@canvasView.add(
+			type : options.type
+			options : new_options
+			full :  model.get('full')
+			model : model
+			canvas : @canvas
+		)
 		
 
 	addAll: ->
 		@collection.each @addOne, @
-
-	addField: (e) ->
-		_this = @ 
-		id = jQuery(e.currentTarget).data('field-id')
-		type = jQuery(e.currentTarget).data('field-type')
-		attrs = jQuery.extend true,{}, Customizer.images[type][id]
-		_this.addImageLayer(attrs)
-
 		
 	createField: (attrs, options) ->
 		if Customizer.options.settings.administration is true
@@ -1037,7 +809,12 @@ class CustomizerView extends Backbone.View
 
 	addImageLayer: (data) ->
 		_this = @
-		obj = _.where(@canvas.getObjects(), { name: 'background' });
+		if Customizer.has_iamge 
+			return
+		
+
+		Customizer.has_iamge = true;
+		obj = _.where(@canvas.getObjects(), { name: data.name });
 		if(obj[0] != undefined)
 			obj = obj[0];
 
@@ -1053,14 +830,14 @@ class CustomizerView extends Backbone.View
 		_addNew = ()->
 			_addImageLayer = ()->
 				newData = jQuery.extend(true, {}, data)
-
+				newData.type = 'image'
 				if(newData.url and newData.full is undefined)
 					newData.full = newData.url
 
 				if newData.id isnt undefined
 					delete newData.id
-			
-				return _this.createField Customizer.helpers.defaultLayersAttrs('img', 'image', newData)
+				rf = _this.collection.create newData, newData
+				return rf
 				
 			return _addImageLayer()
 
@@ -1071,44 +848,54 @@ class CustomizerView extends Backbone.View
 			obj = _addNew();
 
 
+	change_background: (evt) ->
+		#_this.$el.find(".pc-canvas").height(600);
+		@$el.find(".canvas-container").hide();
+		@$el.find(".background-upload-container").show();
+		#@$el.find('.pc-upload-image').click();
+
 	uploadImages: (evt) ->
-
-		@background_upload_image(evt.target.files)
-		#@ajax_upload_image(evt.target.files)
-
-	randerUploadedImages : ()->
-		uploadImages = sessionStorage.getItem('uploadImages');
-		if uploadImages == undefined || uploadImages == null
-			uploadImages = {};
+		@background_upload_image(evt.target.files, evt.target)
 		
-		@add_uploaded_image(uploadImages)
-		#@randerUploadedImage(data)
 
-	updateSession : (data)->
-		if data is undefined or uploadImages is null
-			uploadImages = {}
-		else   
-			uploadImages = data;
+	clearFileInput : (ele) ->
+		console.log(ele);
+		oldInput = ele; 
 
+		newInput = document.createElement("input"); 
 
-		sessionStorage.setItem 'uploadImages', JSON.stringify(uploadImages)
+		newInput.type = "file"; 
+		newInput.id = oldInput.id; 
+		newInput.name = oldInput.name; 
+		newInput.className = oldInput.className; 
+		newInput.style.cssText = oldInput.style.cssText; 
+		#TODO: copy any other relevant attributes 
 
+		oldInput.parentNode.replaceChild(newInput, oldInput); 
 
+	background_upload_image : (files, ele)->
 
-
-	background_upload_image : (files)->
 		image_data = "";
 		_this = @		
 
 		$ul = _this.$el.find('.pd-upload-zone')
 		$preview = $ul.find('.image-preview');
+		#console.log(files);
+		setCanvasImage = ()->
 
-		setCanvasImage = ()->	
 			_this.$uploadCrop.croppie('result', {
 				type: 'base64',
 				size: { width : 1920, height : 1080}
 			}).then((image_data)->
-				$preview.css('background-image', "url('#{image_data}')");
+				_this.$el.find(".pc-canvas").height(600);
+				_this.$el.find(".canvas-container").show();
+				_this.$el.find(".background-upload-container").hide();
+				
+				_this.reSizeWindow();
+
+				_this.addImageLayer(Customizer.image)
+
+				#$preview.css('background-image', "url('#{image_data}')");
 				_this.canvas.setBackgroundImage(image_data, _this.canvas.renderAll.bind(_this.canvas), {
 					width: _this.canvas.width,
 					height: _this.canvas.height,
@@ -1116,8 +903,18 @@ class CustomizerView extends Backbone.View
 					originY: 'top',
 				});
 			)
+			
+
+			#@canvas.setWidth(1920)
+			#_this.canvas.setHeight(700)
+
+
+		
 
 		is_update = false;
+
+		Customizer.background = true;
+
 		if files && files[0]
 			reader = new FileReader();
 			
@@ -1127,17 +924,19 @@ class CustomizerView extends Backbone.View
 			_this.$uploadCrop = $('#upload-image').croppie({
 				showZoomer : false,
 				viewport: { width: 192, height: 108 },
-				boundary: { width: "100%", height: 200 },
+				boundary: { width: 355, height: 200 },
+				
 				update : (croppe)->
 					is_update = true;
 				#enableExif: true
 			});
-
-			setInterval(()=>
+			#_this.$uploadCrop.croppie 'setZoom', 1
+			###setInterval(()=>
 				if is_update
 					is_update = false;
 					setCanvasImage();
 			, 1000)
+			###
 
 			reader.onload = (e)->
 				image_data = e.target.result;
@@ -1145,68 +944,16 @@ class CustomizerView extends Backbone.View
 				_this.$uploadCrop.croppie('bind', {
 					url: e.target.result
 				}).then(()->
+					_this.$uploadCrop.croppie('setZoom', 0)
 					setCanvasImage();
 				);
+
+				_this.clearFileInput(ele)
+				
+
 			reader.readAsDataURL(files[0]);
 				
 
-	ajax_upload_image : (files)->
-		formData = new FormData(jQuery('<form></from>')[0])
-
-		formData.append('image', files[0])
-		formData.append('action', 'pc_upload_image')
-
-		_this = @
-		jQuery.ajax
-			url : @settings.imageUploadUrl
-			type : "post"
-			data : formData
-			dataType : 'json'
-			contentType: false
-			processData: false
-			cache: false
-			beforeSend: ()->
-				_this.loader.show()
-			success: (data) ->
-				if data.status is 'success'
-					image_url = data.url
-					if(image_url isnt undefined and image_url isnt null)
-						attrs = {uploadedImage : image_url}
-					else if (image_temp_url isnt undefined and image_temp_url isnt null)
-						attrs = {uploadedImage : image_url}
-					else
-						return
-					_this.randerUploadedImage(data)
-					_this.loader.hide()
-				else
-					_this.loader.hide()
-
-			error: ()->
-				_this.loader.hide()
-
-	ajax_remove_image : (file)->
-		_this = @
-		jQuery.ajax
-			url : @settings.imageUploadUrl
-			type : "post"
-			data : {action : 'pc_remove_uploaded_image', file : file}
-			dataType : 'json'
-			beforeSend: ()-> _this.loader.show()
-			success: (data) ->  _this.loader.hide()
-			error: ()->  _this.loader.hide()
-
-	add_uploaded_image : (file)->
-
-		_this = @
-		#if file.moved is 'true'
-		_this.addImageLayer({
-			full : file.url 
-			fit : true
-			name : 'background'
-			isResizable : false 
-			hasControls: false
-			isDraggable : false 
-		})
 
 
 	handleFormUpdate: ->
@@ -1224,7 +971,6 @@ class CustomizerView extends Backbone.View
 		
 		payload = @getPayload()
 
-		if Customizer.options.HTTP_ENDPOINT then @doAjaxSave(payload)
 		@customizer.trigger 'save', payload
 
 	getPayload : (type)->
@@ -1245,25 +991,44 @@ class CustomizerView extends Backbone.View
 			)
 		JSON.stringify fields: newFields
 
-	doAjaxSave: (payload) ->
-		jQuery.ajax
-			url: Customizer.options.HTTP_ENDPOINT
-			type: Customizer.options.HTTP_METHOD
-			data: payload
-			contentType: "application/json"
-			success: (data) =>
-				@updatingBatch = true
+	watermarkImage = (elemImage, text) ->
+		# Create test image to get proper dimensions of the image.
+		###testImage = new Image
 
-				for datum in data
-					# set the IDs of new response fields, returned from the server
-					@collection.get(datum.cid)?.set({id: datum.id})
-					@collection.trigger 'sync'
+		testImage.onload = ->
+		h = testImage.height
+		w = testImage.width
+		img = new Image
+		# Once the image with the SVG of the watermark is loaded...
 
-				@updatingBatch = undefined
+		img.onload = ->
+			# Make canvas with image and watermark
+			canvas = Object.assign(document.createElement('canvas'),
+			width: w
+			height: h
+			)
+				ctx = canvas.getContext('2d')
+				ctx.drawImage testImage, 0, 0
+				ctx.drawImage img, 0, 0
+				# If PNG can't be retrieved show the error in the console
+			try
+			elemImage.src = canvas.toDataURL('image/png')
+			catch e
+			console.error 'Cannot watermark image with text:',
+			  src: elemImage.src
+			  text: text
+			  error: e
+			return
 
+		# SVG image watermark (HTML of text at bottom right)
+		img.src = 'data:image/svg+xml;base64,' + window.btoa('<svg xmlns="http://www.w3.org/2000/svg" height="' + h + '" width="' + w + '">' + '<foreignObject width="100%" height="100%">' + '<div xmlns="http://www.w3.org/1999/xhtml">' + '<div style="position: absolute;' + 'right: 0;' + 'bottom: 0;' + 'font-family: Tahoma;' + 'font-size: 10pt;' + 'background: #000;' + 'color: #fff;' + 'padding: 0.25em;' + 'border-radius: 0.25em;' + 'opacity: 0.6;' + 'margin: 0 0.125em 0.125em 0;' + '">' + text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>' + '</div>' + '</foreignObject>' + '</svg>')
+		return
 
+		testImage.src = elemImage.src###
+		return
 
 class Customizer 
+
 	@helpers:
 		defaultLayersAttrs: (type, name, extra_attrs) ->
 			attrs = {}
@@ -1292,10 +1057,13 @@ class Customizer
 		AUTOSAVE: true
 		CLEAR_FIELD_CONFIRM: false
 
+		settings : 
+			  canvas : {}
+
 		jsonArgs : ['id','unlockable', 'removable', 'hideLayer', 'displayInLayerBar', 'order', 'selection', 'selectable', 'locked', 'lockMovementX', 'lockMovementY', 'lockRotation', 'lockScalingX', 'lockScalingY', 'lockUniScaling', 'hasBorders', 'hasControls', 'hasRotatingPoint', 'hoverCursor', 'isResizable', 'isDraggable', 'boundingEnable', 'boundingElementName', 'boundingMode', 'stayOnTop', 'title', 'elementBoundingEnable','boundingCoordsLeft','boundingCoordsTop','boundingCoordsWidth','boundingCoordsHeight', 'clipFor', 'clipName', 'evented', 'dontSync','defaultColor','allowedColors', 'object','administration']
 
 		mappings:
-			DATA_ID    : 'data_id'
+			DATA_ID : 'data_id'
 			TYPE  : 'type'
 			NAME  : 'name'
 			OBJECT: 'object'
@@ -1309,88 +1077,16 @@ class Customizer
 			SAVE_FORM: 'Save changes'
 			UNSAVED_CHANGES: 'You have unsaved changes. If you leave this page, you will lose those changes!'
 
-	@layers: []
 
-	@backgrounds: {}
-	@text: {}
-	@images: {}
-	@fonts : {}
-
-	@fields: {}
-	@image: {}
-
-	@inputFields: {}
-	@nonInputFields: {}
-
-	@addLayers: (opts) ->
-		Customizer.layers.push(opts)
+	@has_iamge: false;
+	@background: false;
+	@image: false
 
 
-	@registerField: (name, opts) ->
-
-		for x in ['view', 'edit']
-			opts[x] = _.template(opts[x])
-
-		Customizer.fields[name] = opts
-
-
-	@registerImages: (category, opts) ->
-
-		if opts.type is undefined
-			opts.type = category
-
-		if opts.object is undefined
-			opts.object = 'image'
-
-		if opts.id isnt undefined
-			id = opts.id
-
-		if(Customizer.images[category] is undefined)
-			Customizer.images[category] = {}
-
-		Customizer.images[category][id] = opts
-
-
-	@registerFonts: (font) ->
-		if font.name is undefined
-				filename = font.url.split('/').pop().split('#')[0].split('?')[0]
-				font.name = filename.split('.')[0];
-				font.name = font.name.replace(/[^a-z0-9_-]/gi, '-').toLowerCase()
-		else
-			font.name = font.name.replace(/[^a-z0-9_-]/gi, '-').toLowerCase()
-
-		if font.displayName is undefined 
-			font.displayName = font.name #.replace(/[^_-]/gi, ' ');
-		
-		if font.src is undefined
-				font.src = {};
-		
-		if font.url isnt undefined
-				filename = font.url.split('/').pop().split('#')[0].split('?')[0];
-				ext = filename.split('.')[1];
-				if(ext isnt undefined)
-						font.src[ext] = font.url;
-		
-		Customizer.fonts[font.name] = font
-
-	@registerShape: () ->
-		opts =
-			type : 'text'
-			object : 'text'
-		Customizer.shape = opts
-
-	###@registerText: () ->
-		opts =
-			type : 'text'
-			object : 'text'
-		Customizer.text = opts###
-
-	@registerImage: () ->
-		opts =
-			type : 'image'
-			object : 'image'
-		Customizer.image = opts
-
+	setImage : (url)->
+		url.object = "image"
+		url.name = "product"
+		Customizer.image = url
 
 	setSettings : (key, value)->
 		Customizer.options.settings[key] = value
@@ -1409,8 +1105,7 @@ class Customizer
 
 		 
 	
-		
-
+	
 window.Customizer = Customizer
 if module?
 	module.exports = Customizer

@@ -1,24 +1,27 @@
-
-<div class='fb-left'>
-	<div class='pc-assets'>
-	  <ul class='fb-tabs'>
-	    <li class='active'><a data-target='#pc-upload-image-panel'><span class="fa fa fa-upload"></span> Background </a></li>
-	
-	    <li><a data-target='#pc-backgrounds-panel'><i class="fa fa-picture-o"></i>  Images</a></li>
-
-	    
-	  </ul>
-
-	  <div class='fb-tab-content'>
-	   
-	    <%= Customizer.templates['partials/panels/images']() %>
-
-	    
-	  </div>
-	</div>
-</div>
 <div class='fb-right'>
+
+	<div class="canvas-container" style="display: none;">
 	<%= Customizer.templates['partials/canvas']() %>
+	</div>
+	<div class="background-upload-container">
+		<div class='fb-upload-image-field-wrapper'>
+			<div class="input-field-container">
+			  	<!-- <label>Background Image</label> -->
+			  	<div class="pd-upload-zone">
+			  		<div class="inner-upload-zone">
+			  			<div class="image-icon picture_iamge"><span class="fa fa-picture-o"></span></div>
+				        
+						<span class="upload-text"><span class="fa fa-upload"></span> Upload Photo with garden and see how this plant group fits in</span>
+			        </div>
+			        <div class="image-preview"></div>
+			  		<input type="file" class="pc-upload-image">
+			  	</div>
+
+			  	<div id="upload-image"></div>
+			</div>
+		</div>
+	</div>
+	
 </div>
 
 <div class='fb-clear'></div>
